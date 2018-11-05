@@ -2,6 +2,15 @@ RBX-NET
 ========
 TypeScript version of [ModRemote](https://github.com/Vorlias/ROBLOX-ModRemote) for roblox-ts.
 
+Requirements
+=============
+This requires [roblox-ts](https://github.com/roblox-ts/roblox-ts) as it is a roblox-ts module.
+
+Installation
+=============
+It's as simple as
+`npm i rbx-net`.
+
 RemoteEvents
 ============
 
