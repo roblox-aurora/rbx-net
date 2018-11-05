@@ -18,10 +18,6 @@ export namespace Net {
         tag: 'modremote-ts-alpha'
     };
 
-    type value_t = string | number | boolean | Function | undefined;
-    type table_t = Object | value_t[];
-    type lua_type = table_t | value_t;
-
     const REMOTES_FOLDER_NAME = "Remotes";
     let remoteFolder: Folder, eventFolder: Folder, functionFolder: Folder;
     let initialized: boolean = false;
@@ -163,11 +159,11 @@ export namespace Net {
             }
         }
 
-        public async CallPlayerAsync(player: Player, ...args: lua_type[]): Promise<lua_type> {
+        public async CallPlayerAsync(player: Player, ...args: any[]): Promise<any> {
             return this.CallPlayer(player, ...args);
         }
 
-        public CallPlayer(player: Player, ...args: lua_type[]): lua_type {
+        public CallPlayer(player: Player, ...args: any[]): any {
             return this._instance.InvokeClient(player, ...args);
         }
 
@@ -238,7 +234,7 @@ export namespace Net {
         }
 
 
-        public CallServer(...args: any[]): lua_type {
+        public CallServer(...args: any[]): any {
             if (this._lastPing < (os.time() + this.Cache)) {
                 let results = [this._instance.InvokeServer(...args)];
                 this._cached = results;
@@ -250,7 +246,7 @@ export namespace Net {
                 return [...this._cached];
         }
 
-        public async CallServerAsync(...args: lua_type[]): Promise<lua_type> {
+        public async CallServerAsync(...args: any[]): Promise<any> {
             return this.CallServer(...args);
         }
 
