@@ -13,11 +13,22 @@ const IS_SERVER = runService.IsServer();
 export namespace Net {
     interface version_t { number: number; date: number; tag?: string }
 
-    const VERSION: version_t = {
-        number: 1,
-        date: 181031,
-        tag: 'modremote-ts-alpha'
+    /**
+     * Version information
+     */
+    export const VERSION: version_t = {
+        number: 0.12,
+        date: 181106,
+        tag: 'alpha'
     };
+
+    /**
+     * Get the version as a string
+     */
+    export function GetVersion()
+    {
+        return `v${VERSION.number} (${VERSION.tag || 'release'})`;
+    }
 
     const REMOTES_FOLDER_NAME = "Remotes";
     let remoteFolder: Folder, eventFolder: Folder, functionFolder: Folder;
@@ -319,11 +330,6 @@ export namespace Net {
             return new ServerEvent(name);
         else
             throw "Net.createFunction can only be used on the server!";
-    }
-
-    export function Version(): [number, number, string] {
-        let { number, date, tag } = VERSION;
-        return [number, date, tag || ''];
     }
 
     export function GetClientEventAsync(name: string): Promise<ClientEvent> {
