@@ -93,178 +93,173 @@ export namespace Net {
         }
     }
 
-    /**
-     * Networking for the Server
-     * (Note: Will throw errors if used on client!)
-     */
-    export namespace Server {
-        export class Event extends MRemoteEvent {
+
+    export class ServerEvent extends MRemoteEvent {
 
 
-            public get Instance() {
-                return this._instance;
-            }
-
-            public get Event() {
-                return this._instance.OnServerEvent;
-            }
-
-            public Connect(callback: (...args: unknown[]) => void) {
-                this.Event.Connect(callback);
-            }
-
-            public SendToAllPlayers(...args: unknown[]) {
-                this._instance.FireAllClients(...args);
-            }
-
-            public SendToPlayer(player: Player, ...args: unknown[]) {
-                this._instance.FireClient(player, ...args);
-            }
-
-            public SendToPlayers(players: Player[], ...args: unknown[]) {
-                players.forEach(player => this.SendToPlayer(player, ...args));
-            }
-
-            constructor(name: string) {
-                super(name);
-                assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
-
-                if (!initialized)
-                    init();
-            }
+        public get Instance() {
+            return this._instance;
         }
 
-        export class Function extends MRemoteFunction {
-            public get ClientCache() {
-                let cache = this._instance.FindFirstChild("Cache") as NumberValue;
-                if (cache)
-                    return cache.Value;
-                else
-                    return 0;
-            }
+        public get Event() {
+            return this._instance.OnServerEvent;
+        }
 
-            public get Callback(): Callback {
-                return this._instance.OnServerInvoke;
-            }
+        public Connect(callback: (...args: unknown[]) => void) {
+            this.Event.Connect(callback);
+        }
 
-            public set Callback(func: Callback) {
-                this._instance.OnServerInvoke = func;
-            }
+        public SendToAllPlayers(...args: unknown[]) {
+            this._instance.FireAllClients(...args);
+        }
 
-            public get Instance() {
-                return this._instance;
-            }
+        public SendToPlayer(player: Player, ...args: unknown[]) {
+            this._instance.FireClient(player, ...args);
+        }
 
-            public set ClientCache(time: number) {
-                let cache = this._instance.FindFirstChild("Cache") as NumberValue;
-                if (!cache) {
-                    let cacheTimer = new NumberValue(this._instance);
-                    cacheTimer.Value = time;
-                    cacheTimer.Name = "Cache";
-                }
-                else {
-                    cache.Value = time;
-                }
-            }
+        public SendToPlayers(players: Player[], ...args: unknown[]) {
+            players.forEach(player => this.SendToPlayer(player, ...args));
+        }
 
-            public async CallPlayerAsync(player: Player, ...args: lua_type[]): Promise<lua_type> {
-                return this.CallPlayer(player, ...args);
-            }
+        constructor(name: string) {
+            super(name);
+            assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
 
-            public CallPlayer(player: Player, ...args: lua_type[]): lua_type {
-                return this._instance.InvokeClient(player, ...args);
-            }
-
-            constructor(name: string) {
-                super(name);
-                assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
-
-                if (!initialized)
-                    init();
-            }
+            if (!initialized)
+                init();
         }
     }
+
+    export class ServerFunction extends MRemoteFunction {
+        public get ClientCache() {
+            let cache = this._instance.FindFirstChild("Cache") as NumberValue;
+            if (cache)
+                return cache.Value;
+            else
+                return 0;
+        }
+
+        public get Callback(): Callback {
+            return this._instance.OnServerInvoke;
+        }
+
+        public set Callback(func: Callback) {
+            this._instance.OnServerInvoke = func;
+        }
+
+        public get Instance() {
+            return this._instance;
+        }
+
+        public set ClientCache(time: number) {
+            let cache = this._instance.FindFirstChild("Cache") as NumberValue;
+            if (!cache) {
+                let cacheTimer = new NumberValue(this._instance);
+                cacheTimer.Value = time;
+                cacheTimer.Name = "Cache";
+            }
+            else {
+                cache.Value = time;
+            }
+        }
+
+        public async CallPlayerAsync(player: Player, ...args: lua_type[]): Promise<lua_type> {
+            return this.CallPlayer(player, ...args);
+        }
+
+        public CallPlayer(player: Player, ...args: lua_type[]): lua_type {
+            return this._instance.InvokeClient(player, ...args);
+        }
+
+        constructor(name: string) {
+            super(name);
+            assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
+
+            if (!initialized)
+                init();
+        }
+    }
+
 
     /**
      * Networking for the Client
      * (Note: Will throw errors if used on server!)
      */
-    export namespace Client {
-        export class Event extends MRemoteEvent {
 
-            public get Instance() {
-                return this._instance;
-            }
+    export class ClientEvent extends MRemoteEvent {
 
-            public get Event() {
-                return this._instance.OnClientEvent;
-            }
-
-            public Connect(callback: (...args: unknown[]) => void) {
-                this.Event.Connect(callback);
-            }
-
-            public SendToServer(...args: unknown[]) {
-                this._instance.FireServer(...args);
-            }
-
-            constructor(name: string) {
-                super(name);
-                assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
-
-                if (!initialized)
-                    init();
-            }
+        public get Instance() {
+            return this._instance;
         }
 
-        export class Function extends MRemoteFunction {
-            private _lastPing = -1;
-            private _cached : any = [];
+        public get Event() {
+            return this._instance.OnClientEvent;
+        }
 
-            public get Callback(): Callback {
-                return this._instance.OnClientInvoke;
-            }
+        public Connect(callback: (...args: unknown[]) => void) {
+            this.Event.Connect(callback);
+        }
 
-            public set Callback(func: Callback) {
-                this._instance.OnClientInvoke = func;
-            }
+        public SendToServer(...args: unknown[]) {
+            this._instance.FireServer(...args);
+        }
 
-            public get Instance() {
-                return this._instance;
-            }
+        constructor(name: string) {
+            super(name);
+            assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
 
-            public get Cache() {
-                let cache = this._instance.FindFirstChild("Cache") as NumberValue;
-                if (cache)
-                    return cache.Value;
-                else
-                    return 0;
-            }
-
-
-            public CallServer(...args: any[]): lua_type {
-                if (this._lastPing < (os.time() + this.Cache))
-                {
-                    let results = [this._instance.InvokeServer(...args)];
-                    this._cached = results;
-
-                    this._lastPing = os.time();
-                    return [...results];
-                }
-                else
-                    return [...this._cached];
-            }
-
-            public async CallServerAsync(...args: lua_type[]): Promise<lua_type> {
-                return this.CallServer(...args);
-            }
-
-            constructor(name: string) {
-                super(name);
-                assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
-            }
+            if (!initialized)
+                init();
         }
     }
+
+    export class ClientFunction extends MRemoteFunction {
+        private _lastPing = -1;
+        private _cached: any = [];
+
+        public get Callback(): Callback {
+            return this._instance.OnClientInvoke;
+        }
+
+        public set Callback(func: Callback) {
+            this._instance.OnClientInvoke = func;
+        }
+
+        public get Instance() {
+            return this._instance;
+        }
+
+        public get Cache() {
+            let cache = this._instance.FindFirstChild("Cache") as NumberValue;
+            if (cache)
+                return cache.Value;
+            else
+                return 0;
+        }
+
+
+        public CallServer(...args: any[]): lua_type {
+            if (this._lastPing < (os.time() + this.Cache)) {
+                let results = [this._instance.InvokeServer(...args)];
+                this._cached = results;
+
+                this._lastPing = os.time();
+                return [...results];
+            }
+            else
+                return [...this._cached];
+        }
+
+        public async CallServerAsync(...args: lua_type[]): Promise<lua_type> {
+            return this.CallServer(...args);
+        }
+
+        constructor(name: string) {
+            super(name);
+            assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
+        }
+    }
+
 
 
 
@@ -304,12 +299,12 @@ export namespace Net {
      * @param name The name of the function
      * (Must be created on server)
      */
-    export function CreateFunction(name: string): Server.Function {
+    export function CreateFunction(name: string): ServerFunction {
         if (!initialized)
             init();
 
         if (IS_SERVER)
-            return new Server.Function(name);
+            return new ServerFunction(name);
         else
             throw "Net.createFunction can only be used on the server!";
     }
@@ -319,12 +314,12 @@ export namespace Net {
  * @param name The name of the event
  * (Must be created on server)
  */
-    export function CreateEvent(name: string): Server.Event {
+    export function CreateEvent(name: string): ServerEvent {
         if (!initialized)
             init();
 
         if (IS_SERVER)
-            return new Server.Event(name);
+            return new ServerEvent(name);
         else
             throw "Net.createFunction can only be used on the server!";
     }
@@ -334,10 +329,10 @@ export namespace Net {
         return [number, date, tag || ''];
     }
 
-    export function GetClientEventAsync(name: string): Promise<Client.Event> {
+    export function GetClientEventAsync(name: string): Promise<ClientEvent> {
         return new Promise((resolve, reject) => {
             if (MRemoteEvent.Exists(name)) {
-                let newFunc = new Client.Event(name);
+                let newFunc = new ClientEvent(name);
                 resolve(newFunc);
             }
             else {
@@ -346,18 +341,17 @@ export namespace Net {
         });
     }
 
-    export function GetClientFunction(name: string) : Client.Function | undefined
-    {
+    export function GetClientFunction(name: string): ClientFunction | undefined {
         if (MRemoteFunction.Exists(name))
-            return new Client.Function(name);
+            return new ClientFunction(name);
         else
-            return undefined;       
+            return undefined;
     }
 
-    export function GetServerEventAsync(name: string): Promise<Server.Event> {
+    export function GetServerEventAsync(name: string): Promise<ServerEvent> {
         return new Promise((resolve, reject) => {
             if (MRemoteEvent.Exists(name)) {
-                let newFunc = new Server.Event(name);
+                let newFunc = new ServerEvent(name);
                 resolve(newFunc);
             }
             else {
@@ -366,10 +360,10 @@ export namespace Net {
         });
     }
 
-    export function GetClientFunctionAsync(name: string): Promise<Client.Function> {
+    export function GetClientFunctionAsync(name: string): Promise<ClientFunction> {
         return new Promise((resolve, reject) => {
             if (MRemoteFunction.Exists(name)) {
-                let newFunc = new Client.Function(name);
+                let newFunc = new ClientFunction(name);
                 resolve(newFunc);
             }
             else {
@@ -378,10 +372,10 @@ export namespace Net {
         });
     }
 
-    export function GetServerFunctionAsync(name: string): Promise<Server.Function> {
+    export function GetServerFunctionAsync(name: string): Promise<ServerFunction> {
         return new Promise((resolve, reject) => {
             if (MRemoteFunction.Exists(name)) {
-                let newFunc = new Server.Function(name);
+                let newFunc = new ServerFunction(name);
                 resolve(newFunc);
             }
             else {
@@ -392,5 +386,3 @@ export namespace Net {
 }
 
 export default Net;
-export let Client = Net.Client;
-export let Server = Net.Server;

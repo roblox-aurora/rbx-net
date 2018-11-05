@@ -17,7 +17,7 @@ import Net from 'rbx-net';
 let exampleOne = Net.CreateEvent("NameOfEvent");
 
 // second way of doing it
-let exampleTwo = new Net.Server.Event("NameOfEvent");
+let exampleTwo = new Net.ServerEvent("NameOfEvent");
 ```
 
 Getting
@@ -27,7 +27,7 @@ import Net from 'rbx-net';
 
 // get on server
 let exampleServerOne = Net.GetServerEvent("NameOfEvent");
-let exampleServerTwo = new Net.Server.Event("NameOfEvent"); // THIS WILL CREATE IF NOT EXISTING!!
+let exampleServerTwo = new Net.ServerEvent("NameOfEvent"); // THIS WILL CREATE IF NOT EXISTING!!
 let exampleServerThree = Net.GetServerEventAsync("NameOfEvent").then(event => {
     // do things with the event...
 }, err => {
@@ -36,7 +36,7 @@ let exampleServerThree = Net.GetServerEventAsync("NameOfEvent").then(event => {
 
 // get on client
 let exampleClientOne = Net.GetClientEvent("NameOfEvent");
-let exampleClientTwo = new Net.Client.Event("NameOfEvent");
+let exampleClientTwo = new Net.ClientEvent("NameOfEvent");
 let exampleClientThree = Net.GetClientEventAsync("NameOfEvent").then(event => {
     // do things with the event...
 }, err => {
@@ -99,7 +99,7 @@ import Net from 'rbx-net';
 let exampleOne = Net.CreateFunction("NameOfFunction");
 
 // second way of doing it
-let exampleTwo = new Net.Server.Function("NameOfFunction");
+let exampleTwo = new Net.ServerFunction("NameOfFunction");
 ```
 
 
@@ -116,7 +116,7 @@ let getFunctionTwo = Net.GetClientFunctionAsync("NameOfFunction").then(func => {
 }, err => {
     // handle errors
 });
-let getFunctionThree = new Net.Client.Function("NameOfFunction");
+let getFunctionThree = new Net.ClientFunction("NameOfFunction");
 ```
 
 ### server-side
@@ -128,7 +128,7 @@ let getFunctionTwo = Net.GetServerFunctionAsync("NameOfFunction").then(func => {
 }, err => {
     // handle errors
 });
-let getFunctionThree = new Net.Server.Function("NameOfFunction");
+let getFunctionThree = new Net.ServerFunction("NameOfFunction");
 ```
 
 
