@@ -11,6 +11,11 @@ Installation
 It's as simple as
 `npm i rbx-net`.
 
+Then you can easily import it using
+```ts
+import Net from 'rbx-net';
+```
+
 RemoteEvents
 ============
 
