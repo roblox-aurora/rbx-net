@@ -1,12 +1,12 @@
 {
   "name": "rbx-net",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Networking Library for roblox-ts",
   "main": "./out/init.lua",
   "typings": "./out/index.d.ts",
   "scripts": {},
   "author": "vorlias",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "rbx-types": "^1.0.65"
   },
