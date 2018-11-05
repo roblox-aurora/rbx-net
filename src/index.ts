@@ -25,8 +25,7 @@ export namespace Net {
     /**
      * Get the version as a string
      */
-    export function GetVersion()
-    {
+    export function GetVersion() {
         return `v${VERSION.number} (${VERSION.tag || 'release'})`;
     }
 
@@ -102,33 +101,64 @@ export namespace Net {
     }
 
 
+    /**
+     * An event on the server
+     */
     export class ServerEvent extends MRemoteEvent {
 
-
+        /**
+         * The RemoteEvent instance
+         */
         public get Instance() {
             return this._instance;
         }
 
+        /**
+         * The RBXScriptSignal for this RemoteEvent
+         */
         public get Event() {
             return this._instance.OnServerEvent;
         }
 
+        /**
+         * Connect a fucntion to fire when the event is invoked by the client
+         * @param callback The function fired when the event is invoked by the client
+         */
         public Connect(callback: (...args: unknown[]) => void) {
             this.Event.Connect(callback);
         }
 
+        /**
+         * Sends the specified arguments to all players
+         * @param args The arguments to send to the players
+         */
         public SendToAllPlayers(...args: unknown[]) {
             this._instance.FireAllClients(...args);
         }
 
+        /**
+         * Sends the specified arguments to a specified player
+         * @param player The player
+         * @param args The arguments to send to the player
+         */
         public SendToPlayer(player: Player, ...args: unknown[]) {
             this._instance.FireClient(player, ...args);
         }
 
+        /**
+         * Sends the specified argumetns to the specified list of players
+         * @param players The players
+         * @param args The arugments to send to these players
+         */
         public SendToPlayers(players: Player[], ...args: unknown[]) {
             players.forEach(player => this.SendToPlayer(player, ...args));
         }
 
+        /**
+         * Creates a new instance of a server event (Will also create the corresponding remote if it does not exist!)
+         * @param name The name of this server event
+         * @throws If not created on server
+         */
         constructor(name: string) {
             super(name);
             assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
@@ -138,7 +168,14 @@ export namespace Net {
         }
     }
 
+    /**
+     * A function on the server
+     */
     export class ServerFunction extends MRemoteFunction {
+
+        /**
+         * The client cache in seconds
+         */
         public get ClientCache() {
             let cache = this._instance.FindFirstChild("Cache") as NumberValue;
             if (cache)
@@ -147,18 +184,31 @@ export namespace Net {
                 return 0;
         }
 
+        /**
+         * The callback function
+         */
         public get Callback(): Callback {
             return this._instance.OnServerInvoke;
         }
 
+        /**
+         * Set the callback function when called by the client
+         */
         public set Callback(func: Callback) {
             this._instance.OnServerInvoke = func;
         }
 
+        /**
+         * The RemoteFunction instance
+         */
         public get Instance() {
             return this._instance;
         }
 
+        /**
+         * Sets a client cache timer in seconds
+         * @param time seconds to cache on client
+         */
         public set ClientCache(time: number) {
             let cache = this._instance.FindFirstChild("Cache") as NumberValue;
             if (!cache) {
@@ -171,14 +221,21 @@ export namespace Net {
             }
         }
 
+        /**
+         * Calls the player and returns a promise
+         * @async returns Promise
+         * @param player The player to call the function on
+         * @param args The arguments to call the function with
+         */
         public async CallPlayerAsync(player: Player, ...args: any[]): Promise<any> {
-            return this.CallPlayer(player, ...args);
-        }
-
-        public CallPlayer(player: Player, ...args: any[]): any {
             return this._instance.InvokeClient(player, ...args);
         }
 
+        /**
+         * Creates a new instance of a server function (Will also create the corresponding remote if it does not exist!)
+         * @param name The name of this server function
+         * @throws If not created on server
+         */
         constructor(name: string) {
             super(name);
             assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
@@ -190,53 +247,85 @@ export namespace Net {
 
 
     /**
-     * Networking for the Client
-     * (Note: Will throw errors if used on server!)
+     * An event on the client
      */
-
     export class ClientEvent extends MRemoteEvent {
 
+        /**
+         * The RemoteEvent instance
+         */
         public get Instance() {
             return this._instance;
         }
 
+        /**
+         * The RBXScriptConnection
+         */
         public get Event() {
             return this._instance.OnClientEvent;
         }
 
+        /**
+         * Connect a function to fire when the event is invoked by the client
+         * @param callback The function fired when the event is invoked by the client
+         */
         public Connect(callback: (...args: unknown[]) => void) {
             this.Event.Connect(callback);
         }
 
+        /**
+         * Sends the specified arguments to the server
+         * @param args The arguments to send to the server
+         */
         public SendToServer(...args: unknown[]) {
             this._instance.FireServer(...args);
         }
 
+        /**
+         * Create a new instance of the ClientEvent
+         * @param name The name of the client event
+         * @throws If created on server, or does not exist.
+         */
         constructor(name: string) {
             super(name);
             assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
+            assert(MRemoteEvent.Exists(name), `The specified event '${name}' does not exist!`);
 
             if (!initialized)
                 init();
         }
     }
 
+    /**
+     * A function on the client
+     */
     export class ClientFunction extends MRemoteFunction {
         private _lastPing = -1;
         private _cached: any = [];
 
+        /**
+         * The callback
+         */
         public get Callback(): Callback {
             return this._instance.OnClientInvoke;
         }
 
+        /**
+        * Set the callback function when called by the server
+        */
         public set Callback(func: Callback) {
             this._instance.OnClientInvoke = func;
         }
 
+        /** 
+         * The remoteFunction instance */
         public get Instance() {
             return this._instance;
         }
 
+        /**
+         * The client cache in seconds
+         */
         public get Cache() {
             let cache = this._instance.FindFirstChild("Cache") as NumberValue;
             if (cache)
@@ -246,6 +335,11 @@ export namespace Net {
         }
 
 
+        /**
+         * Call the server with the specified arguments
+         * @param args The arguments to call the server with
+         * @returns the result of the call to the server
+         */
         public CallServer(...args: any[]): any {
             if (this._lastPing < (os.time() + this.Cache)) {
                 let results = [this._instance.InvokeServer(...args)];
@@ -258,6 +352,11 @@ export namespace Net {
                 return [...this._cached];
         }
 
+        /**
+         * Call the server with the specified arguments asynchronously
+         * @param args The args to call the server with
+         * @async Will return a promise
+         */
         public async CallServerAsync(...args: any[]): Promise<any> {
             return this.CallServer(...args);
         }
@@ -265,11 +364,9 @@ export namespace Net {
         constructor(name: string) {
             super(name);
             assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
+            assert(MRemoteFunction.Exists(name), `The specified function '${name}' does not exist!`);
         }
     }
-
-
-
 
     function init() {
         let replicatedStorage = game.GetService("ReplicatedStorage");
@@ -318,10 +415,10 @@ export namespace Net {
     }
 
     /**
- * Create an event
- * @param name The name of the event
- * (Must be created on server)
- */
+     * Create an event
+     * @param name The name of the event
+     * (Must be created on server)
+     */
     export function CreateEvent(name: string): ServerEvent {
         if (!initialized)
             init();
