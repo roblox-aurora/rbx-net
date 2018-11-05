@@ -11,7 +11,8 @@ const IS_SERVER = runService.IsServer();
  * Typescript Networking Library for ROBLOX
  */
 export namespace Net {
-    export type version_t = { number: number, date: number, tag?: string };
+    interface version_t { number: number; date: number; tag?: string }
+
     const VERSION: version_t = {
         number: 1,
         date: 181031,
