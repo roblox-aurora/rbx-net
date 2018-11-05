@@ -10,7 +10,21 @@
   "devDependencies": {
     "rbx-types": "^1.0.65"
   },
-  "peerDependencies":{
-    "rbx-types": "^1.0.65"   
-  }
+  "peerDependencies": {
+    "rbx-types": "^1.0.65"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vorlias/rbx-net.git"
+  },
+  "keywords": [
+    "roblox",
+    "typescript",
+    "networking"
+  ],
+  "bugs": {
+    "url": "https://github.com/Vorlias/rbx-net/issues"
+  },
+  "homepage": "https://github.com/Vorlias/rbx-net#readme"
 }
