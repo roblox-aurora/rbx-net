@@ -4,6 +4,7 @@
 		"rootDir": "src",
 		"baseUrl": "src",
 		"module": "commonjs",
+		"target": "es5",
 		"strict": true,
 		"noLib": true,
 		"downlevelIteration": true,
