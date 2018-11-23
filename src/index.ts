@@ -88,18 +88,6 @@ export namespace NetInternal
          * @internal
          */
         constructor(name: string) {
-            // let existing = functionFolder.FindFirstChild(name) as RemoteFunction;
-            // if (existing)
-            //     this._instance = existing;
-            // else {
-            //     if (!IS_SERVER)
-            //         throw "Remote Function must be created on server first!";
-
-            //     let newFunction = new RemoteFunction();
-            //     newFunction.Name = name;
-            //     newFunction.Parent = functionFolder;
-            //     this._instance = newFunction;
-            // }
             this._instance = createRemoteIfNotExist("Function", name) as RemoteFunction;
             this._name = name;
         }
@@ -117,18 +105,6 @@ export namespace NetInternal
          * @internal
          */
         constructor(name: string) {
-            // let existing = eventFolder.FindFirstChild(name) as RemoteEvent;
-            // if (existing)
-            //     this._instance = existing;
-            // else {
-            //     if (!IS_SERVER)
-            //         throw "Remote Event must be created on server first!";
-    
-            //     let newFunction = new RemoteEvent();
-            //     newFunction.Name = name;
-            //     newFunction.Parent = eventFolder;
-            //     this._instance = newFunction;
-            // }
             this._instance = createRemoteIfNotExist("Event", name) as RemoteEvent;
     
             this._name = name;
