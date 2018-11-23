@@ -73,43 +73,42 @@ function createRemoteIfNotExist(type: "Function" | "Event", name: string)
     }
 }
 
-export namespace NetInternal
-{
-    export abstract class FunctionBase {
-        private _name: string;
-        protected _instance: RemoteFunction;
 
-        public get Name() {
-            return this._name;
-        }
+export abstract class __FunctionBase {
+    private _name: string;
+    protected _instance: RemoteFunction;
 
-        /**
-         * @internal
-         */
-        constructor(name: string) {
-            this._instance = createRemoteIfNotExist("Function", name) as RemoteFunction;
-            this._name = name;
-        }
+    public get Name() {
+        return this._name;
     }
 
-    export abstract class EventBase {
-        private _name: string;
-        protected _instance: RemoteEvent;
-    
-        public get Name() {
-            return this._name;
-        }
-
-        /**
-         * @internal
-         */
-        constructor(name: string) {
-            this._instance = createRemoteIfNotExist("Event", name) as RemoteEvent;
-    
-            this._name = name;
-        }
+    /**
+     * @internal
+     */
+    constructor(name: string) {
+        this._instance = createRemoteIfNotExist("Function", name) as RemoteFunction;
+        this._name = name;
     }
 }
+
+export abstract class __EventBase {
+    private _name: string;
+    protected _instance: RemoteEvent;
+
+    public get Name() {
+        return this._name;
+    }
+
+    /**
+     * @internal
+     */
+    constructor(name: string) {
+        this._instance = createRemoteIfNotExist("Event", name) as RemoteEvent;
+
+        this._name = name;
+    }
+}
+
 
 
 
@@ -139,7 +138,7 @@ export namespace Net {
     /**
      * An event on the server
      */
-    export class ServerEvent extends NetInternal.EventBase {
+    export class ServerEvent extends __EventBase {
 
         /**
          * The RemoteEvent instance
@@ -203,7 +202,7 @@ export namespace Net {
     /**
      * A function on the server
      */
-    export class ServerFunction extends NetInternal.FunctionBase {
+    export class ServerFunction extends __FunctionBase {
 
         /**
          * The client cache in seconds
@@ -278,7 +277,7 @@ export namespace Net {
     /**
      * An event on the client
      */
-    export class ClientEvent extends NetInternal.EventBase {
+    export class ClientEvent extends __EventBase {
 
         /**
          * The RemoteEvent instance
@@ -325,7 +324,7 @@ export namespace Net {
     /**
      * A function on the client
      */
-    export class ClientFunction extends NetInternal.FunctionBase {
+    export class ClientFunction extends __FunctionBase {
         private _lastPing = -1;
         private _cached: any = [];
 
