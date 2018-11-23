@@ -33,7 +33,7 @@ export namespace Net {
     let remoteFolder: Folder, eventFolder: Folder, functionFolder: Folder;
     let initialized: boolean = false;
 
-    class MRemoteEvent {
+    abstract class MRemoteEvent {
         private _name: string;
         protected _instance: RemoteEvent;
 
@@ -41,12 +41,18 @@ export namespace Net {
             return this._name;
         }
 
+        /**
+         * @internal
+         */
         public static Exists(name: string) {
             if (!initialized) init();
 
             return eventFolder.FindFirstChild(name) as boolean;
         }
 
+        /**
+         * @internal
+         */
         constructor(name: string) {
             let existing = eventFolder.FindFirstChild(name) as RemoteEvent;
             if (existing)
@@ -68,7 +74,7 @@ export namespace Net {
     /**
      * The wrapper for the RemoteFunction instance
      */
-    class MRemoteFunction {
+    abstract class MRemoteFunction {
         private _name: string;
         protected _instance: RemoteFunction;
 
@@ -76,12 +82,18 @@ export namespace Net {
             return this._name;
         }
 
+        /**
+         * @internal
+         */
         public static Exists(name: string) {
             if (!initialized) init();
 
             return functionFolder.FindFirstChild(name) as boolean;
         }
 
+        /**
+         * @internal
+         */
         constructor(name: string) {
             let existing = functionFolder.FindFirstChild(name) as RemoteFunction;
             if (existing)
