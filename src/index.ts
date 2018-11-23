@@ -1,11 +1,141 @@
-/**
- * rbx-net, (alias: modremote-ts)
- */
-
 let _exports = {}; // hack that fixes _exports for default
 let runService = game.GetService('RunService');
+let replicatedStorage = game.GetService("ReplicatedStorage");
+
 const IS_CLIENT = runService.IsClient();
 const IS_SERVER = runService.IsServer();
+
+const REMOTES_FOLDER_NAME = "Remotes";
+const FUNCTIONS_FOLDER_NAME = "Functions";
+const EVENTS_FOLDER_NAME = "Events";
+
+let remoteFolder: Folder, eventFolder: Folder, functionFolder: Folder;
+let initialized: boolean = false;
+
+remoteFolder = replicatedStorage.FindFirstChild(REMOTES_FOLDER_NAME) as Folder;
+
+if (!remoteFolder) {
+    remoteFolder = new Folder(replicatedStorage);
+    remoteFolder.Name = REMOTES_FOLDER_NAME;
+}
+
+functionFolder = remoteFolder.FindFirstChild(FUNCTIONS_FOLDER_NAME) as Folder;
+if (!functionFolder) {
+    functionFolder = new Folder(remoteFolder);
+    functionFolder.Name = FUNCTIONS_FOLDER_NAME;
+}
+
+eventFolder = remoteFolder.FindFirstChild(EVENTS_FOLDER_NAME) as Folder;
+if (!eventFolder) {
+    eventFolder = new Folder(remoteFolder);
+    eventFolder.Name = EVENTS_FOLDER_NAME;
+}
+
+function EventExists(name: string)
+{
+    return eventFolder.FindFirstChild(name) as boolean;
+}
+
+function FunctionExists(name: string)
+{
+    return functionFolder.FindFirstChild(name) as boolean;
+}
+
+function createRemoteIfNotExist(type: "Function" | "Event", name: string)
+{
+    let folder : Folder;
+    if (type === "Event")
+        folder = eventFolder;
+    else if (type === "Function")
+        folder = functionFolder;
+    else
+        throw "Invalid type: " + type;
+
+    let existing = folder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
+    if (existing)
+        return existing;
+    else
+    {
+        if (!IS_SERVER)
+            throw "Creation of Events or Functions must be done on server!";
+
+        let newb : RemoteEvent | RemoteFunction;
+
+        if (type === "Event")
+            newb = new RemoteEvent();
+        else if (type === "Function")
+            newb = new RemoteFunction();
+        else return; // stfu
+
+        newb.Name = name;
+        newb.Parent = folder;
+        return newb;
+    }
+}
+
+export namespace NetInternal
+{
+    export abstract class FunctionBase {
+        private _name: string;
+        protected _instance: RemoteFunction;
+
+        public get Name() {
+            return this._name;
+        }
+
+        /**
+         * @internal
+         */
+        constructor(name: string) {
+            // let existing = functionFolder.FindFirstChild(name) as RemoteFunction;
+            // if (existing)
+            //     this._instance = existing;
+            // else {
+            //     if (!IS_SERVER)
+            //         throw "Remote Function must be created on server first!";
+
+            //     let newFunction = new RemoteFunction();
+            //     newFunction.Name = name;
+            //     newFunction.Parent = functionFolder;
+            //     this._instance = newFunction;
+            // }
+            this._instance = createRemoteIfNotExist("Function", name) as RemoteFunction;
+            this._name = name;
+        }
+    }
+
+    export abstract class EventBase {
+        private _name: string;
+        protected _instance: RemoteEvent;
+    
+        public get Name() {
+            return this._name;
+        }
+
+        /**
+         * @internal
+         */
+        constructor(name: string) {
+            // let existing = eventFolder.FindFirstChild(name) as RemoteEvent;
+            // if (existing)
+            //     this._instance = existing;
+            // else {
+            //     if (!IS_SERVER)
+            //         throw "Remote Event must be created on server first!";
+    
+            //     let newFunction = new RemoteEvent();
+            //     newFunction.Name = name;
+            //     newFunction.Parent = eventFolder;
+            //     this._instance = newFunction;
+            // }
+            this._instance = createRemoteIfNotExist("Event", name) as RemoteEvent;
+    
+            this._name = name;
+        }
+    }
+}
+
+
 
 /**
  * Typescript Networking Library for ROBLOX
@@ -15,9 +145,10 @@ export namespace Net {
 
     /**
      * Version information
+     * @internal
      */
     export const VERSION: version_t = {
-        number: 0.12,
+        number: 0.20,
         date: 181106,
         tag: 'alpha'
     };
@@ -29,94 +160,10 @@ export namespace Net {
         return `v${VERSION.number} (${VERSION.tag || 'release'})`;
     }
 
-    const REMOTES_FOLDER_NAME = "Remotes";
-    let remoteFolder: Folder, eventFolder: Folder, functionFolder: Folder;
-    let initialized: boolean = false;
-
-    abstract class MRemoteEvent {
-        private _name: string;
-        protected _instance: RemoteEvent;
-
-        public get Name() {
-            return this._name;
-        }
-
-        /**
-         * @internal
-         */
-        public static Exists(name: string) {
-            if (!initialized) init();
-
-            return eventFolder.FindFirstChild(name) as boolean;
-        }
-
-        /**
-         * @internal
-         */
-        constructor(name: string) {
-            let existing = eventFolder.FindFirstChild(name) as RemoteEvent;
-            if (existing)
-                this._instance = existing;
-            else {
-                if (!IS_SERVER)
-                    throw "Remote Event must be created on server first!";
-
-                let newFunction = new RemoteEvent();
-                newFunction.Name = name;
-                newFunction.Parent = eventFolder;
-                this._instance = newFunction;
-            }
-
-            this._name = name;
-        }
-    }
-
-    /**
-     * The wrapper for the RemoteFunction instance
-     */
-    abstract class MRemoteFunction {
-        private _name: string;
-        protected _instance: RemoteFunction;
-
-        public get Name() {
-            return this._name;
-        }
-
-        /**
-         * @internal
-         */
-        public static Exists(name: string) {
-            if (!initialized) init();
-
-            return functionFolder.FindFirstChild(name) as boolean;
-        }
-
-        /**
-         * @internal
-         */
-        constructor(name: string) {
-            let existing = functionFolder.FindFirstChild(name) as RemoteFunction;
-            if (existing)
-                this._instance = existing;
-            else {
-                if (!IS_SERVER)
-                    throw "Remote Function must be created on server first!";
-
-                let newFunction = new RemoteFunction();
-                newFunction.Name = name;
-                newFunction.Parent = functionFolder;
-                this._instance = newFunction;
-            }
-
-            this._name = name;
-        }
-    }
-
-
     /**
      * An event on the server
      */
-    export class ServerEvent extends MRemoteEvent {
+    export class ServerEvent extends NetInternal.EventBase {
 
         /**
          * The RemoteEvent instance
@@ -174,16 +221,13 @@ export namespace Net {
         constructor(name: string) {
             super(name);
             assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
-
-            if (!initialized)
-                init();
         }
     }
 
     /**
      * A function on the server
      */
-    export class ServerFunction extends MRemoteFunction {
+    export class ServerFunction extends NetInternal.FunctionBase {
 
         /**
          * The client cache in seconds
@@ -251,9 +295,6 @@ export namespace Net {
         constructor(name: string) {
             super(name);
             assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
-
-            if (!initialized)
-                init();
         }
     }
 
@@ -261,7 +302,7 @@ export namespace Net {
     /**
      * An event on the client
      */
-    export class ClientEvent extends MRemoteEvent {
+    export class ClientEvent extends NetInternal.EventBase {
 
         /**
          * The RemoteEvent instance
@@ -301,17 +342,14 @@ export namespace Net {
         constructor(name: string) {
             super(name);
             assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
-            assert(MRemoteEvent.Exists(name), `The specified event '${name}' does not exist!`);
-
-            if (!initialized)
-                init();
+            assert(EventExists(name), `The specified event '${name}' does not exist!`);
         }
     }
 
     /**
      * A function on the client
      */
-    export class ClientFunction extends MRemoteFunction {
+    export class ClientFunction extends NetInternal.FunctionBase {
         private _lastPing = -1;
         private _cached: any = [];
 
@@ -376,32 +414,10 @@ export namespace Net {
         constructor(name: string) {
             super(name);
             assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
-            assert(MRemoteFunction.Exists(name), `The specified function '${name}' does not exist!`);
+            assert(FunctionExists(name), `The specified function '${name}' does not exist!`);
         }
     }
 
-    function init() {
-        let replicatedStorage = game.GetService("ReplicatedStorage");
-        remoteFolder = replicatedStorage.FindFirstChild(REMOTES_FOLDER_NAME) as Folder;
-
-        // Check for remotes folder
-        if (!remoteFolder) {
-            remoteFolder = new Folder(replicatedStorage);
-            remoteFolder.Name = REMOTES_FOLDER_NAME;
-        }
-
-        functionFolder = remoteFolder.FindFirstChild("Functions") as Folder;
-        if (!functionFolder) {
-            functionFolder = new Folder(remoteFolder);
-            functionFolder.Name = "Functions";
-        }
-
-        eventFolder = remoteFolder.FindFirstChild("Events") as Folder;
-        if (!eventFolder) {
-            eventFolder = new Folder(remoteFolder);
-            eventFolder.Name = "Events";
-        }
-    }
 
     export function IsClient() {
         return IS_CLIENT;
@@ -417,9 +433,6 @@ export namespace Net {
      * (Must be created on server)
      */
     export function CreateFunction(name: string): ServerFunction {
-        if (!initialized)
-            init();
-
         if (IS_SERVER)
             return new ServerFunction(name);
         else
@@ -432,9 +445,6 @@ export namespace Net {
      * (Must be created on server)
      */
     export function CreateEvent(name: string): ServerEvent {
-        if (!initialized)
-            init();
-
         if (IS_SERVER)
             return new ServerEvent(name);
         else
@@ -443,7 +453,7 @@ export namespace Net {
 
     export function GetClientEventAsync(name: string): Promise<ClientEvent> {
         return new Promise((resolve, reject) => {
-            if (MRemoteEvent.Exists(name)) {
+            if (EventExists(name)) {
                 let newFunc = new ClientEvent(name);
                 resolve(newFunc);
             }
@@ -454,7 +464,7 @@ export namespace Net {
     }
 
     export function GetClientFunction(name: string): ClientFunction | undefined {
-        if (MRemoteFunction.Exists(name))
+        if (FunctionExists(name))
             return new ClientFunction(name);
         else
             return undefined;
@@ -462,7 +472,7 @@ export namespace Net {
 
     export function GetServerEventAsync(name: string): Promise<ServerEvent> {
         return new Promise((resolve, reject) => {
-            if (MRemoteEvent.Exists(name)) {
+            if (EventExists(name)) {
                 let newFunc = new ServerEvent(name);
                 resolve(newFunc);
             }
@@ -474,7 +484,7 @@ export namespace Net {
 
     export function GetClientFunctionAsync(name: string): Promise<ClientFunction> {
         return new Promise((resolve, reject) => {
-            if (MRemoteFunction.Exists(name)) {
+            if (FunctionExists(name)) {
                 let newFunc = new ClientFunction(name);
                 resolve(newFunc);
             }
@@ -486,7 +496,7 @@ export namespace Net {
 
     export function GetServerFunctionAsync(name: string): Promise<ServerFunction> {
         return new Promise((resolve, reject) => {
-            if (MRemoteFunction.Exists(name)) {
+            if (FunctionExists(name)) {
                 let newFunc = new ServerFunction(name);
                 resolve(newFunc);
             }
