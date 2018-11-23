@@ -188,10 +188,10 @@ Recieving
 
 ```ts
 import Net from 'rbx-net';
-let nameOfFunction = Net.GetServerFunction("NameOfFunction");
-nameOfFunction.Callback((...args: any[])=> void {
+let nameOfFunction = Net.getServerFunction("NameOfFunction");
+nameOfFunction.callback = (...args: any[])=> void {
     return "Hello, World!";
-});
+};
 ```
 
 Caching
@@ -199,8 +199,8 @@ Caching
 You can also set a cache timer on the RemoteFunction so a client will cache the result for a set amount of time.
 ```ts
 import Net from 'rbx-net';
-let nameOfFunction = Net.GetServerFunction("NameOfFunction");
-nameOfFunction.ClientCache = 10; // will set a cache timer of 10 seconds.
+let nameOfFunction = Net.getServerFunction("NameOfFunction");
+nameOfFunction.clientCache = 10; // will set a cache timer of 10 seconds.
 
 // NOTE: ClientCache cannot be written on the client.
 ```
