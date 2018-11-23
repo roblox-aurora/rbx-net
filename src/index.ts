@@ -123,7 +123,7 @@ export namespace Net {
      * @internal
      */
     export const VERSION: version_t = {
-        number: 0.20,
+        number: 0.22,
         date: 181106,
         tag: 'alpha'
     };
