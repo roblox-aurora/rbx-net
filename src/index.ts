@@ -4,6 +4,7 @@ let replicatedStorage = game.GetService("ReplicatedStorage");
 
 const IS_CLIENT = runService.IsClient();
 const IS_SERVER = runService.IsServer();
+const IS_STUDIO = runService.IsStudio();
 
 const REMOTES_FOLDER_NAME = "Remotes";
 const FUNCTIONS_FOLDER_NAME = "Functions";
@@ -36,7 +37,7 @@ function EventExists(name: string)
     return eventFolder.FindFirstChild(name) as boolean;
 }
 
-function FunctionExists(name: string)
+function functionExists(name: string)
 {
     return functionFolder.FindFirstChild(name) as boolean;
 }
@@ -156,7 +157,7 @@ export namespace Net {
     /**
      * Get the version as a string
      */
-    export function GetVersion() {
+    function getVersion() {
         return `v${VERSION.number} (${VERSION.tag || 'release'})`;
     }
 
@@ -168,14 +169,14 @@ export namespace Net {
         /**
          * The RemoteEvent instance
          */
-        public get Instance() {
+        public get instance() {
             return this._instance;
         }
 
         /**
          * The RBXScriptSignal for this RemoteEvent
          */
-        public get Event() {
+        public get event() {
             return this._instance.OnServerEvent;
         }
 
@@ -183,15 +184,15 @@ export namespace Net {
          * Connect a fucntion to fire when the event is invoked by the client
          * @param callback The function fired when the event is invoked by the client
          */
-        public Connect(callback: (...args: unknown[]) => void) {
-            this.Event.Connect(callback);
+        public connect(callback: (...args: unknown[]) => void) {
+            this.event.Connect(callback);
         }
 
         /**
          * Sends the specified arguments to all players
          * @param args The arguments to send to the players
          */
-        public SendToAllPlayers(...args: unknown[]) {
+        public sendToAllPlayers(...args: unknown[]) {
             this._instance.FireAllClients(...args);
         }
 
@@ -200,7 +201,7 @@ export namespace Net {
          * @param player The player
          * @param args The arguments to send to the player
          */
-        public SendToPlayer(player: Player, ...args: unknown[]) {
+        public sendToPlayer(player: Player, ...args: unknown[]) {
             this._instance.FireClient(player, ...args);
         }
 
@@ -209,8 +210,8 @@ export namespace Net {
          * @param players The players
          * @param args The arugments to send to these players
          */
-        public SendToPlayers(players: Player[], ...args: unknown[]) {
-            players.forEach(player => this.SendToPlayer(player, ...args));
+        public sendToPlayers(players: Player[], ...args: unknown[]) {
+            players.forEach(player => this.sendToPlayer(player, ...args));
         }
 
         /**
@@ -232,7 +233,7 @@ export namespace Net {
         /**
          * The client cache in seconds
          */
-        public get ClientCache() {
+        public get clientCache() {
             let cache = this._instance.FindFirstChild("Cache") as NumberValue;
             if (cache)
                 return cache.Value;
@@ -243,21 +244,21 @@ export namespace Net {
         /**
          * The callback function
          */
-        public get Callback(): Callback {
+        public get callback(): Callback {
             return this._instance.OnServerInvoke;
         }
 
         /**
          * Set the callback function when called by the client
          */
-        public set Callback(func: Callback) {
+        public set callback(func: Callback) {
             this._instance.OnServerInvoke = func;
         }
 
         /**
          * The RemoteFunction instance
          */
-        public get Instance() {
+        public get instance() {
             return this._instance;
         }
 
@@ -265,7 +266,7 @@ export namespace Net {
          * Sets a client cache timer in seconds
          * @param time seconds to cache on client
          */
-        public set ClientCache(time: number) {
+        public set clientCache(time: number) {
             let cache = this._instance.FindFirstChild("Cache") as NumberValue;
             if (!cache) {
                 let cacheTimer = new NumberValue(this._instance);
@@ -283,7 +284,7 @@ export namespace Net {
          * @param player The player to call the function on
          * @param args The arguments to call the function with
          */
-        public async CallPlayerAsync(player: Player, ...args: any[]): Promise<any> {
+        public async callPlayerAsync(player: Player, ...args: any[]): Promise<any> {
             return this._instance.InvokeClient(player, ...args);
         }
 
@@ -307,14 +308,14 @@ export namespace Net {
         /**
          * The RemoteEvent instance
          */
-        public get Instance() {
+        public get instance() {
             return this._instance;
         }
 
         /**
          * The RBXScriptConnection
          */
-        public get Event() {
+        public get event() {
             return this._instance.OnClientEvent;
         }
 
@@ -322,15 +323,15 @@ export namespace Net {
          * Connect a function to fire when the event is invoked by the client
          * @param callback The function fired when the event is invoked by the client
          */
-        public Connect(callback: (...args: unknown[]) => void) {
-            this.Event.Connect(callback);
+        public connect(callback: (...args: unknown[]) => void) {
+            this.event.Connect(callback);
         }
 
         /**
          * Sends the specified arguments to the server
          * @param args The arguments to send to the server
          */
-        public SendToServer(...args: unknown[]) {
+        public sendToServer(...args: unknown[]) {
             this._instance.FireServer(...args);
         }
 
@@ -356,27 +357,27 @@ export namespace Net {
         /**
          * The callback
          */
-        public get Callback(): Callback {
+        public get callback(): Callback {
             return this._instance.OnClientInvoke;
         }
 
         /**
         * Set the callback function when called by the server
         */
-        public set Callback(func: Callback) {
+        public set callback(func: Callback) {
             this._instance.OnClientInvoke = func;
         }
 
         /** 
          * The remoteFunction instance */
-        public get Instance() {
+        public get instance() {
             return this._instance;
         }
 
         /**
          * The client cache in seconds
          */
-        public get Cache() {
+        public get cache() {
             let cache = this._instance.FindFirstChild("Cache") as NumberValue;
             if (cache)
                 return cache.Value;
@@ -390,8 +391,8 @@ export namespace Net {
          * @param args The arguments to call the server with
          * @returns the result of the call to the server
          */
-        public CallServer(...args: any[]): any {
-            if (this._lastPing < (os.time() + this.Cache)) {
+        public callServer(...args: any[]): any {
+            if (this._lastPing < (os.time() + this.cache)) {
                 let results = [this._instance.InvokeServer(...args)];
                 this._cached = results;
 
@@ -407,23 +408,23 @@ export namespace Net {
          * @param args The args to call the server with
          * @async Will return a promise
          */
-        public async CallServerAsync(...args: any[]): Promise<any> {
-            return this.CallServer(...args);
+        public async callServerAsync(...args: any[]): Promise<any> {
+            return this.callServer(...args);
         }
 
         constructor(name: string) {
             super(name);
             assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
-            assert(FunctionExists(name), `The specified function '${name}' does not exist!`);
+            assert(functionExists(name), `The specified function '${name}' does not exist!`);
         }
     }
 
 
-    export function IsClient() {
+    export function isClient() {
         return IS_CLIENT;
     }
 
-    export function IsServer() {
+    export function isServer() {
         return IS_SERVER;
     }
 
@@ -432,7 +433,7 @@ export namespace Net {
      * @param name The name of the function
      * (Must be created on server)
      */
-    export function CreateFunction(name: string): ServerFunction {
+    export function createFunction(name: string): ServerFunction {
         if (IS_SERVER)
             return new ServerFunction(name);
         else
@@ -444,14 +445,14 @@ export namespace Net {
      * @param name The name of the event
      * (Must be created on server)
      */
-    export function CreateEvent(name: string): ServerEvent {
+    export function createEvent(name: string): ServerEvent {
         if (IS_SERVER)
             return new ServerEvent(name);
         else
             throw "Net.createFunction can only be used on the server!";
     }
 
-    export function GetClientEventAsync(name: string): Promise<ClientEvent> {
+    export function getClientEventAsync(name: string): Promise<ClientEvent> {
         return new Promise((resolve, reject) => {
             if (EventExists(name)) {
                 let newFunc = new ClientEvent(name);
@@ -463,14 +464,14 @@ export namespace Net {
         });
     }
 
-    export function GetClientFunction(name: string): ClientFunction | undefined {
-        if (FunctionExists(name))
+    export function getClientFunction(name: string): ClientFunction | undefined {
+        if (functionExists(name))
             return new ClientFunction(name);
         else
             return undefined;
     }
 
-    export function GetServerEventAsync(name: string): Promise<ServerEvent> {
+    export function getServerEventAsync(name: string): Promise<ServerEvent> {
         return new Promise((resolve, reject) => {
             if (EventExists(name)) {
                 let newFunc = new ServerEvent(name);
@@ -482,9 +483,9 @@ export namespace Net {
         });
     }
 
-    export function GetClientFunctionAsync(name: string): Promise<ClientFunction> {
+    export function getClientFunctionAsync(name: string): Promise<ClientFunction> {
         return new Promise((resolve, reject) => {
-            if (FunctionExists(name)) {
+            if (functionExists(name)) {
                 let newFunc = new ClientFunction(name);
                 resolve(newFunc);
             }
@@ -494,9 +495,9 @@ export namespace Net {
         });
     }
 
-    export function GetServerFunctionAsync(name: string): Promise<ServerFunction> {
+    export function getServerFunctionAsync(name: string): Promise<ServerFunction> {
         return new Promise((resolve, reject) => {
-            if (FunctionExists(name)) {
+            if (functionExists(name)) {
                 let newFunc = new ServerFunction(name);
                 resolve(newFunc);
             }
@@ -505,6 +506,9 @@ export namespace Net {
             }
         });
     }
+
+    if (IS_STUDIO)
+        print("[rbx-net] Loaded rbx-net", getVersion());
 }
 
 export default Net;
