@@ -44,6 +44,14 @@ function functionExists(name: string) {
 	return functionFolder.FindFirstChild(name) !== undefined;
 }
 
+function waitForEvent(name: string, timeOut: number): RemoteEvent | undefined {
+	return eventFolder.WaitForChild(name, timeOut);
+}
+
+function waitForFunction(name: string, timeOut: number): RemoteFunction | undefined {
+	return functionFolder.WaitForChild(name, timeOut);
+}
+
 function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
 	let folder: Folder;
 	if (type === "Event") {
@@ -78,7 +86,8 @@ function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
 	}
 }
 
-type NetworkSerializable = string | boolean | number | undefined | Instance | { [name: string]: NetworkSerializable };
+type NetworkSerializable = string | boolean | number | undefined
+	| Instance | { [name: string]: NetworkSerializable };
 type NetworkSerializableReturnValue = Array<NetworkSerializable> | NetworkSerializable;
 type NetworkSerializableArgs = Array<NetworkSerializable>;
 
@@ -296,6 +305,15 @@ export namespace Net {
 			assert(eventExists(name), `The specified event '${name}' does not exist!`);
 		}
 
+		public static async waitFor(name: string): Promise<Net.ClientEvent> {
+			const fun: RemoteEvent | undefined = waitForEvent(name, MAX_CLIENT_WAITFORCHILD_TIMEOUT);
+			if (!fun) {
+				error("Failed to retrieve client Event!");
+			}
+
+			return new Net.ClientEvent(name);
+		}
+
 		/**
 		 * The RemoteEvent instance
 		 */
@@ -339,6 +357,15 @@ export namespace Net {
 			super(name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
 			assert(functionExists(name), `The specified function '${name}' does not exist!`);
+		}
+
+		public static async waitFor(name: string): Promise<Net.ClientFunction> {
+			const fun: RemoteFunction | undefined = waitForFunction(name, MAX_CLIENT_WAITFORCHILD_TIMEOUT);
+			if (!fun) {
+				error("Failed to retrieve client Function!");
+			}
+
+			return new Net.ClientFunction(name);
 		}
 
 		/**
@@ -453,6 +480,16 @@ export namespace Net {
 		} else {
 			return undefined;
 		}
+	}
+
+	const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
+
+	export async function WaitForClientFunction(name: string) {
+		return Net.ClientFunction.waitFor(name);
+	}
+
+	export async function WaitForClientEvent(name: string) {
+		return Net.ClientEvent.waitFor(name);
 	}
 
 	export function GetServerEventAsync(name: string): Promise<ServerEvent> {
