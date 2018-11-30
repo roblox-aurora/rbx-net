@@ -1,5 +1,11 @@
 RBX-NET
 ========
+<div align="center">
+    	<a href="https://www.npmjs.com/package/rbx-net">
+		<img src="https://badge.fury.io/js/rbx-net.svg"></img>
+	</a>
+</div>
+
 TypeScript version of [ModRemote](https://github.com/Vorlias/ROBLOX-ModRemote) for roblox-ts.
 
 Requirements
