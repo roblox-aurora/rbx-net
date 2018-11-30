@@ -408,13 +408,14 @@ export namespace Net {
 		 */
 		public CallServer<T extends NetworkSerializableArgs>(...args: T): NetworkSerializableReturnValue {
 			if (this.lastPing < (os.time() + this.Cache)) {
-				const results = [this.instance.InvokeServer(...args)];
-				this.cached = results;
+				const result = this.instance.InvokeServer(...args);
+				this.cached = result;
 
 				this.lastPing = os.time();
-				return [...results] as any;
+
+				return result;
 			} else {
-				return [...this.cached] as any;
+				return this.cached;
 			}
 		}
 
