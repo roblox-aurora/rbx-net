@@ -474,7 +474,14 @@ export namespace Net {
 		});
 	}
 
+	/**
+	 * @deprecated Use `GetClientFunctionAsync` or `WaitForClientFunctionAsync`
+	 */
 	export function GetClientFunction(name: string): ClientFunction | undefined {
+		warn("[GetClientFunction]" +
+			"GetClientFunctionAsync/WaitForClientFunctionAsync should be used instead of GetClientFunction");
+		warn(debug.traceback());
+
 		if (functionExists(name)) {
 			return new ClientFunction(name);
 		} else {
@@ -484,11 +491,11 @@ export namespace Net {
 
 	const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
 
-	export async function WaitForClientFunction(name: string) {
+	export async function WaitForClientFunctionAsync(name: string) {
 		return Net.ClientFunction.waitFor(name);
 	}
 
-	export async function WaitForClientEvent(name: string) {
+	export async function WaitForClientEventAsync(name: string) {
 		return Net.ClientEvent.waitFor(name);
 	}
 
