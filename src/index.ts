@@ -33,12 +33,12 @@ if (!eventFolder) {
 
 function eventExists(name: string)
 {
-    return eventFolder.FindFirstChild(name) as boolean;
+    return eventFolder.FindFirstChild(name) !== undefined;
 }
 
 function functionExists(name: string)
 {
-    return functionFolder.FindFirstChild(name) as boolean;
+    return functionFolder.FindFirstChild(name) !== undefined;
 }
 
 function createRemoteIfNotExist(type: "Function" | "Event", name: string)
@@ -73,6 +73,9 @@ function createRemoteIfNotExist(type: "Function" | "Event", name: string)
     }
 }
 
+type NetworkSerializable = string | boolean | number | undefined | Instance | {[name: string]: NetworkSerializable}
+type NetworkSerializableReturnValue = NetworkSerializable[] | NetworkSerializable; 
+type NetworkSerializableArgs = Array<NetworkSerializable>;
 
 export abstract class __FunctionBase {
     private _name: string;
@@ -158,15 +161,15 @@ export namespace Net {
          * Connect a fucntion to fire when the event is invoked by the client
          * @param callback The function fired when the event is invoked by the client
          */
-        public Connect(callback: (...args: unknown[]) => void) {
-            this.Event.Connect(callback);
+        public Connect<T extends NetworkSerializableArgs>(callback: (...args: T) => void) {
+            this.Event.Connect(callback as any);
         }
 
         /**
          * Sends the specified arguments to all players
          * @param args The arguments to send to the players
          */
-        public SendToAllPlayers(...args: unknown[]) {
+        public SendToAllPlayers<T extends NetworkSerializableArgs>(...args: T) {
             this._instance.FireAllClients(...args);
         }
 
@@ -175,7 +178,7 @@ export namespace Net {
          * @param player The player
          * @param args The arguments to send to the player
          */
-        public SendToPlayer(player: Player, ...args: unknown[]) {
+        public SendToPlayer<T extends NetworkSerializableArgs>(player: Player, ...args: T) {
             this._instance.FireClient(player, ...args);
         }
 
@@ -184,7 +187,7 @@ export namespace Net {
          * @param players The players
          * @param args The arugments to send to these players
          */
-        public SendToPlayers(players: Player[], ...args: unknown[]) {
+        public SendToPlayers<T extends NetworkSerializableArgs>(players: Player[], ...args: T) {
             players.forEach(player => this.SendToPlayer(player, ...args));
         }
 
@@ -258,8 +261,8 @@ export namespace Net {
          * @param player The player to call the function on
          * @param args The arguments to call the function with
          */
-        public async CallPlayerAsync(player: Player, ...args: any[]): Promise<any> {
-            return this._instance.InvokeClient(player, ...args);
+        public async CallPlayerAsync<T extends NetworkSerializableArgs>(player: Player, ...args: T): Promise<NetworkSerializableReturnValue> {
+            return this._instance.InvokeClient(player, ...args) as any;
         }
 
         /**
@@ -297,15 +300,15 @@ export namespace Net {
          * Connect a function to fire when the event is invoked by the client
          * @param callback The function fired when the event is invoked by the client
          */
-        public Connect(callback: (...args: unknown[]) => void) {
-            this.Event.Connect(callback);
+        public Connect<T extends NetworkSerializableArgs>(callback: (...args: T) => void) {
+            this.Event.Connect(callback as any);
         }
 
         /**
          * Sends the specified arguments to the server
          * @param args The arguments to send to the server
          */
-        public SendToServer(...args: unknown[]) {
+        public SendToServer<T extends NetworkSerializableArgs>(...args: T) {
             this._instance.FireServer(...args);
         }
 
@@ -365,16 +368,16 @@ export namespace Net {
          * @param args The arguments to call the server with
          * @returns the result of the call to the server
          */
-        public CallServer(...args: any[]): any {
+        public CallServer<T extends NetworkSerializableArgs>(...args: T): NetworkSerializableReturnValue {
             if (this._lastPing < (os.time() + this.Cache)) {
                 let results = [this._instance.InvokeServer(...args)];
                 this._cached = results;
 
                 this._lastPing = os.time();
-                return [...results];
+                return [...results] as any;
             }
             else
-                return [...this._cached];
+                return [...this._cached] as any;
         }
 
         /**
@@ -382,7 +385,7 @@ export namespace Net {
          * @param args The args to call the server with
          * @async Will return a promise
          */
-        public async CallServerAsync(...args: any[]): Promise<any> {
+        public async CallServerAsync<T extends NetworkSerializableArgs>(...args: T): Promise<NetworkSerializableReturnValue> {
             return this.CallServer(...args);
         }
 
@@ -479,7 +482,52 @@ export namespace Net {
                 reject("Could not find Server Function: " + name + " (did you create it?)");
             }
         });
-    }
+	}
+	
+	/**
+	 * Function that allows using class methods as a callback/event handling function.
+	 * Will also pass any extra arguments to the event handler function
+	 * 
+	 * 	cosnt bound = bind(this.method, this)
+	 * 
+	 * is equivalent to
+	 * 
+```lua
+	local bound = function(...) self.method(self, ...); end
+```
+	 * 
+	 * Example usage
+	 * 
+	 * 	class MyClass {
+	 * 		private someEvent: Net.ServerEvent; 
+	 * 		
+	 * 		constructor() {
+	 * 			this.someEvent = new Net.ServerEvent("SomeEvent");
+	 * 			this.someEvent.Connect(
+	 * 				Net.bind(this.onSomeEvent, this)
+	 * 			);
+	 * 		}
+	 * 		
+	 * 		private onSomeEvent() {
+	 * 			print("Do the event!");
+	 * 		}
+	 * 	}
+	 * 
+	 * @param func The 
+	 * @param thisArg The instance to call
+	 * @param args 
+	 */
+	export function bind<T extends Array<any>, U>(func: (...args: T) => U, thisArg: any, ...args: Array<any>) {
+		return (...args2: T) => {
+			const args3 = [
+				thisArg,
+				...args,
+				...args2,
+			];
+	
+			(func as any)(thisArg, ...args3);
+		};
+	}
 
     if (IS_STUDIO)
         print("[rbx-net] Loaded rbx-net", getVersion());
