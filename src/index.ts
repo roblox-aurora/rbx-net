@@ -67,6 +67,7 @@ function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
 		return existing;
 	} else {
 		if (!IS_SERVER) {
+			error("Creation of Events or Functions must be done on server!");
 			throw "Creation of Events or Functions must be done on server!";
 		}
 
@@ -447,7 +448,8 @@ export namespace Net {
 		if (IS_SERVER) {
 			return new ServerFunction(name);
 		} else {
-			throw "Net.createFunction can only be used on the server!";
+			error("Net.createFunction can only be used on the server!");
+			throw "";
 		}
 	}
 
@@ -460,6 +462,7 @@ export namespace Net {
 		if (IS_SERVER) {
 			return new ServerEvent(name);
 		} else {
+			error("Net.createFunction can only be used on the server!");
 			throw "Net.createFunction can only be used on the server!";
 		}
 	}
@@ -576,7 +579,7 @@ export namespace Net {
 				...args2,
 			];
 
-			(func as any)(thisArg, ...args3);
+			(func as any)(...args3);
 		};
 	}
 
