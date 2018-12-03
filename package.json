@@ -1,6 +1,6 @@
 {
   "name": "rbx-net",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Networking Library for roblox-ts",
   "main": "./out/init.lua",
   "typings": "./out/index.d.ts",

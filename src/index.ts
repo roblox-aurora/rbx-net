@@ -536,7 +536,7 @@ export namespace Net {
 		});
 	}
 
-// tslint:disable:jsdoc-format
+	// tslint:disable:jsdoc-format
 	/**
 	 * Function that allows using class methods as a callback/event handling function.
 	 * Will also pass any extra arguments to the event handler function
@@ -570,8 +570,8 @@ export namespace Net {
 	 * @param thisArg The instance to call
 	 * @param args
 	 */
-// tslint:enable:jsdoc-format
-	export function bind<T extends Array<any>, U>(func: (...args: T) => U, thisArg: any, ...args: Array<any>) {
+	// tslint:enable:jsdoc-format
+	export function Bind<T extends Array<any>, U>(func: (...args: T) => U, thisArg: any, ...args: Array<any>) {
 		return (...args2: T) => {
 			const args3 = [
 				thisArg,
@@ -582,6 +582,11 @@ export namespace Net {
 			(func as any)(...args3);
 		};
 	}
+
+	/**
+	 * @deprecated
+	 */
+	export const bind = Bind;
 
 	if (IS_STUDIO) {
 		print("[rbx-net] Loaded rbx-net", getVersion());
