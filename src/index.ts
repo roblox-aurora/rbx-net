@@ -610,18 +610,19 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 	 *
 	 * @param func The
 	 * @param thisArg The instance to call
-	 * @param args
+	 * @param bindArgs
 	 */
 	// tslint:enable:jsdoc-format
-	export function Bind<T extends Array<any>, U>(func: (...args: T) => U, thisArg: any, ...args: Array<any>) {
-		return (...args2: T) => {
-			const args3 = [
+	export function Bind<T extends Array<any>, U, E extends Array<any>>(
+		func: (...args: T) => U, thisArg: any, ...bindArgs: E) {
+		return (...callbackArgs: T) => {
+			const resultingArgs = [
 				thisArg,
-				...args,
-				...args2,
+				...bindArgs,
+				...callbackArgs,
 			];
 
-			(func as any)(...args3);
+			(func as any)(...resultingArgs);
 		};
 	}
 
