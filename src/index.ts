@@ -185,7 +185,7 @@ export namespace Net {
 		 * Connect a fucntion to fire when the event is invoked by the client
 		 * @param callback The function fired when the event is invoked by the client
 		 */
-		public Connect<T extends NetworkSerializableArgs>(callback: (...args: T) => void) {
+		public Connect<T extends NetworkSerializableArgs>(callback: (sourcePlayer: Player, ...args: T) => void) {
 			this.Event.Connect(callback as any);
 		}
 
