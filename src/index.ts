@@ -212,7 +212,9 @@ export namespace Net {
 		 * @param args The arugments to send to these players
 		 */
 		public SendToPlayers<T extends NetworkSerializableArgs>(players: Array<Player>, ...args: T) {
-			players.forEach(player => this.SendToPlayer(player, ...args));
+			for (const player of players) {
+				this.SendToPlayer(player, ...args);
+			}
 		}
 	}
 
