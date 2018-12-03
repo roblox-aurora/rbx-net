@@ -131,6 +131,8 @@ export abstract class EventBase {
  * Typescript Networking Library for ROBLOX
  */
 export namespace Net {
+	const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
+
 	interface VersionType { number: number; date: number; tag?: string; }
 
 	/**
@@ -481,8 +483,6 @@ export namespace Net {
 			return undefined;
 		}
 	}
-
-	const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
 
 	// tslint:disable:jsdoc-format
 	/**
