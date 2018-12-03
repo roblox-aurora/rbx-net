@@ -306,7 +306,7 @@ export namespace Net {
 			assert(eventExists(name), `The specified event '${name}' does not exist!`);
 		}
 
-		public static async waitFor(name: string): Promise<Net.ClientEvent> {
+		public static async WaitFor(name: string): Promise<Net.ClientEvent> {
 			const fun: RemoteEvent | undefined = waitForEvent(name, MAX_CLIENT_WAITFORCHILD_TIMEOUT);
 			if (!fun) {
 				error("Failed to retrieve client Event!");
@@ -360,7 +360,7 @@ export namespace Net {
 			assert(functionExists(name), `The specified function '${name}' does not exist!`);
 		}
 
-		public static async waitFor(name: string): Promise<Net.ClientFunction> {
+		public static async WaitFor(name: string): Promise<Net.ClientFunction> {
 			const fun: RemoteFunction | undefined = waitForFunction(name, MAX_CLIENT_WAITFORCHILD_TIMEOUT);
 			if (!fun) {
 				error("Failed to retrieve client Function!");
@@ -495,12 +495,60 @@ export namespace Net {
 
 	const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
 
+	// tslint:disable:jsdoc-format
+	/**
+	 * Wait for a client function specified by `name`
+	 *
+	 * Usage
+	 *
+```ts
+Net.WaitForClientFunctionAsync("FunctionName").then(func => {
+	func.Callback = clientCallbackFunction;
+}, err => {
+	warn("Error fetching FunctionName:", err);
+});```
+	 *
+	 * Or inside an async function:
+```ts
+	const func = await Net.WaitForClientFunctionAsync("FunctionName");
+	func.Callback = clientCallbackFunction;
+```
+	 *
+	 * @param name The name of the function
+	 * @alias for `Net.ClientFunction.WaitFor(name)`
+	 * @returns `Promise<Net.ClientFunction>`
+	 */
+	// tslint:enable:jsdoc-format
 	export async function WaitForClientFunctionAsync(name: string) {
-		return Net.ClientFunction.waitFor(name);
+		return Net.ClientFunction.WaitFor(name);
 	}
 
+	// tslint:disable:jsdoc-format
+	/**
+	 * Wait for a client function specified by `name`
+	 *
+	 * Usage
+	 *
+```ts
+Net.WaitForClientEventAsync("EventName").then(event => {
+	event.Connect(eventHandler);
+}, err => {
+	warn("Error fetching EventName:", err);
+});```
+	 *
+	 * Or inside an async function:
+```ts
+	const event = await Net.WaitForClientEventAsync("EventName");
+	event.Connect(eventHandler);
+```
+	 *
+	 * @param name The name of the function
+	 * @alias for `Net.ClientEvent.WaitFor(name)`
+	 * @returns `Promise<Net.ClientEvent>`
+	 */
+	// tslint:enable:jsdoc-format
 	export async function WaitForClientEventAsync(name: string) {
-		return Net.ClientEvent.waitFor(name);
+		return Net.ClientEvent.WaitFor(name);
 	}
 
 	export function GetServerEventAsync(name: string): Promise<ServerEvent> {
@@ -557,7 +605,7 @@ export namespace Net {
 	 * 		constructor() {
 	 * 			this.someEvent = new Net.ServerEvent("SomeEvent");
 	 * 			this.someEvent.Connect(
-	 * 				Net.bind(this.onSomeEvent, this)
+	 * 				Net.Bind(this.onSomeEvent, this)
 	 * 			);
 	 * 		}
 	 *
