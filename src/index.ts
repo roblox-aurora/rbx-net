@@ -467,17 +467,6 @@ export namespace Net {
 		}
 	}
 
-	export function GetClientEventAsync(name: string): Promise<ClientEvent> {
-		return new Promise((resolve, reject) => {
-			if (eventExists(name)) {
-				const newFunc = new ClientEvent(name);
-				resolve(newFunc);
-			} else {
-				reject("Could not find Client Event: " + name + " (did you create it on the server?)");
-			}
-		});
-	}
-
 	/**
 	 * @deprecated Use `GetClientFunctionAsync` or `WaitForClientFunctionAsync`
 	 */
@@ -562,15 +551,18 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 		});
 	}
 
-	export function GetClientFunctionAsync(name: string): Promise<ClientFunction> {
-		return new Promise((resolve, reject) => {
-			if (functionExists(name)) {
-				const newFunc = new ClientFunction(name);
-				resolve(newFunc);
-			} else {
-				reject("Could not find Client Function: " + name + " (did you create it on the server?)");
-			}
-		});
+	/**
+	 * @deprecated Use `WaitForClientEventAsync`
+	 */
+	export async function GetClientEventAsync(name: string): Promise<ClientEvent> {
+		return await WaitForClientEventAsync(name);
+	}
+
+	/**
+	 * @deprecated Use `WaitForClientFunctionAsync`
+	 */
+	export async function GetClientFunctionAsync(name: string): Promise<ClientFunction> {
+		return await WaitForClientFunctionAsync(name);
 	}
 
 	export function GetServerFunctionAsync(name: string): Promise<ServerFunction> {
