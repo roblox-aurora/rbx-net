@@ -5,7 +5,9 @@
 	"main": "./out/init.lua",
 	"typings": "./out/index.d.ts",
 	"scripts": {
-		"prepublish": "rbxtsc"
+		"prepublish": "npm run build",
+		"cleanup": "rm -rf ./out",
+		"build": "npm run cleanup && rbxtsc"
 	},
 	"author": "vorlias",
 	"license": "MIT",
