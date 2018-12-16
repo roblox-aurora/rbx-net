@@ -1,6 +1,8 @@
-RBX-NET
-========
 <div align="center">
+	<img src="https://assets.vorlias.com/i1/net-tsx.png"/>
+</div>
+<div align="center">
+	<h1>Roblox Networking Library (Typescript)</h1>
     	<a href="https://www.npmjs.com/package/rbx-net">
 		<img src="https://badge.fury.io/js/rbx-net.svg"></img>
 	</a>
