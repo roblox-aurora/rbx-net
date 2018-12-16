@@ -476,6 +476,7 @@ export namespace Net {
 
 	/**
 	 * @deprecated Use `GetClientFunctionAsync` or `WaitForClientFunctionAsync`
+	 * @internal
 	 */
 	export function GetClientFunction(name: string): ClientFunction | undefined {
 		warn("[GetClientFunction]" +
@@ -554,20 +555,6 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 				reject("Could not find Server Event: " + name + " (did you create it on the server?)");
 			}
 		});
-	}
-
-	/**
-	 * @deprecated Use `WaitForClientEventAsync`
-	 */
-	export async function GetClientEventAsync(name: string): Promise<ClientEvent> {
-		return await WaitForClientEventAsync(name);
-	}
-
-	/**
-	 * @deprecated Use `WaitForClientFunctionAsync`
-	 */
-	export async function GetClientFunctionAsync(name: string): Promise<ClientFunction> {
-		return await WaitForClientFunctionAsync(name);
 	}
 
 	export function GetServerFunctionAsync(name: string): Promise<ServerFunction> {
