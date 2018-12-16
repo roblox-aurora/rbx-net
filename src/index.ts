@@ -133,15 +133,16 @@ export abstract class EventBase {
 export namespace Net {
 	const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
 
-	interface VersionType { number: number; date: number; tag?: string; }
+	interface VersionType { major: number; minor: number; revision: number; }
+	interface VersionInformation { number: VersionType; date: number; tag?: string; }
 
 	/**
 	 * Version information
 	 * @internal
 	 */
-	export const VERSION: VersionType = {
-		number: 0.22,
-		date: 181106,
+	export const VERSION: VersionInformation = {
+		number: { major: 0, minor: 5, revision: 0 },
+		date: 181216,
 		tag: "alpha",
 	};
 
@@ -149,7 +150,9 @@ export namespace Net {
 	 * Get the version as a string
 	 */
 	function getVersion() {
-		return `v${VERSION.number} (${VERSION.tag || "release"})`;
+		const { major, minor, revision } = VERSION.number;
+
+		return `${major}.${minor}.${revision}`;
 	}
 
 	/**
@@ -632,7 +635,7 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 	export const bind = Bind;
 
 	if (IS_STUDIO) {
-		print("[rbx-net] Loaded rbx-net", getVersion());
+		print("[rbx-net] Loaded rbx-net", `v${getVersion()}`);
 	}
 }
 
