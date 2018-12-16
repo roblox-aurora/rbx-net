@@ -17,20 +17,20 @@ let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
 
-remoteFolder = replicatedStorage.FindFirstChild(REMOTES_FOLDER_NAME) as Folder;
+remoteFolder = replicatedStorage.FindFirstChild<Folder>(REMOTES_FOLDER_NAME)!;
 
 if (!remoteFolder) {
 	remoteFolder = new Folder(replicatedStorage);
 	remoteFolder.Name = REMOTES_FOLDER_NAME;
 }
 
-functionFolder = remoteFolder.FindFirstChild(FUNCTIONS_FOLDER_NAME) as Folder;
+functionFolder = remoteFolder.FindFirstChild<Folder>(FUNCTIONS_FOLDER_NAME)!;
 if (!functionFolder) {
 	functionFolder = new Folder(remoteFolder);
 	functionFolder.Name = FUNCTIONS_FOLDER_NAME;
 }
 
-eventFolder = remoteFolder.FindFirstChild(EVENTS_FOLDER_NAME) as Folder;
+eventFolder = remoteFolder.FindFirstChild<Folder>(EVENTS_FOLDER_NAME)!;
 if (!eventFolder) {
 	eventFolder = new Folder(remoteFolder);
 	eventFolder.Name = EVENTS_FOLDER_NAME;
