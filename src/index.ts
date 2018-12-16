@@ -568,59 +568,6 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 		});
 	}
 
-	// tslint:disable:jsdoc-format
-	/**
-	 * Function that allows using class methods as a callback/event handling function.
-	 * Will also pass any extra arguments to the event handler function
-	 *
-	 * 	cosnt bound = bind(this.method, this)
-	 *
-	 * is equivalent to
-	 *
-```lua
-	local bound = function(...) self.method(self, ...); end
-```
-	 *
-	 * Example usage
-	 *
-	 * 	class MyClass {
-	 * 		private someEvent: Net.ServerEvent;
-	 *
-	 * 		constructor() {
-	 * 			this.someEvent = new Net.ServerEvent("SomeEvent");
-	 * 			this.someEvent.Connect(
-	 * 				Net.Bind(this.onSomeEvent, this)
-	 * 			);
-	 * 		}
-	 *
-	 * 		private onSomeEvent() {
-	 * 			print("Do the event!");
-	 * 		}
-	 * 	}
-	 *
-	 * @param func The
-	 * @param thisArg The instance to call
-	 * @param bindArgs
-	 */
-	// tslint:enable:jsdoc-format
-	export function Bind<T extends Array<any>, U, E extends Array<any>>(
-		func: (...args: T) => U, thisArg: any, ...bindArgs: E) {
-		return (...callbackArgs: T) => {
-			const resultingArgs = [
-				thisArg,
-				...bindArgs,
-				...callbackArgs,
-			];
-
-			(func as any)(...resultingArgs);
-		};
-	}
-
-	/**
-	 * @deprecated
-	 */
-	export const bind = Bind;
-
 	if (IS_STUDIO) {
 		print("[rbx-net] Loaded rbx-net", `v${getVersion()}`);
 	}
