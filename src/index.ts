@@ -53,37 +53,36 @@ function waitForFunction(name: string, timeOut: number): RemoteFunction | undefi
 }
 
 function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
-	let folder: Folder;
+	let targetFolder: Folder;
 	if (type === "Event") {
-		folder = eventFolder;
+		targetFolder = eventFolder;
 	} else if (type === "Function") {
-		folder = functionFolder;
+		targetFolder = functionFolder;
 	} else {
 		throw "Invalid type: " + type;
 	}
 
-	const existing = folder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
+	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
 	if (existing) {
 		return existing;
 	} else {
 		if (!IS_SERVER) {
-			error("Creation of Events or Functions must be done on server!");
 			throw "Creation of Events or Functions must be done on server!";
 		}
 
-		let newb: RemoteEvent | RemoteFunction;
+		let remote: RemoteEvent | RemoteFunction;
 
 		if (type === "Event") {
-			newb = new RemoteEvent();
+			remote = new RemoteEvent();
 		} else if (type === "Function") {
-			newb = new RemoteFunction();
+			remote = new RemoteFunction();
 		} else {
 			return;
 		} // stfu
 
-		newb.Name = name;
-		newb.Parent = folder;
-		return newb;
+		remote.Name = name;
+		remote.Parent = targetFolder;
+		return remote;
 	}
 }
 
