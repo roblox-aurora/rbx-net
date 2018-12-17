@@ -12,7 +12,7 @@ TypeScript version of [ModRemote](https://github.com/Vorlias/ROBLOX-ModRemote) f
 
 Requirements
 =============
-This requires [roblox-ts](https://github.com/roblox-ts/roblox-ts) as it is a roblox-ts module.
+This requires [roblox-ts](https://github.com/roblox-ts/roblox-ts) as it is a roblox-ts module. Future Lua support will be added once `roblox-ts` has a bundling feature.
 
 Installation
 =============
