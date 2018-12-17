@@ -1,3 +1,8 @@
+interface RemoteTypes {
+	Event: RemoteEvent;
+	Function: RemoteFunction;
+}
+
 // tslint:disable:variable-name
 const _exports = {}; // hack that fixes _exports for default
 // tslint:enable:variable-name
@@ -52,7 +57,7 @@ function waitForFunction(name: string, timeOut: number): RemoteFunction | undefi
 	return functionFolder.WaitForChild(name, timeOut);
 }
 
-function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
+function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 	let targetFolder: Folder;
 	if (type === "Event") {
 		targetFolder = eventFolder;
@@ -61,6 +66,22 @@ function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
 	} else {
 		throw "Invalid type: " + type;
 	}
+
+	return targetFolder;
+}
+
+function findRemoteOrThrow<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
+	const targetFolder = getRemoteFolder(type);
+	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
+	if (existing) {
+		return existing;
+	} else {
+		throw `Could not find Remote of type ${type} called "${name}"`;
+	}
+}
+
+function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
+	const targetFolder = getRemoteFolder(type);
 
 	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
 	if (existing) {
@@ -77,7 +98,7 @@ function createRemoteIfNotExist(type: "Function" | "Event", name: string) {
 		} else if (type === "Function") {
 			remote = new RemoteFunction();
 		} else {
-			return;
+			throw `Invalid Remote Type: ${type}`;
 		} // stfu
 
 		remote.Name = name;
@@ -90,42 +111,6 @@ type NetworkSerializable = string | boolean | number | undefined
 	| Instance | { [name: string]: NetworkSerializable };
 type NetworkSerializableReturnValue = Array<NetworkSerializable> | NetworkSerializable;
 type NetworkSerializableArgs = Array<NetworkSerializable>;
-
-export abstract class FunctionBase {
-	private name: string;
-	protected instance: RemoteFunction;
-
-	public get Name() {
-		return this.name;
-	}
-
-	/**
-	 * @internal
-	 */
-	constructor(name: string) {
-		this.instance = createRemoteIfNotExist("Function", name) as RemoteFunction;
-		this.name = name;
-	}
-}
-
-export abstract class EventBase {
-	private name: string;
-	protected instance: RemoteEvent;
-
-	public get Name() {
-		return this.name;
-	}
-
-	/**
-	 * @internal
-	 */
-	constructor(name: string) {
-		this.instance = createRemoteIfNotExist("Event", name) as RemoteEvent;
-
-		this.name = name;
-	}
-}
-
 /**
  * Typescript Networking Library for ROBLOX
  */
@@ -157,7 +142,9 @@ export namespace Net {
 	/**
 	 * An event on the server
 	 */
-	export class ServerEvent extends EventBase {
+	export class ServerEvent {
+		/** @internal */
+		private instance: RemoteEvent;
 
 		/**
 		 * Creates a new instance of a server event (Will also create the corresponding remote if it does not exist!)
@@ -165,7 +152,7 @@ export namespace Net {
 		 * @throws If not created on server
 		 */
 		constructor(name: string) {
-			super(name);
+			this.instance = findOrCreateRemote("Event", name);
 			assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
 		}
 
@@ -223,7 +210,9 @@ export namespace Net {
 	/**
 	 * A function on the server
 	 */
-	export class ServerFunction extends FunctionBase {
+	export class ServerFunction {
+		/** @internal */
+		private instance: RemoteFunction;
 
 		/**
 		 * Creates a new instance of a server function (Will also create the corresponding remote if it does not exist!)
@@ -231,7 +220,7 @@ export namespace Net {
 		 * @throws If not created on server
 		 */
 		constructor(name: string) {
-			super(name);
+			this.instance = findOrCreateRemote("Function", name);
 			assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
 		}
 
@@ -299,7 +288,9 @@ export namespace Net {
 	/**
 	 * An event on the client
 	 */
-	export class ClientEvent extends EventBase {
+	export class ClientEvent {
+		/** @internal */
+		private instance: RemoteEvent;
 
 		/**
 		 * Create a new instance of the ClientEvent
@@ -307,9 +298,8 @@ export namespace Net {
 		 * @throws If created on server, or does not exist.
 		 */
 		constructor(name: string) {
-			super(name);
+			this.instance = findRemoteOrThrow("Event", name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
-			assert(eventExists(name), `The specified event '${name}' does not exist!`);
 		}
 
 		public static async WaitFor(name: string): Promise<Net.ClientEvent> {
@@ -356,12 +346,16 @@ export namespace Net {
 	/**
 	 * A function on the client
 	 */
-	export class ClientFunction extends FunctionBase {
+	export class ClientFunction {
+		/** @internal */
 		private lastPing = -1;
+		/** @internal */
 		private cached: any = [];
+		/** @internal */
+		private instance: RemoteFunction;
 
 		constructor(name: string) {
-			super(name);
+			this.instance = findRemoteOrThrow("Function", name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
 			assert(functionExists(name), `The specified function '${name}' does not exist!`);
 		}
