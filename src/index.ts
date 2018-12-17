@@ -130,14 +130,13 @@ export namespace Net {
 		tag: "alpha",
 	};
 
-	/**
-	 * Get the version as a string
-	 */
-	function getVersion() {
-		const { major, minor, revision } = VERSION.number;
+	setmetatable(VERSION, {
+		__tostring: (self) => {
+			const { major, minor, revision } = self.number;
 
-		return `${major}.${minor}.${revision}`;
-	}
+			return `${major}.${minor}.${revision}`;
+		},
+	});
 
 	/**
 	 * An event on the server
@@ -562,7 +561,7 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 	}
 
 	if (IS_STUDIO) {
-		print("[rbx-net] Loaded rbx-net", `v${getVersion()}`);
+		print("[rbx-net] Loaded rbx-net", `v${VERSION}`);
 	}
 }
 
