@@ -341,7 +341,7 @@ export namespace Net {
 	/**
 	 * A function on the client
 	 */
-	export class ClientFunction {
+	export class ClientFunction<SR extends any> {
 		/** @internal */
 		private lastPing = -1;
 		/** @internal */
@@ -355,13 +355,13 @@ export namespace Net {
 			assert(functionExists(name), `The specified function '${name}' does not exist!`);
 		}
 
-		public static async WaitFor(name: string): Promise<Net.ClientFunction> {
+		public static async WaitFor<R extends any>(name: string): Promise<Net.ClientFunction<R>> {
 			const fun: RemoteFunction | undefined = waitForFunction(name, MAX_CLIENT_WAITFORCHILD_TIMEOUT);
 			if (!fun) {
 				error("Failed to retrieve client Function!");
 			}
 
-			return new Net.ClientFunction(name);
+			return new Net.ClientFunction<R>(name);
 		}
 
 		/**
@@ -402,7 +402,7 @@ export namespace Net {
 		 * @param args The arguments to call the server with
 		 * @returns the result of the call to the server
 		 */
-		public CallServer<R extends any, T extends Array<any>>(...args: T): R {
+		public CallServer<T extends Array<any>>(...args: T): SR {
 			if (this.lastPing < (os.time() + this.Cache)) {
 				const result = this.instance.InvokeServer(...args);
 				this.cached = result;
@@ -420,7 +420,7 @@ export namespace Net {
 		 * @param args The args to call the server with
 		 * @async Will return a promise
 		 */
-		public async CallServerAsync<R extends any, T extends Array<any>>(...args: T): Promise<R> {
+		public async CallServerAsync<T extends Array<any>>(...args: T): Promise<SR> {
 			return this.CallServer(...args);
 		}
 
@@ -466,7 +466,7 @@ export namespace Net {
 	 * @deprecated Use `GetClientFunctionAsync` or `WaitForClientFunctionAsync`
 	 * @internal
 	 */
-	export function GetClientFunction(name: string): ClientFunction | undefined {
+	export function GetClientFunction<R extends any>(name: string): ClientFunction<R> | undefined {
 		warn("[GetClientFunction]" +
 			"GetClientFunctionAsync/WaitForClientFunctionAsync should be used instead of GetClientFunction");
 		warn(debug.traceback());
@@ -502,8 +502,8 @@ Net.WaitForClientFunctionAsync("FunctionName").then(func => {
 	 * @returns `Promise<Net.ClientFunction>`
 	 */
 	// tslint:enable:jsdoc-format
-	export async function WaitForClientFunctionAsync(name: string) {
-		return Net.ClientFunction.WaitFor(name);
+	export async function WaitForClientFunctionAsync<R extends any>(name: string) {
+		return Net.ClientFunction.WaitFor<R>(name);
 	}
 
 	// tslint:disable:jsdoc-format
