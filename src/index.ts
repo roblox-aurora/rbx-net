@@ -205,7 +205,7 @@ export namespace Net {
 	/**
 	 * A function on the server
 	 */
-	export class ServerFunction {
+	export class ServerFunction<CR extends any> {
 		/** @internal */
 		private instance: RemoteFunction;
 
@@ -273,8 +273,8 @@ export namespace Net {
 		 * @param player The player to call the function on
 		 * @param args The arguments to call the function with
 		 */
-		public async CallPlayerAsync<R extends any, T extends Array<any>>(
-			player: Player, ...args: T): Promise<R> {
+		public async CallPlayerAsync<T extends Array<any>>(
+			player: Player, ...args: T): Promise<CR> {
 			return this.instance.InvokeClient(player, ...args) as any;
 		}
 
@@ -439,9 +439,9 @@ export namespace Net {
 	 * @param name The name of the function
 	 * (Must be created on server)
 	 */
-	export function CreateFunction(name: string): ServerFunction {
+	export function CreateFunction<CR extends any>(name: string): ServerFunction<CR> {
 		if (IS_SERVER) {
-			return new ServerFunction(name);
+			return new ServerFunction<CR>(name);
 		} else {
 			error("Net.createFunction can only be used on the server!");
 			throw "";
@@ -459,22 +459,6 @@ export namespace Net {
 		} else {
 			error("Net.createFunction can only be used on the server!");
 			throw "Net.createFunction can only be used on the server!";
-		}
-	}
-
-	/**
-	 * @deprecated Use `GetClientFunctionAsync` or `WaitForClientFunctionAsync`
-	 * @internal
-	 */
-	export function GetClientFunction<R extends any>(name: string): ClientFunction<R> | undefined {
-		warn("[GetClientFunction]" +
-			"GetClientFunctionAsync/WaitForClientFunctionAsync should be used instead of GetClientFunction");
-		warn(debug.traceback());
-
-		if (functionExists(name)) {
-			return new ClientFunction(name);
-		} else {
-			return undefined;
 		}
 	}
 
@@ -545,7 +529,7 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 		});
 	}
 
-	export function GetServerFunctionAsync(name: string): Promise<ServerFunction> {
+	export function GetServerFunctionAsync<CR extends any>(name: string): Promise<ServerFunction<CR>> {
 		return new Promise((resolve, reject) => {
 			if (functionExists(name)) {
 				const newFunc = new ServerFunction(name);
