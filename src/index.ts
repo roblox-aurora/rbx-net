@@ -107,10 +107,6 @@ function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string):
 	}
 }
 
-type NetworkSerializable = string | boolean | number | undefined
-	| Instance | { [name: string]: NetworkSerializable };
-type NetworkSerializableReturnValue = Array<NetworkSerializable> | NetworkSerializable;
-type NetworkSerializableArgs = Array<NetworkSerializable>;
 /**
  * Typescript Networking Library for ROBLOX
  */
@@ -173,7 +169,7 @@ export namespace Net {
 		 * Connect a fucntion to fire when the event is invoked by the client
 		 * @param callback The function fired when the event is invoked by the client
 		 */
-		public Connect<T extends NetworkSerializableArgs>(callback: (sourcePlayer: Player, ...args: T) => void) {
+		public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
 			this.Event.Connect(callback as any);
 		}
 
@@ -181,7 +177,7 @@ export namespace Net {
 		 * Sends the specified arguments to all players
 		 * @param args The arguments to send to the players
 		 */
-		public SendToAllPlayers<T extends NetworkSerializableArgs>(...args: T) {
+		public SendToAllPlayers<T extends Array<any>>(...args: T) {
 			this.instance.FireAllClients(...args);
 		}
 
@@ -190,7 +186,7 @@ export namespace Net {
 		 * @param player The player
 		 * @param args The arguments to send to the player
 		 */
-		public SendToPlayer<T extends NetworkSerializableArgs>(player: Player, ...args: T) {
+		public SendToPlayer<T extends Array<any>>(player: Player, ...args: T) {
 			this.instance.FireClient(player, ...args);
 		}
 
@@ -199,7 +195,7 @@ export namespace Net {
 		 * @param players The players
 		 * @param args The arugments to send to these players
 		 */
-		public SendToPlayers<T extends NetworkSerializableArgs>(players: Array<Player>, ...args: T) {
+		public SendToPlayers<T extends Array<any>>(players: Array<Player>, ...args: T) {
 			for (const player of players) {
 				this.SendToPlayer(player, ...args);
 			}
@@ -277,8 +273,8 @@ export namespace Net {
 		 * @param player The player to call the function on
 		 * @param args The arguments to call the function with
 		 */
-		public async CallPlayerAsync<T extends NetworkSerializableArgs>(
-			player: Player, ...args: T): Promise<NetworkSerializableReturnValue> {
+		public async CallPlayerAsync<R extends any, T extends Array<any>>(
+			player: Player, ...args: T): Promise<R> {
 			return this.instance.InvokeClient(player, ...args) as any;
 		}
 
@@ -328,7 +324,7 @@ export namespace Net {
 		 * Connect a function to fire when the event is invoked by the client
 		 * @param callback The function fired when the event is invoked by the client
 		 */
-		public Connect<T extends NetworkSerializableArgs>(callback: (...args: T) => void) {
+		public Connect<T extends Array<any>>(callback: (...args: T) => void) {
 			this.Event.Connect(callback as any);
 		}
 
@@ -336,7 +332,7 @@ export namespace Net {
 		 * Sends the specified arguments to the server
 		 * @param args The arguments to send to the server
 		 */
-		public SendToServer<T extends NetworkSerializableArgs>(...args: T) {
+		public SendToServer<T extends Array<any>>(...args: T) {
 			this.instance.FireServer(...args);
 		}
 
@@ -406,14 +402,14 @@ export namespace Net {
 		 * @param args The arguments to call the server with
 		 * @returns the result of the call to the server
 		 */
-		public CallServer<T extends NetworkSerializableArgs>(...args: T): NetworkSerializableReturnValue {
+		public CallServer<R extends any, T extends Array<any>>(...args: T): R {
 			if (this.lastPing < (os.time() + this.Cache)) {
 				const result = this.instance.InvokeServer(...args);
 				this.cached = result;
 
 				this.lastPing = os.time();
 
-				return result;
+				return result as any;
 			} else {
 				return this.cached;
 			}
@@ -424,7 +420,7 @@ export namespace Net {
 		 * @param args The args to call the server with
 		 * @async Will return a promise
 		 */
-		public async CallServerAsync<T extends NetworkSerializableArgs>(...args: T): Promise<NetworkSerializableReturnValue> {
+		public async CallServerAsync<R extends any, T extends Array<any>>(...args: T): Promise<R> {
 			return this.CallServer(...args);
 		}
 
