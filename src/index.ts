@@ -205,7 +205,7 @@ export namespace Net {
 	/**
 	 * A function on the server
 	 */
-	export class ServerFunction<CR extends any> {
+	export class ServerFunction<CR extends any = any> {
 		/** @internal */
 		private instance: RemoteFunction;
 
