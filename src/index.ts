@@ -281,6 +281,23 @@ export namespace Net {
 	}
 
 	/**
+	 * MessagingService Event
+	 */
+	export class GlobalEvent {
+		private constructor(name: string) {
+			assert(false, "Not yet implemented!");
+		}
+
+		public SendToAllServers(message: any) {
+			// use MessagingService::PublishAsync
+		}
+
+		public Connect(handler: (message: string) => void) {
+			// use MessagingService::SubscribeAsync
+		}
+	}
+
+	/**
 	 * An event on the client
 	 */
 	export class ClientEvent {
@@ -446,6 +463,10 @@ export namespace Net {
 			error("Net.createFunction can only be used on the server!");
 			throw "";
 		}
+	}
+
+	export function GetGlobalEvent(name: string): void {
+		// return new GlobalEvent(name);
 	}
 
 	/**
