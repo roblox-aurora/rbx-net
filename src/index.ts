@@ -286,6 +286,65 @@ export namespace Net {
 	}
 
 	const MessagingService = game.GetService("MessagingService") as Instance & IMessagingServiceProto;
+	const Players = game.GetService("Players");
+
+	/** @internal */
+	export class GlobalServerEvent {
+		private instance: ServerEvent;
+		private event: GlobalEvent;
+
+		constructor(name: string) {
+			this.instance = new ServerEvent(`G~${name}`);
+			this.event = new GlobalEvent(name);
+			assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
+
+			this.event.Connect(message => this.recievedMessage(message as any));
+		}
+
+		private getPlayersMatchingId(matching: Array<number> | number) {
+			if (typeof matching === "number") {
+				return Players.GetPlayerByUserId(matching);
+			} else {
+				const players = new Array<Player>();
+				for (const id of matching) {
+					const player = Players.GetPlayerByUserId(id);
+					if (player) {
+						players.push(player);
+					}
+				}
+
+				return players;
+			}
+		}
+
+		private recievedMessage(message: { data: Array<any>, targetId?: number, targetIds?: Array<number> }) {
+			if (message.targetIds) {
+				const players = this.getPlayersMatchingId(message.targetIds);
+				if (players) {
+					this.instance.SendToPlayers(players as Array<Player>, ...message.data);
+				}
+			} else if (message.targetId) {
+				const player = this.getPlayersMatchingId(message.targetId);
+				if (player) {
+					this.instance.SendToPlayer(player as Player, ...message.data);
+				}
+			} else {
+				this.instance.SendToAllPlayers(...message.data);
+			}
+		}
+
+		public SendToAllServers<T extends Array<any>>(...args: T) {
+			this.event.SendToAllServers({ data: [...args] });
+		}
+
+		public SendToPlayer<T extends Array<any>>(userId: number, ...args: T) {
+			this.event.SendToAllServers({ data: [...args], targetId: userId });
+		}
+
+		public SendToPlayers<T extends Array<any>>(userIds: Array<number>, ...args: T) {
+			this.event.SendToAllServers({ data: [...args], targetIds: userIds });
+		}
+	}
 
 	/**
 	 * MessagingService Event
