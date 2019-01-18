@@ -280,20 +280,31 @@ export namespace Net {
 
 	}
 
+	interface IMessagingServiceProto {
+		PublishAsync(topic: string, message: any): void;
+		SubscribeAsync(topic: string, handler: (message: string) => void): RBXScriptConnection;
+	}
+
+	const MessagingService = game.GetService("MessagingService") as Instance & IMessagingServiceProto;
+
 	/**
 	 * MessagingService Event
 	 */
 	export class GlobalEvent {
-		private constructor(name: string) {
-			assert(false, "Not yet implemented!");
+		private name: string;
+
+		constructor(name: string) {
+			this.name = name;
 		}
 
+		/** @internal */
 		public SendToAllServers(message: any) {
-			// use MessagingService::PublishAsync
+			MessagingService.PublishAsync(this.name, message);
 		}
 
+		/** @internal */
 		public Connect(handler: (message: string) => void) {
-			// use MessagingService::SubscribeAsync
+			return MessagingService.SubscribeAsync(this.name, handler);
 		}
 	}
 
@@ -465,8 +476,8 @@ export namespace Net {
 		}
 	}
 
-	export function GetGlobalEvent(name: string): void {
-		// return new GlobalEvent(name);
+	export function GetGlobalEvent(name: string): GlobalEvent {
+		return new GlobalEvent(name);
 	}
 
 	/**

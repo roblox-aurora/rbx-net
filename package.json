@@ -12,10 +12,10 @@
 	"author": "vorlias",
 	"license": "MIT",
 	"devDependencies": {
-	"rbx-types": "^1.0.83"
+	"rbx-types": "^1.0.100"
 	},
 	"peerDependencies": {
-	"rbx-types": "^1.0.65"
+	"rbx-types": "^1.0.100"
 	},
 	"dependencies": {},
 	"repository": {
