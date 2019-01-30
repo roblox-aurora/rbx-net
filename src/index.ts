@@ -1,3 +1,5 @@
+import * as throttler from "./Throttle";
+
 interface RemoteTypes {
 	Event: RemoteEvent;
 	Function: RemoteFunction;
@@ -198,16 +200,20 @@ export namespace Net {
 		}
 	}
 
+
+
 	/**
 	 * A function on the server
 	 */
 	export class ServerFunction<CR extends any = any> {
 		/** @internal */
-		private instance: RemoteFunction;
+		protected instance: RemoteFunction;
+
 
 		/**
 		 * Creates a new instance of a server function (Will also create the corresponding remote if it does not exist!)
 		 * @param name The name of this server function
+		 * @param rateLimit The number of requests allowed per minute per client (0 = none)
 		 * @throws If not created on server
 		 */
 		constructor(name: string) {
@@ -274,6 +280,59 @@ export namespace Net {
 			return this.instance.InvokeClient(player, ...args) as any;
 		}
 
+	}
+
+	interface RequestCounter { Increment(player: Player): void; Get(player: Player): number; }
+
+	export class ThrottledServerFunction<CR extends any = any> extends ServerFunction<CR> {
+		/** @internal */
+		public static rates = new Map<string, Array<number>>();
+
+		private maxRequestsPerMinute: number = 0;
+		private clientRequests: RequestCounter;
+
+		constructor(name: string, rateLimit: number) {
+			super(name);
+			this.maxRequestsPerMinute = rateLimit;
+
+			this.clientRequests = throttler.Get(`Function~${name}`);
+
+			const clientValue = new IntValue(this.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = rateLimit;
+		}
+
+		public set Callback(callback: Callback) {
+			this.instance.OnServerInvoke = (player: Player, ...args: Array<any>) => {
+				const clientRequestCount = this.clientRequests.Get(player);
+				if (clientRequestCount >= this.maxRequestsPerMinute) {
+					error(`Rate limit reached (${clientRequestCount})!`);
+				} else {
+					this.clientRequests.Increment(player);
+					return callback(player, ...args);
+				}
+			};
+		}
+
+		/**
+		 * The number of requests allowed per minute per user
+		 */
+		public set RateLimit(requestsPerMinute: number) {
+			this.maxRequestsPerMinute = requestsPerMinute;
+
+			let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
+			if (clientValue) {
+				clientValue.Value = requestsPerMinute;
+			} else {
+				clientValue = new IntValue(this.instance);
+				clientValue.Name = "RateLimit";
+				clientValue.Value = requestsPerMinute;
+			}
+		}
+
+		public get RateLimit() {
+			return this.maxRequestsPerMinute;
+		}
 	}
 
 	/**
@@ -464,18 +523,18 @@ export namespace Net {
 	 *
 	 * Usage
 	 *
-```ts
-Net.WaitForClientFunctionAsync("FunctionName").then(func => {
+	```ts
+	Net.WaitForClientFunctionAsync("FunctionName").then(func => {
 	func.Callback = clientCallbackFunction;
-}, err => {
+	}, err => {
 	warn("Error fetching FunctionName:", err);
-});```
+	});```
 	 *
 	 * Or inside an async function:
-```ts
+	```ts
 	const func = await Net.WaitForClientFunctionAsync("FunctionName");
 	func.Callback = clientCallbackFunction;
-```
+	```
 	 *
 	 * @param name The name of the function
 	 * @alias for `Net.ClientFunction.WaitFor(name)`
@@ -492,18 +551,18 @@ Net.WaitForClientFunctionAsync("FunctionName").then(func => {
 	 *
 	 * Usage
 	 *
-```ts
-Net.WaitForClientEventAsync("EventName").then(event => {
+	```ts
+	Net.WaitForClientEventAsync("EventName").then(event => {
 	event.Connect(eventHandler);
-}, err => {
+	}, err => {
 	warn("Error fetching EventName:", err);
-});```
+	});```
 	 *
 	 * Or inside an async function:
-```ts
+	```ts
 	const event = await Net.WaitForClientEventAsync("EventName");
 	event.Connect(eventHandler);
-```
+	```
 	 *
 	 * @param name The name of the function
 	 * @alias for `Net.ClientEvent.WaitFor(name)`
@@ -538,6 +597,16 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 
 	if (IS_STUDIO) {
 		print("[rbx-net] Loaded rbx-net", `v${VERSION}`);
+	}
+
+	if (IS_SERVER) {
+		let lastTick = 0;
+		game.GetService("RunService").Stepped.Connect((time, step) => {
+			if (tick() > lastTick + 60) {
+				lastTick = tick();
+				throttler.Clear();
+			}
+		});
 	}
 }
 
