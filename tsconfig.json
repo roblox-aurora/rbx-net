@@ -10,7 +10,7 @@
 		"stripInternal": true,
 		"downlevelIteration": true,
 		"declaration": true,
-		"typeRoots": ["rbx-types"]
+		"types": ["rbx-types"]
 	},
 	"typeAcquisition": {
 		"enable": true

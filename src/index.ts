@@ -3,10 +3,6 @@ interface RemoteTypes {
 	Function: RemoteFunction;
 }
 
-// tslint:disable:variable-name
-const _exports = {}; // hack that fixes _exports for default
-// tslint:enable:variable-name
-
 const runService = game.GetService("RunService");
 const replicatedStorage = game.GetService("ReplicatedStorage");
 
