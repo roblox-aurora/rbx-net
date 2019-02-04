@@ -312,6 +312,9 @@ export namespace Net {
 
 	interface RequestCounter { Increment(player: Player): void; Get(player: Player): number; }
 
+	/**
+	 * A server event that can be rate limited
+	 */
 	export class ServerThrottledEvent extends ServerEvent {
 		private maxRequestsPerMinute: number = 0;
 		private clientRequests: RequestCounter;
@@ -372,6 +375,9 @@ export namespace Net {
 		}
 	}
 
+	/**
+	 * A server function that can be rate limited
+	 */
 	export class ServerThrottledFunction<CR extends any = any> extends ServerFunction<CR> {
 		/** @internal */
 		public static rates = new Map<string, Array<number>>();
@@ -592,7 +598,9 @@ export namespace Net {
 	}
 
 	/**
-	 * Creates a throttled server function
+	 * Creates a function that has a limited number of client requests every timeout (default 60 seconds)
+	 * @param name The name of the function
+	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
 	 */
 	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): ServerThrottledFunction<CR> {
 		if (IS_SERVER) {
@@ -603,6 +611,11 @@ export namespace Net {
 		}
 	}
 
+	/**
+	 * Creates an event that has a limited number of client requests every timeout (default 60 seconds)
+	 * @param name The name of the event
+	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
+	 */
 	export function CreateThrottledEvent(name: string, rateLimit: number): ServerThrottledEvent {
 		if (IS_SERVER) {
 			return new ServerThrottledEvent(name, rateLimit);
