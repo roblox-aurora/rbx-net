@@ -1,6 +1,6 @@
 interface RemoteTypes {
-	Event: RemoteEvent;
-	Function: RemoteFunction;
+	RemoteEvent: RemoteEvent;
+	RemoteFunction: RemoteFunction;
 }
 
 const runService = game.GetService("RunService");
@@ -18,22 +18,26 @@ let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
 
+function createFolder(parent?: Instance): Folder {
+	return new Instance("Folder", parent);
+}
+
 remoteFolder = replicatedStorage.FindFirstChild<Folder>(REMOTES_FOLDER_NAME)!;
 
 if (!remoteFolder) {
-	remoteFolder = new Folder(replicatedStorage);
+	remoteFolder = createFolder(replicatedStorage);
 	remoteFolder.Name = REMOTES_FOLDER_NAME;
 }
 
 functionFolder = remoteFolder.FindFirstChild<Folder>(FUNCTIONS_FOLDER_NAME)!;
 if (!functionFolder) {
-	functionFolder = new Folder(remoteFolder);
+	functionFolder = createFolder(remoteFolder);
 	functionFolder.Name = FUNCTIONS_FOLDER_NAME;
 }
 
 eventFolder = remoteFolder.FindFirstChild<Folder>(EVENTS_FOLDER_NAME)!;
 if (!eventFolder) {
-	eventFolder = new Folder(remoteFolder);
+	eventFolder = createFolder(remoteFolder);
 	eventFolder.Name = EVENTS_FOLDER_NAME;
 }
 
@@ -89,10 +93,8 @@ function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string):
 
 		let remote: RemoteEvent | RemoteFunction;
 
-		if (type === "Event") {
-			remote = new RemoteEvent();
-		} else if (type === "Function") {
-			remote = new RemoteFunction();
+		if (type === "RemoteEvent" || type === "RemoteFunction") {
+			remote = new Instance(type);
 		} else {
 			throw `Invalid Remote Type: ${type}`;
 		} // stfu
@@ -143,7 +145,7 @@ export namespace Net {
 		 * @throws If not created on server
 		 */
 		constructor(name: string) {
-			this.instance = findOrCreateRemote("Event", name);
+			this.instance = findOrCreateRemote("RemoteEvent", name);
 			assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
 		}
 
@@ -211,7 +213,7 @@ export namespace Net {
 		 * @throws If not created on server
 		 */
 		constructor(name: string) {
-			this.instance = findOrCreateRemote("Function", name);
+			this.instance = findOrCreateRemote("RemoteFunction", name);
 			assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
 		}
 
@@ -255,7 +257,7 @@ export namespace Net {
 		public set ClientCache(time: number) {
 			const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 			if (!cache) {
-				const cacheTimer = new NumberValue(this.instance);
+				const cacheTimer = new Instance("NumberValue", this.instance);
 				cacheTimer.Value = time;
 				cacheTimer.Name = "Cache";
 			} else {
@@ -289,7 +291,7 @@ export namespace Net {
 		 * @throws If created on server, or does not exist.
 		 */
 		constructor(name: string) {
-			this.instance = findRemoteOrThrow("Event", name);
+			this.instance = findRemoteOrThrow("RemoteEvent", name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
 		}
 
@@ -346,7 +348,7 @@ export namespace Net {
 		private instance: RemoteFunction;
 
 		constructor(name: string) {
-			this.instance = findRemoteOrThrow("Function", name);
+			this.instance = findRemoteOrThrow("RemoteFunction", name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
 			assert(functionExists(name), `The specified function '${name}' does not exist!`);
 		}
