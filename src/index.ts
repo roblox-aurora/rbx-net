@@ -310,7 +310,7 @@ export namespace Net {
 
 	interface RequestCounter { Increment(player: Player): void; Get(player: Player): number; }
 
-	export class ThrottledServerFunction<CR extends any = any> extends ServerFunction<CR> {
+	export class ServerThrottledFunction<CR extends any = any> extends ServerFunction<CR> {
 		/** @internal */
 		public static rates = new Map<string, Array<number>>();
 
@@ -532,9 +532,9 @@ export namespace Net {
 	/**
 	 * Creates a throttled server function
 	 */
-	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): ThrottledServerFunction<CR> {
+	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): ServerThrottledFunction<CR> {
 		if (IS_SERVER) {
-			return new ThrottledServerFunction<CR>(name, rateLimit);
+			return new ServerThrottledFunction<CR>(name, rateLimit);
 		} else {
 			error("Net.createFunction can only be used on the server!");
 			throw "";
