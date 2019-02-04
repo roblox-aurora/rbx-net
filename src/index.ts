@@ -20,8 +20,7 @@ let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
 let throttleResetTimer = 60;
-
-const RATE_LIMITED_MSG = "Rate Limit Reached!";
+let rateLimitReachedMessage = "Rate Limit Reached by {player}!";
 
 function createFolder(parent?: Instance): Folder {
 	return new Instance("Folder", parent);
@@ -116,6 +115,12 @@ interface RbxNetConfigItem {
 	 */
 	ServerThrottleResetTimer: number;
 
+	/**
+	 * The message shown when the throttle has been exceeded.
+	 * {player} will be replaced with the player's name!
+	 */
+	ServerThrottleMessage: string;
+
 	/** @internal */
 	__stfuTypescript: undefined;
 }
@@ -151,6 +156,8 @@ export namespace Net {
 		assert(IS_SERVER, "Cannot modify configuration on client!");
 		if (key === "ServerThrottleResetTimer") {
 			throttleResetTimer = value as number;
+		} else if (key === "ServerThrottleMessage") {
+			rateLimitReachedMessage = value as string;
 		}
 	}
 
@@ -158,6 +165,9 @@ export namespace Net {
 		if (key === "ServerThrottleResetTimer") {
 			assert(IS_SERVER, "ServerThrottleResetTimer is not used on the client!");
 			return throttleResetTimer;
+		} else if (key === "ServerThrottleMessage") {
+			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!");
+			return rateLimitReachedMessage;
 		} else {
 			return undefined;
 		}
@@ -346,7 +356,7 @@ export namespace Net {
 			this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
 				const clientRequestCount = this.clientRequests.Get(player);
 				if (clientRequestCount >= this.maxRequestsPerMinute) {
-					error(RATE_LIMITED_MSG);
+					error(rateLimitReachedMessage.gsub("{player}", player.Name));
 				} else {
 					this.clientRequests.Increment(player);
 					callback(player, ...args as any);
@@ -400,7 +410,7 @@ export namespace Net {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<any>) => {
 				const clientRequestCount = this.clientRequests.Get(player);
 				if (clientRequestCount >= this.maxRequestsPerMinute) {
-					error(RATE_LIMITED_MSG);
+					error(rateLimitReachedMessage.gsub("{player}", player.Name));
 				} else {
 					this.clientRequests.Increment(player);
 					return callback(player, ...args);
