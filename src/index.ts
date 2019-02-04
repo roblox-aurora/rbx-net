@@ -114,7 +114,7 @@ interface RbxNetConfigItem {
 	/**
 	 * The throttle reset timer (default: 60 seconds)
 	 */
-	ThrottleResetTimer: number;
+	ServerThrottleResetTimer: number;
 
 	/** @internal */
 	__stfuTypescript: undefined;
@@ -149,14 +149,14 @@ export namespace Net {
 
 	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
 		assert(IS_SERVER, "Cannot modify configuration on client!");
-		if (key === "ThrottleResetTimer") {
+		if (key === "ServerThrottleResetTimer") {
 			throttleResetTimer = value as number;
 		}
 	}
 
 	export function GetConfiguration<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
-		if (key === "ThrottleResetTimer") {
-			assert(IS_SERVER, "ThrottleResetTimer is not used on the client!");
+		if (key === "ServerThrottleResetTimer") {
+			assert(IS_SERVER, "ServerThrottleResetTimer is not used on the client!");
 			return throttleResetTimer;
 		} else {
 			return undefined;
