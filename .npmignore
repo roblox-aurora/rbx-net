@@ -2,3 +2,4 @@ src
 tsconfig.json
 include
 tslint.json
+rojo.json
