@@ -21,6 +21,8 @@ let eventFolder: Folder;
 let functionFolder: Folder;
 let throttleResetTimer = 60;
 
+const RATE_LIMITED_MSG = "Rate Limit Reached!";
+
 function createFolder(parent?: Instance): Folder {
 	return new Instance("Folder", parent);
 }
@@ -166,7 +168,7 @@ export namespace Net {
 	 */
 	export class ServerEvent {
 		/** @internal */
-		private instance: RemoteEvent;
+		protected instance: RemoteEvent;
 
 		/**
 		 * Creates a new instance of a server event (Will also create the corresponding remote if it does not exist!)
@@ -310,6 +312,66 @@ export namespace Net {
 
 	interface RequestCounter { Increment(player: Player): void; Get(player: Player): number; }
 
+	export class ServerThrottledEvent extends ServerEvent {
+		private maxRequestsPerMinute: number = 0;
+		private clientRequests: RequestCounter;
+
+		constructor(name: string, rateLimit: number) {
+			super(name);
+			this.maxRequestsPerMinute = rateLimit;
+
+			this.clientRequests = throttler.Get(`Event~${name}`);
+
+			const clientValue = new Instance("IntValue", this.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = rateLimit;
+		}
+
+		/**
+		 * The RBXScriptSignal for this RemoteEvent
+		 */
+		public get Event() {
+			error("Use 'Connect' instead foor ServerThrottledEvent!");
+			return this.instance.OnServerEvent;
+		}
+
+		/**
+		 * Connect a fucntion to fire when the event is invoked by the client
+		 * @param callback The function fired when the event is invoked by the client
+		 */
+		public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
+			this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
+				const clientRequestCount = this.clientRequests.Get(player);
+				if (clientRequestCount >= this.maxRequestsPerMinute) {
+					error(RATE_LIMITED_MSG);
+				} else {
+					this.clientRequests.Increment(player);
+					callback(player, ...args as any);
+				}
+			});
+		}
+
+		/**
+		 * The number of requests allowed per minute per user
+		 */
+		public set RateLimit(requestsPerMinute: number) {
+			this.maxRequestsPerMinute = requestsPerMinute;
+
+			let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
+			if (clientValue) {
+				clientValue.Value = requestsPerMinute;
+			} else {
+				clientValue = new Instance("IntValue", this.instance);
+				clientValue.Name = "RateLimit";
+				clientValue.Value = requestsPerMinute;
+			}
+		}
+
+		public get RateLimit() {
+			return this.maxRequestsPerMinute;
+		}
+	}
+
 	export class ServerThrottledFunction<CR extends any = any> extends ServerFunction<CR> {
 		/** @internal */
 		public static rates = new Map<string, Array<number>>();
@@ -332,7 +394,7 @@ export namespace Net {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<any>) => {
 				const clientRequestCount = this.clientRequests.Get(player);
 				if (clientRequestCount >= this.maxRequestsPerMinute) {
-					error(`Rate limit reached (${clientRequestCount})!`);
+					error(RATE_LIMITED_MSG);
 				} else {
 					this.clientRequests.Increment(player);
 					return callback(player, ...args);
@@ -538,6 +600,15 @@ export namespace Net {
 		} else {
 			error("Net.createFunction can only be used on the server!");
 			throw "";
+		}
+	}
+
+	export function CreateThrottledEvent(name: string, rateLimit: number): ServerThrottledEvent {
+		if (IS_SERVER) {
+			return new ServerThrottledEvent(name, rateLimit);
+		} else {
+			error("Net.createFunction can only be used on the server!");
+			throw "Net.createFunction can only be used on the server!";
 		}
 	}
 
