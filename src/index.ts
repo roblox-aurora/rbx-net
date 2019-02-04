@@ -18,28 +18,20 @@ let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
 
-function createFolder(parent?: Instance): Folder {
-	return new Instance("Folder", parent);
+function findOrCreateFolder(parent: Instance, name: string): Folder {
+	let folder = parent.FindFirstChild<Folder>(name);
+	if (folder) {
+		return folder;
+	} else {
+		folder = new Instance("Folder", parent);
+		folder.Name = name;
+		return folder;
+	}
 }
 
-remoteFolder = replicatedStorage.FindFirstChild<Folder>(REMOTES_FOLDER_NAME)!;
-
-if (!remoteFolder) {
-	remoteFolder = createFolder(replicatedStorage);
-	remoteFolder.Name = REMOTES_FOLDER_NAME;
-}
-
-functionFolder = remoteFolder.FindFirstChild<Folder>(FUNCTIONS_FOLDER_NAME)!;
-if (!functionFolder) {
-	functionFolder = createFolder(remoteFolder);
-	functionFolder.Name = FUNCTIONS_FOLDER_NAME;
-}
-
-eventFolder = remoteFolder.FindFirstChild<Folder>(EVENTS_FOLDER_NAME)!;
-if (!eventFolder) {
-	eventFolder = createFolder(remoteFolder);
-	eventFolder.Name = EVENTS_FOLDER_NAME;
-}
+remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
+functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
+eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
 
 function eventExists(name: string) {
 	return eventFolder.FindFirstChild(name) !== undefined;
