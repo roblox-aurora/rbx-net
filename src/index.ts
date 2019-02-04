@@ -202,15 +202,12 @@ export namespace Net {
 		}
 	}
 
-
-
 	/**
 	 * A function on the server
 	 */
 	export class ServerFunction<CR extends any = any> {
 		/** @internal */
 		protected instance: RemoteFunction;
-
 
 		/**
 		 * Creates a new instance of a server function (Will also create the corresponding remote if it does not exist!)
@@ -299,7 +296,7 @@ export namespace Net {
 
 			this.clientRequests = throttler.Get(`Function~${name}`);
 
-			const clientValue = new IntValue(this.instance);
+			const clientValue = new Instance("IntValue", this.instance);
 			clientValue.Name = "RateLimit";
 			clientValue.Value = rateLimit;
 		}
@@ -326,7 +323,7 @@ export namespace Net {
 			if (clientValue) {
 				clientValue.Value = requestsPerMinute;
 			} else {
-				clientValue = new IntValue(this.instance);
+				clientValue = new Instance("IntValue", this.instance);
 				clientValue.Name = "RateLimit";
 				clientValue.Value = requestsPerMinute;
 			}
