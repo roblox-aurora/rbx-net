@@ -503,6 +503,18 @@ export namespace Net {
 	}
 
 	/**
+	 * Creates a throttled server function
+	 */
+	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): ThrottledServerFunction<CR> {
+		if (IS_SERVER) {
+			return new ThrottledServerFunction<CR>(name, rateLimit);
+		} else {
+			error("Net.createFunction can only be used on the server!");
+			throw "";
+		}
+	}
+
+	/**
 	 * Create an event
 	 * @param name The name of the event
 	 * (Must be created on server)
