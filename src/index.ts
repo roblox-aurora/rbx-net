@@ -20,7 +20,7 @@ let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
 let throttleResetTimer = 60;
-let rateLimitReachedMessage = "Rate Limit Reached by {player}!";
+let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via {remote}";
 
 function createFolder(parent?: Instance): Folder {
 	return new Instance("Folder", parent);
@@ -43,6 +43,19 @@ eventFolder = remoteFolder.FindFirstChild<Folder>(EVENTS_FOLDER_NAME)!;
 if (!eventFolder) {
 	eventFolder = createFolder(remoteFolder);
 	eventFolder.Name = EVENTS_FOLDER_NAME;
+}
+
+/**
+ * Errors with variables formatted in a message
+ * @param message The message
+ * @param vars variables to pass to the error message
+ */
+function errorft(message: string, vars: { [name: string]: any }) {
+	message = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+		return vars[token] || token;
+	});
+
+	error(message, 2);
 }
 
 function eventExists(name: string) {
@@ -354,9 +367,14 @@ export namespace Net {
 		 */
 		public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
 			this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
+				const maxRequests = this.maxRequestsPerMinute;
 				const clientRequestCount = this.clientRequests.Get(player);
-				if (clientRequestCount >= this.maxRequestsPerMinute) {
-					error(rateLimitReachedMessage.gsub("{player}", player.Name));
+				if (clientRequestCount >= maxRequests) {
+					errorft(rateLimitReachedMessage, {
+						player: player.UserId,
+						remote: this.instance.Name,
+						limit: maxRequests,
+					});
 				} else {
 					this.clientRequests.Increment(player);
 					callback(player, ...args as any);
@@ -408,9 +426,14 @@ export namespace Net {
 
 		public set Callback(callback: Callback) {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<any>) => {
+				const maxRequests = this.maxRequestsPerMinute;
 				const clientRequestCount = this.clientRequests.Get(player);
-				if (clientRequestCount >= this.maxRequestsPerMinute) {
-					error(rateLimitReachedMessage.gsub("{player}", player.Name));
+				if (clientRequestCount >= maxRequests) {
+					errorft(rateLimitReachedMessage, {
+						player: player.UserId,
+						remote: this.instance.Name,
+						limit: maxRequests,
+					});
 				} else {
 					this.clientRequests.Increment(player);
 					return callback(player, ...args);
