@@ -19,6 +19,7 @@ const EVENTS_FOLDER_NAME = "Events";
 let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
+let throttleResetTimer = 60;
 
 function createFolder(parent?: Instance): Folder {
 	return new Instance("Folder", parent);
@@ -107,6 +108,16 @@ function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string):
 	}
 }
 
+interface RbxNetConfigItem {
+	/**
+	 * The throttle reset timer (default: 60 seconds)
+	 */
+	ThrottleResetTimer: number;
+
+	/** @internal */
+	__stfuTypescript: undefined;
+}
+
 /**
  * Typescript Networking Library for ROBLOX
  */
@@ -133,6 +144,22 @@ export namespace Net {
 			return `${major}.${minor}.${revision}`;
 		},
 	});
+
+	export namespace Config {
+		export function Set<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
+			if (key === "ThrottleResetTimer") {
+				throttleResetTimer = value as number;
+			}
+		}
+
+		export function Get<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
+			if (key === "ThrottleResetTimer") {
+				return throttleResetTimer;
+			} else {
+				return undefined;
+			}
+		}
+	}
 
 	/**
 	 * An event on the server
@@ -613,7 +640,7 @@ export namespace Net {
 	if (IS_SERVER) {
 		let lastTick = 0;
 		game.GetService("RunService").Stepped.Connect((time, step) => {
-			if (tick() > lastTick + 60) {
+			if (tick() > lastTick + throttleResetTimer) {
 				lastTick = tick();
 				throttler.Clear();
 			}
