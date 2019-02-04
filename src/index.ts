@@ -1,3 +1,5 @@
+import * as throttler from "./Throttle";
+
 interface RemoteTypes {
 	RemoteEvent: RemoteEvent;
 	RemoteFunction: RemoteFunction;
@@ -17,6 +19,8 @@ const EVENTS_FOLDER_NAME = "Events";
 let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
+let throttleResetTimer = 60;
+let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via {remote}";
 
 function createFolder(parent?: Instance): Folder {
 	return new Instance("Folder", parent);
@@ -41,6 +45,19 @@ if (!eventFolder) {
 	eventFolder.Name = EVENTS_FOLDER_NAME;
 }
 
+/**
+ * Errors with variables formatted in a message
+ * @param message The message
+ * @param vars variables to pass to the error message
+ */
+function errorft(message: string, vars: { [name: string]: any }) {
+	message = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+		return vars[token] || token;
+	});
+
+	error(message, 2);
+}
+
 function eventExists(name: string) {
 	return eventFolder.FindFirstChild(name) !== undefined;
 }
@@ -59,9 +76,9 @@ function waitForFunction(name: string, timeOut: number): RemoteFunction | undefi
 
 function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 	let targetFolder: Folder;
-	if (type === "Event") {
+	if (type === "RemoteEvent") {
 		targetFolder = eventFolder;
-	} else if (type === "Function") {
+	} else if (type === "RemoteFunction") {
 		targetFolder = functionFolder;
 	} else {
 		throw "Invalid type: " + type;
@@ -105,6 +122,22 @@ function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string):
 	}
 }
 
+interface RbxNetConfigItem {
+	/**
+	 * The throttle reset timer (default: 60 seconds)
+	 */
+	ServerThrottleResetTimer: number;
+
+	/**
+	 * The message shown when the throttle has been exceeded.
+	 * {player} will be replaced with the player's name!
+	 */
+	ServerThrottleMessage: string;
+
+	/** @internal */
+	__stfuTypescript: undefined;
+}
+
 /**
  * Typescript Networking Library for ROBLOX
  */
@@ -132,12 +165,33 @@ export namespace Net {
 		},
 	});
 
+	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
+		assert(IS_SERVER, "Cannot modify configuration on client!");
+		if (key === "ServerThrottleResetTimer") {
+			throttleResetTimer = value as number;
+		} else if (key === "ServerThrottleMessage") {
+			rateLimitReachedMessage = value as string;
+		}
+	}
+
+	export function GetConfiguration<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
+		if (key === "ServerThrottleResetTimer") {
+			assert(IS_SERVER, "ServerThrottleResetTimer is not used on the client!");
+			return throttleResetTimer;
+		} else if (key === "ServerThrottleMessage") {
+			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!");
+			return rateLimitReachedMessage;
+		} else {
+			return undefined;
+		}
+	}
+
 	/**
 	 * An event on the server
 	 */
 	export class ServerEvent {
 		/** @internal */
-		private instance: RemoteEvent;
+		protected instance: RemoteEvent;
 
 		/**
 		 * Creates a new instance of a server event (Will also create the corresponding remote if it does not exist!)
@@ -205,11 +259,12 @@ export namespace Net {
 	 */
 	export class ServerFunction<CR extends any = any> {
 		/** @internal */
-		private instance: RemoteFunction;
+		protected instance: RemoteFunction;
 
 		/**
 		 * Creates a new instance of a server function (Will also create the corresponding remote if it does not exist!)
 		 * @param name The name of this server function
+		 * @param rateLimit The number of requests allowed per minute per client (0 = none)
 		 * @throws If not created on server
 		 */
 		constructor(name: string) {
@@ -276,6 +331,135 @@ export namespace Net {
 			return this.instance.InvokeClient(player, ...args) as any;
 		}
 
+	}
+
+	interface RequestCounter { Increment(player: Player): void; Get(player: Player): number; }
+
+	/**
+	 * A server event that can be rate limited
+	 */
+	export class ServerThrottledEvent extends ServerEvent {
+		private maxRequestsPerMinute: number = 0;
+		private clientRequests: RequestCounter;
+
+		constructor(name: string, rateLimit: number) {
+			super(name);
+			this.maxRequestsPerMinute = rateLimit;
+
+			this.clientRequests = throttler.Get(`Event~${name}`);
+
+			const clientValue = new Instance("IntValue", this.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = rateLimit;
+		}
+
+		/**
+		 * The RBXScriptSignal for this RemoteEvent
+		 */
+		public get Event() {
+			error("Use 'Connect' instead foor ServerThrottledEvent!");
+			return this.instance.OnServerEvent;
+		}
+
+		/**
+		 * Connect a fucntion to fire when the event is invoked by the client
+		 * @param callback The function fired when the event is invoked by the client
+		 */
+		public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
+			this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
+				const maxRequests = this.maxRequestsPerMinute;
+				const clientRequestCount = this.clientRequests.Get(player);
+				if (clientRequestCount >= maxRequests) {
+					errorft(rateLimitReachedMessage, {
+						player: player.UserId,
+						remote: this.instance.Name,
+						limit: maxRequests,
+					});
+				} else {
+					this.clientRequests.Increment(player);
+					callback(player, ...args as any);
+				}
+			});
+		}
+
+		/**
+		 * The number of requests allowed per minute per user
+		 */
+		public set RateLimit(requestsPerMinute: number) {
+			this.maxRequestsPerMinute = requestsPerMinute;
+
+			let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
+			if (clientValue) {
+				clientValue.Value = requestsPerMinute;
+			} else {
+				clientValue = new Instance("IntValue", this.instance);
+				clientValue.Name = "RateLimit";
+				clientValue.Value = requestsPerMinute;
+			}
+		}
+
+		public get RateLimit() {
+			return this.maxRequestsPerMinute;
+		}
+	}
+
+	/**
+	 * A server function that can be rate limited
+	 */
+	export class ServerThrottledFunction<CR extends any = any> extends ServerFunction<CR> {
+		/** @internal */
+		public static rates = new Map<string, Array<number>>();
+
+		private maxRequestsPerMinute: number = 0;
+		private clientRequests: RequestCounter;
+
+		constructor(name: string, rateLimit: number) {
+			super(name);
+			this.maxRequestsPerMinute = rateLimit;
+
+			this.clientRequests = throttler.Get(`Function~${name}`);
+
+			const clientValue = new Instance("IntValue", this.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = rateLimit;
+		}
+
+		public set Callback(callback: Callback) {
+			this.instance.OnServerInvoke = (player: Player, ...args: Array<any>) => {
+				const maxRequests = this.maxRequestsPerMinute;
+				const clientRequestCount = this.clientRequests.Get(player);
+				if (clientRequestCount >= maxRequests) {
+					errorft(rateLimitReachedMessage, {
+						player: player.UserId,
+						remote: this.instance.Name,
+						limit: maxRequests,
+					});
+				} else {
+					this.clientRequests.Increment(player);
+					return callback(player, ...args);
+				}
+			};
+		}
+
+		/**
+		 * The number of requests allowed per minute per user
+		 */
+		public set RateLimit(requestsPerMinute: number) {
+			this.maxRequestsPerMinute = requestsPerMinute;
+
+			let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
+			if (clientValue) {
+				clientValue.Value = requestsPerMinute;
+			} else {
+				clientValue = new Instance("IntValue", this.instance);
+				clientValue.Name = "RateLimit";
+				clientValue.Value = requestsPerMinute;
+			}
+		}
+
+		public get RateLimit() {
+			return this.maxRequestsPerMinute;
+		}
 	}
 
 	/**
@@ -447,6 +631,34 @@ export namespace Net {
 	}
 
 	/**
+	 * Creates a function that has a limited number of client requests every timeout (default 60 seconds)
+	 * @param name The name of the function
+	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
+	 */
+	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): ServerThrottledFunction<CR> {
+		if (IS_SERVER) {
+			return new ServerThrottledFunction<CR>(name, rateLimit);
+		} else {
+			error("Net.createFunction can only be used on the server!");
+			throw "";
+		}
+	}
+
+	/**
+	 * Creates an event that has a limited number of client requests every timeout (default 60 seconds)
+	 * @param name The name of the event
+	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
+	 */
+	export function CreateThrottledEvent(name: string, rateLimit: number): ServerThrottledEvent {
+		if (IS_SERVER) {
+			return new ServerThrottledEvent(name, rateLimit);
+		} else {
+			error("Net.createFunction can only be used on the server!");
+			throw "Net.createFunction can only be used on the server!";
+		}
+	}
+
+	/**
 	 * Create an event
 	 * @param name The name of the event
 	 * (Must be created on server)
@@ -466,18 +678,18 @@ export namespace Net {
 	 *
 	 * Usage
 	 *
-```ts
-Net.WaitForClientFunctionAsync("FunctionName").then(func => {
+	```ts
+	Net.WaitForClientFunctionAsync("FunctionName").then(func => {
 	func.Callback = clientCallbackFunction;
-}, err => {
+	}, err => {
 	warn("Error fetching FunctionName:", err);
-});```
+	});```
 	 *
 	 * Or inside an async function:
-```ts
+	```ts
 	const func = await Net.WaitForClientFunctionAsync("FunctionName");
 	func.Callback = clientCallbackFunction;
-```
+	```
 	 *
 	 * @param name The name of the function
 	 * @alias for `Net.ClientFunction.WaitFor(name)`
@@ -494,18 +706,18 @@ Net.WaitForClientFunctionAsync("FunctionName").then(func => {
 	 *
 	 * Usage
 	 *
-```ts
-Net.WaitForClientEventAsync("EventName").then(event => {
+	```ts
+	Net.WaitForClientEventAsync("EventName").then(event => {
 	event.Connect(eventHandler);
-}, err => {
+	}, err => {
 	warn("Error fetching EventName:", err);
-});```
+	});```
 	 *
 	 * Or inside an async function:
-```ts
+	```ts
 	const event = await Net.WaitForClientEventAsync("EventName");
 	event.Connect(eventHandler);
-```
+	```
 	 *
 	 * @param name The name of the function
 	 * @alias for `Net.ClientEvent.WaitFor(name)`
@@ -540,6 +752,16 @@ Net.WaitForClientEventAsync("EventName").then(event => {
 
 	if (IS_STUDIO) {
 		print("[rbx-net] Loaded rbx-net", `v${VERSION}`);
+	}
+
+	if (IS_SERVER) {
+		let lastTick = 0;
+		game.GetService("RunService").Stepped.Connect((time, step) => {
+			if (tick() > lastTick + throttleResetTimer) {
+				lastTick = tick();
+				throttler.Clear();
+			}
+		});
 	}
 }
 
