@@ -1,5 +1,7 @@
 import * as throttler from "./Throttle";
 
+const Players = game.GetService("Players");
+
 interface RemoteTypes {
 	RemoteEvent: RemoteEvent;
 	RemoteFunction: RemoteFunction;
@@ -144,9 +146,9 @@ export namespace Net {
 	 * @internal
 	 */
 	export const VERSION: VersionInformation = {
-		number: { major: 0, minor: 5, revision: 0 },
-		date: 181216,
-		tag: "alpha",
+		number: { major: 0, minor: 6, revision: 1 },
+		date: 190205,
+		tag: "beta",
 	};
 
 	setmetatable(VERSION, {
@@ -223,6 +225,26 @@ export namespace Net {
 		 */
 		public SendToAllPlayers<T extends Array<any>>(...args: T) {
 			this.instance.FireAllClients(...args);
+		}
+
+		/**
+		 * Will send this message to all players except specified players
+		 * @param blacklist The blacklist
+		 * @param args The arguments
+		 */
+		public SendToAllPlayersExcept<T extends Array<any>>(blacklist: Player | Array<Player>, ...args: T) {
+			if (typeIs(blacklist, "Instance")) {
+				const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
+				for (const player of otherPlayers) {
+					this.instance.FireClient(player, ...args);
+				}
+			} else if (typeof blacklist === "object") {
+				for (const player of Players.GetPlayers()) {
+					if (blacklist.indexOf(player) === -1) {
+						this.instance.FireClient(player, ...args);
+					}
+				}
+			}
 		}
 
 		/**
