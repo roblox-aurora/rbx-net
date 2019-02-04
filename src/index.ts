@@ -147,19 +147,19 @@ export namespace Net {
 		},
 	});
 
-	export namespace Config {
-		export function Set<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
-			if (key === "ThrottleResetTimer") {
-				throttleResetTimer = value as number;
-			}
+	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
+		assert(IS_SERVER, "Cannot modify configuration on client!");
+		if (key === "ThrottleResetTimer") {
+			throttleResetTimer = value as number;
 		}
+	}
 
-		export function Get<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
-			if (key === "ThrottleResetTimer") {
-				return throttleResetTimer;
-			} else {
-				return undefined;
-			}
+	export function GetConfiguration<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
+		if (key === "ThrottleResetTimer") {
+			assert(IS_SERVER, "ThrottleResetTimer is not used on the client!");
+			return throttleResetTimer;
+		} else {
+			return undefined;
 		}
 	}
 
