@@ -64,9 +64,9 @@ function waitForFunction(name: string, timeOut: number): RemoteFunction | undefi
 
 function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 	let targetFolder: Folder;
-	if (type === "Event") {
+	if (type === "RemoteEvent") {
 		targetFolder = eventFolder;
-	} else if (type === "Function") {
+	} else if (type === "RemoteFunction") {
 		targetFolder = functionFolder;
 	} else {
 		throw "Invalid type: " + type;
