@@ -3,3 +3,4 @@ tsconfig.json
 include
 tslint.json
 rojo.json
+package-lock.json

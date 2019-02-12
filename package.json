@@ -12,7 +12,7 @@
 	"author": "vorlias",
 	"license": "MIT",
 	"devDependencies": {
-		"rbx-types": "^1.0.83"
+		"rbx-types": "^1.0.126"
 	},
 	"dependencies": {},
 	"repository": {

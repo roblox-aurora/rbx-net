@@ -44,7 +44,7 @@ eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
  * @param message The message
  * @param vars variables to pass to the error message
  */
-function errorft(message: string, vars: { [name: string]: any }) {
+function errorft(message: string, vars: { [name: string]: unknown }) {
 	message = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
 		return vars[token] || token;
 	});
@@ -215,8 +215,8 @@ export namespace Net {
 		 * Connect a fucntion to fire when the event is invoked by the client
 		 * @param callback The function fired when the event is invoked by the client
 		 */
-		public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
-			this.Event.Connect(callback as any);
+		public Connect<T extends Array<unknown>>(callback: (sourcePlayer: Player, ...args: T) => void) {
+			this.Event.Connect(callback as Callback);
 		}
 
 		/**
@@ -391,7 +391,7 @@ export namespace Net {
 					});
 				} else {
 					this.clientRequests.Increment(player);
-					callback(player, ...args as any);
+					callback(player, ...args as T);
 				}
 			});
 		}
@@ -439,7 +439,7 @@ export namespace Net {
 		}
 
 		public set Callback(callback: Callback) {
-			this.instance.OnServerInvoke = (player: Player, ...args: Array<any>) => {
+			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 				const maxRequests = this.maxRequestsPerMinute;
 				const clientRequestCount = this.clientRequests.Get(player);
 				if (clientRequestCount >= maxRequests) {
@@ -521,7 +521,7 @@ export namespace Net {
 		 * @param callback The function fired when the event is invoked by the client
 		 */
 		public Connect<T extends Array<any>>(callback: (...args: T) => void) {
-			this.Event.Connect(callback as any);
+			this.Event.Connect(callback as Callback);
 		}
 
 		/**
@@ -541,7 +541,7 @@ export namespace Net {
 		/** @internal */
 		private lastPing = -1;
 		/** @internal */
-		private cached: any = [];
+		private cached: unknown = [];
 		/** @internal */
 		private instance: RemoteFunction;
 
@@ -607,7 +607,7 @@ export namespace Net {
 
 				return result as any;
 			} else {
-				return this.cached;
+				return this.cached as SR;
 			}
 		}
 
