@@ -182,6 +182,7 @@ export namespace Net {
 
 	/**
 	 * An event on the server
+	 * @rbxts server
 	 */
 	export class ServerEvent {
 		/** @internal */
@@ -270,6 +271,7 @@ export namespace Net {
 
 	/**
 	 * A function on the server
+	 * @rbxts server
 	 */
 	export class ServerFunction<CR extends any = any> {
 		/** @internal */
@@ -351,6 +353,7 @@ export namespace Net {
 
 	/**
 	 * A server event that can be rate limited
+	 * @rbxts server
 	 */
 	export class ServerThrottledEvent extends ServerEvent {
 		private maxRequestsPerMinute: number = 0;
@@ -419,6 +422,7 @@ export namespace Net {
 
 	/**
 	 * A server function that can be rate limited
+	 * @rbxts server
 	 */
 	export class ServerThrottledFunction<CR extends any = any> extends ServerFunction<CR> {
 		/** @internal */
@@ -478,6 +482,7 @@ export namespace Net {
 
 	/**
 	 * An event on the client
+	 * @rbxts client
 	 */
 	export class ClientEvent {
 		/** @internal */
@@ -536,6 +541,7 @@ export namespace Net {
 
 	/**
 	 * A function on the client
+	 * @rbxts client
 	 */
 	export class ClientFunction<SR extends any> {
 		/** @internal */
@@ -633,7 +639,7 @@ export namespace Net {
 	/**
 	 * Create a function
 	 * @param name The name of the function
-	 * (Must be created on server)
+	 * @rbxts server
 	 */
 	export function CreateFunction<CR extends any>(name: string): ServerFunction<CR> {
 		if (IS_SERVER) {
@@ -648,6 +654,7 @@ export namespace Net {
 	 * Creates a function that has a limited number of client requests every timeout (default 60 seconds)
 	 * @param name The name of the function
 	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
+	 * @rbxts server
 	 */
 	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): ServerThrottledFunction<CR> {
 		if (IS_SERVER) {
@@ -662,6 +669,7 @@ export namespace Net {
 	 * Creates an event that has a limited number of client requests every timeout (default 60 seconds)
 	 * @param name The name of the event
 	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
+	 * @rbxts server
 	 */
 	export function CreateThrottledEvent(name: string, rateLimit: number): ServerThrottledEvent {
 		if (IS_SERVER) {
@@ -675,7 +683,7 @@ export namespace Net {
 	/**
 	 * Create an event
 	 * @param name The name of the event
-	 * (Must be created on server)
+	 * @rbxts server
 	 */
 	export function CreateEvent(name: string): ServerEvent {
 		if (IS_SERVER) {
@@ -708,6 +716,7 @@ export namespace Net {
 	 * @param name The name of the function
 	 * @alias for `Net.ClientFunction.WaitFor(name)`
 	 * @returns `Promise<Net.ClientFunction>`
+	 * @rbxts client
 	 */
 	// tslint:enable:jsdoc-format
 	export async function WaitForClientFunctionAsync<R extends any>(name: string) {
@@ -736,12 +745,14 @@ export namespace Net {
 	 * @param name The name of the function
 	 * @alias for `Net.ClientEvent.WaitFor(name)`
 	 * @returns `Promise<Net.ClientEvent>`
+	 * @rbxts client
 	 */
 	// tslint:enable:jsdoc-format
 	export async function WaitForClientEventAsync(name: string) {
 		return Net.ClientEvent.WaitFor(name);
 	}
 
+	/** @rbxts server */
 	export function GetServerEventAsync(name: string): Promise<ServerEvent> {
 		return new Promise((resolve, reject) => {
 			if (eventExists(name)) {
@@ -753,6 +764,7 @@ export namespace Net {
 		});
 	}
 
+	/** @rbxts server */
 	export function GetServerFunctionAsync<CR extends any>(name: string): Promise<ServerFunction<CR>> {
 		return new Promise((resolve, reject) => {
 			if (functionExists(name)) {
