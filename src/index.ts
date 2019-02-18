@@ -1,4 +1,5 @@
 import * as throttler from "./Throttle";
+import * as guidCache from "./GuidCache";
 
 const Players = game.GetService("Players");
 
@@ -128,6 +129,8 @@ interface RbxNetConfigItem {
 	 */
 	ServerThrottleMessage: string;
 
+	RemoteGUIDGeneratorEnabled: boolean;
+
 	/** @internal */
 	__stfuTypescript: undefined;
 }
@@ -165,6 +168,12 @@ export namespace Net {
 			throttleResetTimer = value as number;
 		} else if (key === "ServerThrottleMessage") {
 			rateLimitReachedMessage = value as string;
+		} else if (key === "RemoteGUIDGeneratorEnabled") {
+			if (guidCache.GetCount() > 0) {
+				throw `Cannot change ${key} after remotes are created.`;
+			} else {
+				guidCache.SetEnabled(value as boolean);
+			}
 		}
 	}
 
@@ -175,6 +184,8 @@ export namespace Net {
 		} else if (key === "ServerThrottleMessage") {
 			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!");
 			return rateLimitReachedMessage;
+		} else if (key === "RemoteGUIDGeneratorEnabled") {
+			return guidCache.enabled;
 		} else {
 			return undefined;
 		}
