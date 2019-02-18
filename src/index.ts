@@ -1,5 +1,5 @@
-import * as throttler from "./Throttle";
-import * as guidCache from "./GuidCache";
+import throttler from "./Throttle";
+import guidCache from "./GuidCache";
 
 const Players = game.GetService("Players");
 
@@ -82,9 +82,24 @@ function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 	return targetFolder;
 }
 
-function findRemoteOrThrow<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
+function findRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] | undefined {
+
+	if (guidCache.enabled) {
+		name = guidCache.GetIdFromName(name);
+	}
+
 	const targetFolder = getRemoteFolder(type);
 	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
+
+	if (IS_SERVER) {
+		guidCache.Lock();
+	}
+
+	return existing;
+}
+
+function getRemoteOrThrow<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
+	const existing = findRemote(type, name);
 	if (existing) {
 		return existing;
 	} else {
@@ -93,9 +108,7 @@ function findRemoteOrThrow<K extends keyof RemoteTypes>(type: K, name: string): 
 }
 
 function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
-	const targetFolder = getRemoteFolder(type);
-
-	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
+	const existing = findRemote(type, name);
 	if (existing) {
 		return existing;
 	} else {
@@ -112,7 +125,7 @@ function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string):
 		} // stfu
 
 		remote.Name = name;
-		remote.Parent = targetFolder;
+		remote.Parent = getRemoteFolder(type);
 		return remote;
 	}
 }
@@ -505,7 +518,7 @@ export namespace Net {
 		 * @throws If created on server, or does not exist.
 		 */
 		constructor(name: string) {
-			this.instance = findRemoteOrThrow("RemoteEvent", name);
+			this.instance = getRemoteOrThrow("RemoteEvent", name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientEvent on the Server!");
 		}
 
@@ -563,7 +576,7 @@ export namespace Net {
 		private instance: RemoteFunction;
 
 		constructor(name: string) {
-			this.instance = findRemoteOrThrow("RemoteFunction", name);
+			this.instance = getRemoteOrThrow("RemoteFunction", name);
 			assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
 			assert(functionExists(name), `The specified function '${name}' does not exist!`);
 		}

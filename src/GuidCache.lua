@@ -1,21 +1,43 @@
 local guidCache = {
 	cache = {},
-	enabled = false
+	enabled = false,
+	lock = false
 }
 
 local runService = game:GetService("RunService")
 local httpService = game:GetService("HttpService")
+local IS_SERVER = runService:IsServer()
+
 local guidGetAll
+local guidUpdated
 if (runService:IsServer()) then
+	guidUpdated = Instance.new("RemoteEvent", script)
+	guidUpdated.Name = "GuidListUpdated"
+
 	guidGetAll = Instance.new("RemoteFunction", script)
 	guidGetAll.Name = "GetGuidList"
+	guidGetAll.OnServerInvoke = function(player)
+		print("[rbx-net-guid] Cache GET", player)
+		return guidCache.cache
+	end
 else
 	guidGetAll = script:FindFirstChild("GetGuidList")
+	guidUpdated = script:FindFirstChild("GuidListUpdated")
 end
 
-function guidCache:GetIds()
+function guidCache:Lock()
+	self.lock = true
+end
+
+function guidCache:GetIds(forceRefresh)
 	if runService:IsClient() then
-		return guidGetAll:InvokeServer()
+		if #self.cache == 0 or forceRefresh then
+			local cache = guidGetAll:InvokeServer()
+			self.cache = cache
+			return cache
+		else
+			return self.cache
+		end
 	else
 		return self.cache
 	end
@@ -30,6 +52,10 @@ function guidCache:GetCount()
 end
 
 function guidCache:SetEnabled(enabled)
+	if self.lock then
+		error("[rbx-net-guid] Cannot change state of GuidCache after remotes are created!", 3)
+	end
+
 	if (enabled == nil) then
 		self.enabled = true
 	else
@@ -48,11 +74,18 @@ function guidCache:GetOrCreateIdFromName(name)
 	local id = self.cache[name]
 	if id then
 		return id
-	else
+	elseif IS_SERVER then
 		id = httpService:GenerateGUID(false)
 		self.cache[name] = id
+		guidUpdated:FireAllClients(name, id)
 		return id
+	else
+		error(string.format("[rbx-net-guid] Stale Cache, could not get: %s", name))
 	end
+end
+
+if (not IS_SERVER) then
+	guidCache.cache = guidCache:GetIds(true)
 end
 
 return guidCache
