@@ -4,6 +4,8 @@ local guidCache = {
 	lock = false
 }
 
+local userLock = {}
+
 local runService = game:GetService("RunService")
 local httpService = game:GetService("HttpService")
 local IS_SERVER = runService:IsServer()
@@ -17,6 +19,10 @@ if (runService:IsServer()) then
 	guidGetAll = Instance.new("RemoteFunction", script)
 	guidGetAll.Name = "GetGuidList"
 	guidGetAll.OnServerInvoke = function(player)
+		if (userLock[player.UserId]) then
+			error("[rbx-net-guid] Cannot retrieve remote GUIDs after init.")
+		end
+		userLock[player.UserId] = true
 		print("[rbx-net-guid] Cache GET", player)
 		return guidCache.cache
 	end
@@ -29,9 +35,9 @@ function guidCache:Lock()
 	self.lock = true
 end
 
-function guidCache:GetIds(forceRefresh)
+function guidCache:GetIds()
 	if runService:IsClient() then
-		if #self.cache == 0 or forceRefresh then
+		if #self.cache == 0 then
 			local cache = guidGetAll:InvokeServer()
 			self.cache = cache
 			return cache
@@ -63,14 +69,19 @@ function guidCache:SetEnabled(enabled)
 	end
 end
 
-function guidCache:GetIdFromName(name)
-	local id = self.cache[name]
+local function getName(type, name)
+	return tostring(type) .. "~" .. tostring(name);
+end
+
+function guidCache:GetIdFromName(type, name)
+	local id = self.cache[getName(type, name)]
 	if id then
 		return id
 	end
 end
 
-function guidCache:GetOrCreateIdFromName(name)
+function guidCache:GetOrCreateIdFromName(type, name)
+	name = getName(type, name)
 	local id = self.cache[name]
 	if id then
 		return id
@@ -86,6 +97,10 @@ end
 
 if (not IS_SERVER) then
 	guidCache.cache = guidCache:GetIds(true)
+	guidUpdated.OnClientEvent:connect(function(name, id)
+		warn("[rbx-net-guid] Client is recieving remote guid post-join... this is insecure.")
+		guidCache.cache[name] = id;
+	end);
 end
 
 return guidCache

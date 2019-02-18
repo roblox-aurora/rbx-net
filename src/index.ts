@@ -3,11 +3,6 @@ import guidCache from "./GuidCache";
 
 const Players = game.GetService("Players");
 
-interface RemoteTypes {
-	RemoteEvent: RemoteEvent;
-	RemoteFunction: RemoteFunction;
-}
-
 const runService = game.GetService("RunService");
 const replicatedStorage = game.GetService("ReplicatedStorage");
 
@@ -85,13 +80,13 @@ function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 function findRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] | undefined {
 
 	if (guidCache.enabled) {
-		name = guidCache.GetIdFromName(name);
+		name = guidCache.GetIdFromName(type, name);
 	}
 
 	const targetFolder = getRemoteFolder(type);
 	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
 
-	if (IS_SERVER) {
+	if (IS_SERVER && !guidCache.lock) {
 		guidCache.Lock();
 	}
 
@@ -142,7 +137,10 @@ interface RbxNetConfigItem {
 	 */
 	ServerThrottleMessage: string;
 
-	RemoteGUIDGeneratorEnabled: boolean;
+	/**
+	 * Whether or not to use RemoteGUIDs. Must be set before the first remote is created!
+	 */
+	EXPERIMENTAL_RemoteGuidEnabled: boolean;
 
 	/** @internal */
 	__stfuTypescript: undefined;
@@ -181,9 +179,9 @@ export namespace Net {
 			throttleResetTimer = value as number;
 		} else if (key === "ServerThrottleMessage") {
 			rateLimitReachedMessage = value as string;
-		} else if (key === "RemoteGUIDGeneratorEnabled") {
-			if (guidCache.GetCount() > 0) {
-				throw `Cannot change ${key} after remotes are created.`;
+		} else if (key === "EXPERIMENTAL_RemoteGuidEnabled") {
+			if (guidCache.lock) {
+				error(`[rbx-net] Cannot set ${key} after the first remote has been created!`);
 			} else {
 				guidCache.SetEnabled(value as boolean);
 			}
@@ -197,7 +195,7 @@ export namespace Net {
 		} else if (key === "ServerThrottleMessage") {
 			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!");
 			return rateLimitReachedMessage;
-		} else if (key === "RemoteGUIDGeneratorEnabled") {
+		} else if (key === "EXPERIMENTAL_RemoteGuidEnabled") {
 			return guidCache.enabled;
 		} else {
 			return undefined;
