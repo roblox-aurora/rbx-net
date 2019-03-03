@@ -1,5 +1,6 @@
 import throttler from "./Throttle";
 import guidCache from "./GuidCache";
+import Serializer from "./Serializer";
 
 const Players = game.GetService("Players");
 
@@ -261,7 +262,7 @@ export namespace Net {
 				for (const player of otherPlayers) {
 					this.instance.FireClient(player, ...args);
 				}
-			} else if (typeof blacklist === "object") {
+			} else if (typeIs(blacklist, "object")) {
 				for (const player of Players.GetPlayers()) {
 					if (blacklist.indexOf(player) === -1) {
 						this.instance.FireClient(player, ...args);
@@ -658,6 +659,9 @@ export namespace Net {
 		return IS_SERVER;
 	}
 
+	export const Serialize = Serializer.serialize;
+	export const Deserialize = Serializer.deserialize;
+
 	/**
 	 * Create a function
 	 * @param name The name of the function
@@ -814,3 +818,7 @@ export namespace Net {
 }
 
 export default Net;
+
+interface NetId {
+	"Testing": true
+}

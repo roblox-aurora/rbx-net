@@ -11,9 +11,7 @@
 		"downlevelIteration": true,
 		"declaration": true,
 		"allowSyntheticDefaultImports": true,
-		"types": ["rbx-types"]
-	},
-	"typeAcquisition": {
-		"enable": true
+		"types": ["rbx-types"],
+		"typeRoots": ["./src/Serializer"]
 	}
 }
