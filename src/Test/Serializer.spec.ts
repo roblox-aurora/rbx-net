@@ -49,32 +49,48 @@ export = () => {
 			}
 
 			const person: Serializable<Person> = { name: "Test Name" };
-			const deserialized = Serializer.deserialize<Person>(person, p => new Person(p.name));
+			const deserialized = Serializer.Deserialize<Person>(person, p => new Person(p.name));
 
 			expect(deserialized instanceof Person).to.equal(true);
 			expect(deserialized.name).to.be.ok();
 			expect(deserialized.name).to.equal("Test Name");
 		});
 
-		// it("should allow static deserialization", () => {
-		// 	class Person {
-		// 		public name: string;
-		// 		constructor(name: string) {
-		// 			this.name = name;
-		// 		}
+		it("should allow static deserialization", () => {
+			class Person {
+				public name: string;
+				constructor(name: string) {
+					this.name = name;
+				}
 
-		// 		public static deserialize(serialized: Serializable<Person>) {
-		// 			return new Person(serialized.name);
-		// 		}
-		// 	}
+				public static deserialize(serialized: Serializable<Person>) {
+					return new Person(serialized.name);
+				}
+			}
 
-		// 	const person: Serializable<Person> = { name: "Test Name" };
-		// 	const deserialized = Serializer.deserialize<Person>(person, Person);
-		// 	expect(deserialized.name).to.be.ok();
-		// 	expect(deserialized.name).to.equal("Test Name");
-		// })
+			const person: Serializable<Person> = { name: "Test Name" };
+			const deserialized = Serializer.Deserialize<Person>(person, Person);
+			expect(deserialized.name).to.be.ok();
+			expect(deserialized.name).to.equal("Test Name");
+		});
+
+		it("should allow direct deserialization", () => {
+			class Person {
+				public name: string;
+				constructor(name: string) {
+					this.name = name;
+				}
+
+				public static deserialize(serialized: Serializable<Person>) {
+					return new Person(serialized.name);
+				}
+			}
+
+			const person: Serializable<Person> = { name: "Test Name" };
+			const personTarget = new Person("");
+			Serializer.Deserialize<Person>(person, personTarget);
+			expect(personTarget.name).to.be.ok();
+			expect(personTarget.name).to.equal("Test Name");
+		});
 	});
-
-
-
-}
+};

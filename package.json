@@ -5,10 +5,11 @@
 	"main": "./out/init.lua",
 	"typings": "./out/index.d.ts",
 	"scripts": {
+		"test": "rbxtsc --standalone && lua ./out/Test/spec.lua",
 		"prepublish": "npm run build",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
 		"build": "npm run cleanup && rbxtsc",
-		"buildrbxm": "npm run cleanup && rbxtsc --static && npm run rbxm",
+		"buildrbxm": "npm run cleanup && rbxtsc --standalone && npm run rbxm",
 		"rbxm": "mkdir -p ./dist && rojo build --output ./dist/rbx-net.rbxm ./lua.project.json"
 	},
 	"author": "vorlias",

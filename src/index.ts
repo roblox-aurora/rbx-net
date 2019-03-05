@@ -659,8 +659,8 @@ export namespace Net {
 		return IS_SERVER;
 	}
 
-	export const Serialize = Serializer.serialize;
-	export const Deserialize = Serializer.deserialize;
+	export const Serialize = Serializer.Serialize;
+	export const Deserialize = Serializer.Deserialize;
 
 	/**
 	 * Create a function

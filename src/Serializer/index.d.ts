@@ -11,11 +11,25 @@ type Primitive = number | string | boolean | Instance;
 declare namespace Serializer {
 	export type Serializable<T> = SubType<T, Primitive | Array<Primitive>>;
 
-	function serialize<T, K extends keyof T>(object: T): Serializable<T>;
+	/** 
+	 * Serializes an object 
+	 */
+	function Serialize<T, K extends keyof T>(object: T): Serializable<T>;
 
-	// function deserialize<T>(object: Serializable<T>, target: T): T;
-	// function deserialize<T>(object: Serializable<T>, target: { new(...args: any[]): T }): T;
-	function deserialize<T>(object: Serializable<T>, deserializer: (value: Serializable<T>) => T): T;
+	/**
+	 * Deserialize using a deserializer function
+	 */
+	function Deserialize<T>(object: Serializable<T>, deserializer: (value: Serializable<T>) => T): T;
+
+	/**
+	 * Deserialize using a static method
+	 */
+	function Deserialize<T>(object: Serializable<T>, target: { new(...args: any[]): T, deserialize(object: Serializable<T>): T }): T;
+
+	/**
+	 * Deserialize by reference
+	 */
+	function Deserialize<T>(object: Serializable<T>, target: T): void;
 }
 
 export as namespace Serializer;
