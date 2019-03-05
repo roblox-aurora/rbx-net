@@ -65,7 +65,7 @@ function guidCache:SetEnabled(enabled)
 	if (enabled == nil) then
 		self.enabled = true
 	else
-		self.endabled = enabled
+		self.enabled = enabled
 	end
 end
 
