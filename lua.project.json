@@ -1,0 +1,7 @@
+{
+	"name": "rbx-net-lua",
+	"servePort": 34872,
+	"tree": {
+		"$path": "out"
+	}
+}

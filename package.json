@@ -6,8 +6,10 @@
 	"typings": "./out/index.d.ts",
 	"scripts": {
 		"prepublish": "npm run build",
-		"cleanup": "rm -rf ./out",
-		"build": "npm run cleanup && rbxtsc"
+		"cleanup": "rm -rf ./out && rm -rf ./dist",
+		"build": "npm run cleanup && rbxtsc",
+		"buildrbxm": "npm run cleanup && rbxtsc --static && npm run rbxm",
+		"rbxm": "mkdir -p ./dist && rojo build --output ./dist/rbx-net.rbxm ./lua.project.json"
 	},
 	"author": "vorlias",
 	"license": "MIT",
