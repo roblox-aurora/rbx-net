@@ -821,7 +821,3 @@ export default Net;
 
 /** @internal */
 export const LuaNet = Net;
-
-interface NetId {
-	"Testing": true
-}
