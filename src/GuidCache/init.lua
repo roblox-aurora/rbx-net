@@ -9,6 +9,7 @@ local userLock = {}
 local runService = game:GetService("RunService")
 local httpService = game:GetService("HttpService")
 local IS_SERVER = runService:IsServer()
+local IS_LEMUR = not not __LEMUR__
 
 local guidGetAll
 local guidUpdated
@@ -85,6 +86,14 @@ function guidCache:GetOrCreateIdFromName(type, name)
 	local id = self.cache[name]
 	if id then
 		return id
+	elseif IS_LEMUR then
+		if (not self.cache[name]) then
+			id = httpService:GenerateGUID(false)
+			self.cache[name] = id
+			return id;
+		else
+			return self.cache[name]
+		end
 	elseif IS_SERVER then
 		id = httpService:GenerateGUID(false)
 		self.cache[name] = id
@@ -95,7 +104,7 @@ function guidCache:GetOrCreateIdFromName(type, name)
 	end
 end
 
-if (not IS_SERVER and not __LEMUR__) then
+if (not IS_SERVER and not IS_LEMUR) then
 	guidCache.cache = guidCache:GetIds(true)
 	guidUpdated.OnClientEvent:connect(function(name, id)
 		warn("[rbx-net-guid] Client is recieving remote guid post-join... this is insecure.")
