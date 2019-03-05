@@ -36,7 +36,7 @@ function guidCache:Lock()
 end
 
 function guidCache:GetIds()
-	if runService:IsClient() then
+	if not runService:IsServer() then
 		if #self.cache == 0 then
 			local cache = guidGetAll:InvokeServer()
 			self.cache = cache
@@ -95,7 +95,7 @@ function guidCache:GetOrCreateIdFromName(type, name)
 	end
 end
 
-if (not IS_SERVER) then
+if (not IS_SERVER and not __LEMUR__) then
 	guidCache.cache = guidCache:GetIds(true)
 	guidUpdated.OnClientEvent:connect(function(name, id)
 		warn("[rbx-net-guid] Client is recieving remote guid post-join... this is insecure.")

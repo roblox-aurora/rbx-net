@@ -13,7 +13,8 @@ declare namespace Serializer {
 
 	function serialize<T, K extends keyof T>(object: T): Serializable<T>;
 
-	function deserialize<T>(object: Serializable<T>, target: T): T;
+	// function deserialize<T>(object: Serializable<T>, target: T): T;
+	// function deserialize<T>(object: Serializable<T>, target: { new(...args: any[]): T }): T;
 	function deserialize<T>(object: Serializable<T>, deserializer: (value: Serializable<T>) => T): T;
 }
 

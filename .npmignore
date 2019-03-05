@@ -1,7 +1,3 @@
-src
-tsconfig.json
-include
-tslint.json
-rojo.json
-package-lock.json
-dist
+*
+!out/*.lua
+!out/**/*.lua
