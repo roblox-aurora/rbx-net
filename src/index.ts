@@ -7,7 +7,7 @@ const Players = game.GetService("Players");
 const runService = game.GetService("RunService");
 const replicatedStorage = game.GetService("ReplicatedStorage");
 
-const IS_CLIENT = runService.IsClient();
+const IS_CLIENT = __LEMUR__ && !runService.IsServer() || runService.IsClient();
 const IS_SERVER = runService.IsServer();
 const IS_STUDIO = runService.IsStudio();
 
