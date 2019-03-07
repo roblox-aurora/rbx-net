@@ -8,8 +8,22 @@ type SubType<Base, Condition> = Pick<Base, AllowedNames<Base, Condition>>;
 
 type Primitive = number | string | boolean | Instance;
 
+declare class Deserializable<T> {
+	public static deserialize<T>(serialized: Serializer.Serializable<T>): T;
+}
+
+interface DeserializeWrapper<T, U extends unknown[]> {
+	new(...param: U): T,
+	deserialize(serialized: Serializer.Serializable<T>): T;
+}
+
 declare namespace Serializer {
-	export type Serializable<T> = SubType<T, Primitive | Array<Primitive>>;
+	type Serializable<T> = {
+		[P in FilterFlags<T, string | number | boolean | Instance | Primitive[]>[keyof T]]: T[P];
+	};
+
+	type ISerializable<T> = { serialize(): Serializable<T>, deserialize(serialized: Serializable<T>): void; }
+
 
 	/** 
 	 * Serializes an object 
@@ -30,7 +44,28 @@ declare namespace Serializer {
 	 * Deserialize by reference
 	 */
 	function Deserialize<T>(object: Serializable<T>, target: T): void;
+
+
+
+	/**
+	 * Create an object with a deserialize static method
+	 * @param classObject The class to deserialize
+	 * @param deserializer The deserializer function
+	 */
+	function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, deserializer: (serialized: Serializable<T>) => T): {
+		new(...param: U): T,
+		deserialize(serialized: Serializable<T>): T;
+	}
+
+	/**
+	 * Create an object with a deserialize static method
+	 * @param classObject The class to deserialize
+	 * @param constructorArg The default constructor arguments
+	 */
+	function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, ...constructorArg: U): DeserializeWrapper<T, U>;
 }
+
+
 
 export as namespace Serializer;
 export = Serializer;

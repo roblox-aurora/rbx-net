@@ -92,5 +92,34 @@ export = () => {
 			expect(personTarget.name).to.be.ok();
 			expect(personTarget.name).to.equal("Test Name");
 		});
+
+		it("should allow wrapping a deserializer", () => {
+			class Person {
+				constructor(public name: string) {
+
+				}
+			}
+
+			const PersonWrapper = Serializer.makeDeserializable(Person, "");
+			const person = PersonWrapper.deserialize({ name: "Test" });
+			expect(person).to.be.ok();
+			expect(person.name).to.equal("Test");
+		})
+
+		it("should allow wrapping a deserialization function", () => {
+			class Person {
+				constructor(public name: string) {
+
+				}
+			}
+
+			const PersonWrapper = Serializer.makeDeserializable(Person, p => {
+				return new Person(p.name);
+			});
+
+			const person = PersonWrapper.deserialize({ name: "Test" });
+			expect(person).to.be.ok();
+			expect(person.name).to.equal("Test");
+		})
 	});
 };

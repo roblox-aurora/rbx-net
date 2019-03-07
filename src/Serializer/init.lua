@@ -35,4 +35,23 @@ function Serializer.Deserialize(struct, deserializer)
 	end
 end
 
+function Serializer.makeDeserializable(class, callback)
+	local wrapper = {}
+	if (type(callback) == "function") then
+		wrapper.deserialize = function(_, serialized)
+			return callback(serialized)
+		end
+	else
+		wrapper.deserialize = function(_, serialized, ...)
+			local obj = class.new(...)
+			for index, value in next, serialized do
+				obj[index] = value
+			end
+			return obj
+		end
+	end
+
+	return setmetatable(wrapper, {__index = class})
+end
+
 return Serializer
