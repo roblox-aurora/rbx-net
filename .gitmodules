@@ -1,6 +1,7 @@
 [submodule "vendor/lemur"]
 	path = vendor/lemur
 	url = https://github.com/LPGhatguy/lemur.git
+	ignore = dirty
 [submodule "vendor/testez"]
 	path = vendor/testez
 	url = https://github.com/Roblox/testez.git
