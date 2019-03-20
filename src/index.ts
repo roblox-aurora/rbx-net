@@ -6,6 +6,7 @@ const Players = game.GetService("Players");
 
 const runService = game.GetService("RunService");
 const replicatedStorage = game.GetService("ReplicatedStorage");
+const messagingService = game.GetService("MessagingService");
 
 const IS_CLIENT = __LEMUR__ && !runService.IsServer() || runService.IsClient();
 const IS_SERVER = runService.IsServer();
@@ -207,7 +208,7 @@ export namespace Net {
 	 * An event on the server
 	 * @rbxts server
 	 */
-	export class ServerEvent {
+	export class ServerEvent implements IServerNetEvent {
 		/** @internal */
 		protected instance: RemoteEvent;
 
@@ -507,7 +508,7 @@ export namespace Net {
 	 * An event on the client
 	 * @rbxts client
 	 */
-	export class ClientEvent {
+	export class ClientEvent implements IClientNetEvent {
 		/** @internal */
 		private instance: RemoteEvent;
 
@@ -560,6 +561,172 @@ export namespace Net {
 			this.instance.FireServer(...args);
 		}
 
+	}
+
+
+	export interface IMessage {
+		data: Array<unknown>;
+		targetId?: number;
+		targetIds?: Array<number>;
+	}
+
+	function getGlobalRemote(name: string) {
+		return `G~${name}`;
+	}
+
+	function isLuaTable(value: unknown): value is Map<unknown, unknown> {
+		return typeIs(value, "table");
+	}
+
+	function isMessage(value: unknown): value is IMessage {
+		if (isLuaTable(value)) {
+			const hasData = value.has("data");
+			return !value.isEmpty() && (hasData && typeOf(value.get("data")) === "table");
+		} else {
+			return false;
+		}
+	}
+
+
+	export class GlobalServerEvent implements INetXServerEvent {
+		private readonly instance: ServerEvent;
+		private readonly event: GlobalEvent;
+
+		constructor(name: string) {
+			this.instance = new ServerEvent(getGlobalRemote(name));
+			this.event = new GlobalEvent(name);
+			assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
+
+			this.event.Connect(message => {
+				if (isMessage(message)) {
+					this.recievedMessage(message);
+				} else {
+					warn(`[rbx-net] Recieved malformed message for GlobalServerEvent: ${name}`);
+				}
+			});
+		}
+
+		private getPlayersMatchingId(matching: Array<number> | number) {
+			if (typeof matching === "number") {
+				return Players.GetPlayerByUserId(matching);
+			} else {
+				const players = new Array<Player>();
+				for (const id of matching) {
+					const player = Players.GetPlayerByUserId(id);
+					if (player) {
+						players.push(player);
+					}
+				}
+
+				return players;
+			}
+		}
+
+		private recievedMessage(message: IMessage) {
+			if (message.targetIds) {
+				const players = this.getPlayersMatchingId(message.targetIds);
+				if (players) {
+					this.instance.SendToPlayers(players as Array<Player>, ...message.data);
+				}
+			} else if (message.targetId) {
+				const player = this.getPlayersMatchingId(message.targetId);
+				if (player) {
+					this.instance.SendToPlayer(player as Player, ...message.data);
+				}
+			} else {
+				this.instance.SendToAllPlayers(...message.data);
+			}
+		}
+
+		public SendToAllServers<T extends Array<unknown>>(...args: T) {
+			this.event.SendToAllServers({ data: [...args] });
+		}
+
+		public SendToPlayer<T extends Array<unknown>>(userId: number, ...args: T) {
+			this.event.SendToAllServers({ data: [...args], targetId: userId });
+		}
+
+		public SendToPlayers<T extends Array<unknown>>(userIds: Array<number>, ...args: T) {
+			this.event.SendToAllServers({ data: [...args], targetIds: userIds });
+		}
+	}
+
+	interface IQueuedMessage {
+		name: string;
+		message: unknown;
+	}
+
+	const globalMessageQueue = new Array<IQueuedMessage>();
+	let lastQueueTick = 0;
+	let globalEventMessageCounter = 0;
+	let globalSubscriptionCounter = 0;
+
+	function processMessageQueue() {
+		if (tick() >= lastQueueTick + 60) {
+			globalEventMessageCounter = 0;
+			globalSubscriptionCounter = 0;
+			lastQueueTick = tick();
+
+			while (globalMessageQueue.length > 0) {
+				const message = globalMessageQueue.pop()!;
+				messagingService.PublishAsync(message.name, message.message);
+				globalEventMessageCounter++;
+			}
+
+			if (globalEventMessageCounter >= GlobalEvent.GetMessageLimit()) {
+				warn("[rbx-net] Too many messages are being sent, any further messages will be queued!");
+			}
+		}
+	}
+
+	/**
+	 * An event that works across all servers
+	 * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
+	 */
+	export class GlobalEvent implements INetXMessageEvent {
+		constructor(private name: string) {
+		}
+
+		/**
+		 * Message Size: 1kB
+		 * MessagesPerMin: 150 + 60 * NUMPLAYERS
+		 * MessagesPerTopicMin: 30M
+		 * MessagesPerUniversePerMin: 30M
+		 * SubsPerServer: 5 + 2 * numPlayers
+		 * SubsPerUniverse: 10K
+		 */
+
+		/**
+		 * Gets the message limit
+		 */
+		public static GetMessageLimit() {
+			return 150 + (60 * Players.GetPlayers().length);
+		}
+
+		public static GetSubscriptionLimit() {
+			return 5 + (2 * Players.GetPlayers().length);
+		}
+
+		public SendToAllServers(message: unknown): void {
+			const limit = GlobalEvent.GetMessageLimit();
+			if (globalEventMessageCounter >= limit) {
+				warn(`[rbx-net] Exceeded message limit of ${limit}, adding to queue...`);
+				globalMessageQueue.push({ name: this.name, message });
+			} else {
+				globalEventMessageCounter++;
+				messagingService.PublishAsync(this.name, message);
+			}
+		}
+
+		public Connect(handler: (message: unknown) => void) {
+			const limit = GlobalEvent.GetSubscriptionLimit();
+			if (globalSubscriptionCounter >= limit) {
+				error(`[rbx-net] Exceeded Subscription limit of ${limit}!`);
+			}
+
+			globalSubscriptionCounter++;
+			return messagingService.SubscribeAsync(this.name, handler);
+		}
 	}
 
 	/**
@@ -813,6 +980,8 @@ export namespace Net {
 				lastTick = tick();
 				throttler.Clear();
 			}
+
+			processMessageQueue();
 		});
 	}
 }

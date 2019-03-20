@@ -47,22 +47,22 @@ declare namespace Serializer {
 
 
 
-	/**
-	 * Create an object with a deserialize static method
-	 * @param classObject The class to deserialize
-	 * @param deserializer The deserializer function
-	 */
-	function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, deserializer: (serialized: Serializable<T>) => T): {
-		new(...param: U): T,
-		deserialize(serialized: Serializable<T>): T;
-	}
+	// /**
+	//  * Create an object with a deserialize static method
+	//  * @param classObject The class to deserialize
+	//  * @param deserializer The deserializer function
+	//  */
+	// function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, deserializer: (serialized: Serializable<T>) => T): {
+	// 	new(...param: U): T,
+	// 	deserialize(serialized: Serializable<T>): T;
+	// }
 
-	/**
-	 * Create an object with a deserialize static method
-	 * @param classObject The class to deserialize
-	 * @param constructorArg The default constructor arguments
-	 */
-	function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, ...constructorArg: U): DeserializeWrapper<T, U>;
+	// /**
+	//  * Create an object with a deserialize static method
+	//  * @param classObject The class to deserialize
+	//  * @param constructorArg The default constructor arguments
+	//  */
+	// function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, ...constructorArg: U): DeserializeWrapper<T, U>;
 }
 
 
