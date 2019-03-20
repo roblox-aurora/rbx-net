@@ -607,7 +607,7 @@ export namespace Net {
 		}
 
 		private getPlayersMatchingId(matching: Array<number> | number) {
-			if (typeof matching === "number") {
+			if (typeIs(matching, "number")) {
 				return Players.GetPlayerByUserId(matching);
 			} else {
 				const players = new Array<Player>();
