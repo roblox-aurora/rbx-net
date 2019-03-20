@@ -8,7 +8,7 @@
 		"test": "rbxtsc && lua ./out/Test/spec.lua",
 		"prepublish": "npm run build",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
-		"declaration-fixes": "find src -name '*.d.ts' -exec cp --parents \\{\\} out \\;",
+		"declaration-fixes": "sh declarationfix.sh",
 		"build": "npm run cleanup && rbxtsc && npm run declaration-fixes",
 		"buildrbxm": "npm run cleanup && rbxtsc && npm run rbxm",
 		"rbxm": "mkdir -p ./dist && rojo build --output ./dist/rbx-net.rbxm ./lua.project.json"
