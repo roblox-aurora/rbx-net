@@ -1,6 +1,6 @@
-import NetServerEvent from "ServerEvent";
-import NetGlobalEvent from "GlobalEvent";
-import { getGlobalRemote, IS_CLIENT } from "internal";
+import NetServerEvent from "./ServerEvent";
+import NetGlobalEvent from "./GlobalEvent";
+import { getGlobalRemote, IS_CLIENT } from "./internal";
 const Players = game.GetService("Players");
 
 export interface IMessage {

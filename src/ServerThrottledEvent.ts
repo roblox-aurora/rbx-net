@@ -1,7 +1,7 @@
-import NetServerEvent from "ServerEvent";
-import { RequestCounter, errorft } from "internal";
-import throttler from "Throttle";
-import { GetConfiguration } from "configuration";
+import NetServerEvent from "./ServerEvent";
+import { RequestCounter, errorft } from "./internal";
+import throttler from "./Throttle";
+import { GetConfiguration } from "./configuration";
 
 /**
  * A server event that can be rate limited

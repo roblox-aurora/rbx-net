@@ -1,4 +1,4 @@
-import { findOrCreateRemote, IS_CLIENT } from "internal";
+import { findOrCreateRemote, IS_CLIENT } from "./internal";
 
 /**
  * A function on the server

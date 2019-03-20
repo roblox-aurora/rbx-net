@@ -1,4 +1,4 @@
-import { ServerTickFunctions } from "internal";
+import { ServerTickFunctions } from "./internal";
 
 const MessagingService = game.GetService("MessagingService");
 const Players = game.GetService("Players");

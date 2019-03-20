@@ -1,4 +1,4 @@
-import { getRemoteOrThrow, IS_CLIENT, functionExists, waitForFunction, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "internal";
+import { getRemoteOrThrow, IS_CLIENT, functionExists, waitForFunction, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "./internal";
 
 /**
  * A function on the client

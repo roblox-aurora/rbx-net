@@ -1,4 +1,4 @@
-import { getRemoteOrThrow, IS_CLIENT, waitForEvent, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "internal";
+import { getRemoteOrThrow, IS_CLIENT, waitForEvent, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "./internal";
 
 /**
  * An event on the client

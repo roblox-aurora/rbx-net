@@ -1,7 +1,7 @@
-import { RequestCounter, errorft } from "internal";
-import throttler from "Throttle";
-import { GetConfiguration } from "configuration";
-import NetServerFunction from "ServerFunction";
+import { RequestCounter, errorft } from "./internal";
+import throttler from "./Throttle";
+import { GetConfiguration } from "./configuration";
+import NetServerFunction from "./ServerFunction";
 
 /**
  * A server function that can be rate limited
