@@ -46,7 +46,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 				});
 			} else {
 				this.clientRequests.Increment(player);
-				callback(player, ...args as T);
+				callback(player, ...(args as T));
 			}
 		});
 	}

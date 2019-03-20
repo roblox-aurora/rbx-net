@@ -1,7 +1,16 @@
 import throttler from "./Throttle";
 import Serializer from "./Serializer";
 import config from "./configuration";
-import { findOrCreateRemote, errorft, getRemoteOrThrow, waitForEvent, functionExists, waitForFunction, eventExists, ServerTickFunctions } from "./internal";
+import {
+	findOrCreateRemote,
+	errorft,
+	getRemoteOrThrow,
+	waitForEvent,
+	functionExists,
+	waitForFunction,
+	eventExists,
+	ServerTickFunctions,
+} from "./internal";
 import NetServerEvent from "./ServerEvent";
 import NetClientEvent from "./ClientEvent";
 import NetClientFunction from "./ClientFunction";
@@ -15,8 +24,7 @@ const Players = game.GetService("Players");
 
 const runService = game.GetService("RunService");
 
-
-const IS_CLIENT = __LEMUR__ && !runService.IsServer() || runService.IsClient();
+const IS_CLIENT = (__LEMUR__ && !runService.IsServer()) || runService.IsClient();
 const IS_SERVER = runService.IsServer();
 const IS_STUDIO = runService.IsStudio();
 
@@ -24,8 +32,16 @@ const IS_STUDIO = runService.IsStudio();
  * Typescript Networking Library for ROBLOX
  */
 export namespace Net {
-	interface VersionType { major: number; minor: number; revision: number; }
-	interface VersionInformation { number: VersionType; date: number; tag?: string; }
+	interface VersionType {
+		major: number;
+		minor: number;
+		revision: number;
+	}
+	interface VersionInformation {
+		number: VersionType;
+		date: number;
+		tag?: string;
+	}
 
 	export const SetConfiguration = config.SetConfiguration;
 	export const GetConfiguration = config.GetConfiguration;
@@ -41,7 +57,7 @@ export namespace Net {
 	};
 
 	setmetatable(VERSION, {
-		__tostring: (self) => {
+		__tostring: self => {
 			const { major, minor, revision } = self.number;
 
 			return `${major}.${minor}.${revision}`;
@@ -88,7 +104,10 @@ export namespace Net {
 	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
 	 * @rbxts server
 	 */
-	export function CreateThrottledFunction<CR extends any>(name: string, rateLimit: number): NetServerThrottledFunction<CR> {
+	export function CreateThrottledFunction<CR extends any>(
+		name: string,
+		rateLimit: number,
+	): NetServerThrottledFunction<CR> {
 		if (IS_SERVER) {
 			return new NetServerThrottledFunction<CR>(name, rateLimit);
 		} else {

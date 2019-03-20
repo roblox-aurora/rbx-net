@@ -36,8 +36,7 @@ function processMessageQueue() {
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
 export default class NetGlobalEvent implements INetXMessageEvent {
-	constructor(private name: string) {
-	}
+	constructor(private name: string) {}
 
 	/**
 	 * Message Size: 1kB
@@ -52,11 +51,11 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 	 * Gets the message limit
 	 */
 	public static GetMessageLimit() {
-		return 150 + (60 * Players.GetPlayers().length);
+		return 150 + 60 * Players.GetPlayers().length;
 	}
 
 	public static GetSubscriptionLimit() {
-		return 5 + (2 * Players.GetPlayers().length);
+		return 5 + 2 * Players.GetPlayers().length;
 	}
 
 	public SendToAllServers(message: unknown): void {

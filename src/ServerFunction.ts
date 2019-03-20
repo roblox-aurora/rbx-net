@@ -73,9 +73,7 @@ export default class NetServerFunction<CR extends any = any> {
 	 * @param player The player to call the function on
 	 * @param args The arguments to call the function with
 	 */
-	public async CallPlayerAsync<T extends Array<any>>(
-		player: Player, ...args: T): Promise<CR> {
+	public async CallPlayerAsync<T extends Array<any>>(player: Player, ...args: T): Promise<CR> {
 		return this.instance.InvokeClient(player, ...args) as any;
 	}
-
 }

@@ -3,13 +3,16 @@ import guidCache from "./GuidCache";
 const replicatedStorage = game.GetService("ReplicatedStorage");
 const runService = game.GetService("RunService");
 
-export interface RequestCounter { Increment(player: Player): void; Get(player: Player): number; }
+export interface RequestCounter {
+	Increment(player: Player): void;
+	Get(player: Player): number;
+}
 
 /** @internal */
 export const IS_SERVER = runService.IsServer();
 
 /** @internal */
-export const IS_CLIENT = __LEMUR__ && !runService.IsServer() || runService.IsClient();
+export const IS_CLIENT = (__LEMUR__ && !runService.IsServer()) || runService.IsClient();
 
 /** @internal */
 export const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
@@ -95,7 +98,6 @@ export function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 
 /** @internal */
 export function findRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] | undefined {
-
 	if (guidCache.enabled) {
 		name = guidCache.GetIdFromName(type, name);
 	}

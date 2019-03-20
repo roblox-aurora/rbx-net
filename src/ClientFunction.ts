@@ -1,4 +1,10 @@
-import { getRemoteOrThrow, IS_CLIENT, functionExists, waitForFunction, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "./internal";
+import {
+	getRemoteOrThrow,
+	IS_CLIENT,
+	functionExists,
+	waitForFunction,
+	MAX_CLIENT_WAITFORCHILD_TIMEOUT,
+} from "./internal";
 
 /**
  * A function on the client
@@ -66,7 +72,7 @@ export default class NetClientFunction<SR extends any> {
 	 * @returns the result of the call to the server
 	 */
 	public CallServer<T extends Array<any>>(...args: T): SR {
-		if (this.lastPing < (os.time() + this.Cache)) {
+		if (this.lastPing < os.time() + this.Cache) {
 			const result = this.instance.InvokeServer(...args);
 			this.cached = result;
 
@@ -86,5 +92,4 @@ export default class NetClientFunction<SR extends any> {
 	public async CallServerAsync<T extends Array<any>>(...args: T): Promise<SR> {
 		return this.CallServer(...args);
 	}
-
 }
