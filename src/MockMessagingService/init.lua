@@ -19,6 +19,7 @@ function MockMessagingService:SubscribeAsync(topicName, callback)
 	if not topic then
 		topic = Instance.new("BindableEvent", script)
 		topic.Name = topicName
+		topics[topicName] = topic
 	end
 
 	return topic.Event:Connect(callback)
