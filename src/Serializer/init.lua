@@ -35,6 +35,36 @@ function Serializer.Deserialize(struct, deserializer)
 	end
 end
 
+local function isMixed(t)
+	assert(type(t) == "table")
+	local mixed = false
+	local _idxType
+
+	for index, value in next, t do
+		if _idxType and _idxType ~= type(index) then
+			return true
+		end
+
+		_idxType = type(index)
+		if type(value) == "table" then
+			mixed = mixed and isMixed(value)
+		end
+	end
+
+	return mixed
+end
+
+function Serializer:IsSerializable(value)
+	local _type = type(value)
+	if _type == "number" or _type == "boolean" or _type == "string" then
+		return true
+	elseif _type == "table" then
+		return not isMixed(value)
+	else
+		return false
+	end
+end
+
 function Serializer.makeDeserializable(class, callback)
 	local wrapper = {}
 	if (type(callback) == "function") then
