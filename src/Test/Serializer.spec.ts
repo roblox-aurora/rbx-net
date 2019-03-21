@@ -1,4 +1,4 @@
-import { Serializable } from "Serializer";
+import { Serializable, Serialize } from "Serializer";
 import Serializer from "Serializer";
 
 export = () => {
@@ -91,34 +91,58 @@ export = () => {
 			expect(personTarget.name).to.be.ok();
 			expect(personTarget.name).to.equal("Test Name");
 		});
+	});
 
-		// it("should allow wrapping a deserializer", () => {
-		// 	class Person {
-		// 		constructor(public name: string) {
+	describe("Serializable Checks", () => {
+		it("should be true for objects and arrays", () => {
+			const testA = { a: 1, b: 2 };
+			expect(Serializer.IsSerializable(testA)).to.equal(true);
 
-		// 		}
-		// 	}
+			const testB = [1, 2, 3];
+			expect(Serializer.IsSerializable(testB)).to.equal(true);
+		});
 
-		// 	const PersonWrapper = Serializer.makeDeserializable(Person, "");
-		// 	const person = PersonWrapper.deserialize({ name: "Test" });
-		// 	expect(person).to.be.ok();
-		// 	expect(person.name).to.equal("Test");
-		// })
+		it("should be false for class objects", () => {
+			class Testing {}
 
-		// it("should allow wrapping a deserialization function", () => {
-		// 	class Person {
-		// 		constructor(public name: string) {
+			const obj = new Testing();
+			expect(Serializer.IsSerializable(obj)).to.equal(false);
+		});
 
-		// 		}
-		// 	}
+		it("should be false for mixed objects", () => {
+			const test = { [1]: "Hello", a: 10 };
+			expect(Serializer.IsSerializable(test)).to.equal(false);
+		});
 
-		// 	const PersonWrapper = Serializer.makeDeserializable(Person, p => {
-		// 		return new Person(p.name);
-		// 	});
+		it("should work for serializable", () => {
+			class Testing {}
 
-		// 	const person = PersonWrapper.deserialize({ name: "Test" });
-		// 	expect(person).to.be.ok();
-		// 	expect(person.name).to.equal("Test");
-		// })
+			const obj = new Testing();
+
+			const objSerialized = Serializer.Serialize(obj);
+			expect(Serializer.IsSerializable(objSerialized)).to.equal(true);
+		});
+
+		it("should be true for primitives", () => {
+			const a = "Test";
+			expect(Serializer.IsSerializable(a)).to.equal(true);
+
+			const b = 10;
+			expect(Serializer.IsSerializable(b)).to.equal(true);
+
+			const c = true;
+			expect(Serializer.IsSerializable(c)).to.equal(true);
+		});
+
+		it("should be false for functions", () => {
+			const f = () => {};
+			expect(Serializer.IsSerializable(f)).to.equal(false);
+		});
+
+		it("should be true for roblox types", () => {
+			expect(Serializer.IsSerializable(new Vector3(10, 20, 30)));
+			expect(Serializer.IsSerializable(new UDim2(0, 1, 2, 3)));
+			expect(Serializer.IsSerializable(new Instance("Frame")));
+		});
 	});
 };

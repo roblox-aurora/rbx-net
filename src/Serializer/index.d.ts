@@ -43,7 +43,10 @@ declare namespace Serializer {
 	 */
 	function Deserialize<T>(object: Serializable<T>, target: T): void;
 
-	function IsSerializable<T>(value: T): boolean;
+	/**
+	 * Get whether or not the specified value can be sent over the network
+	 */
+	function IsSerializable(value: unknown): boolean;
 
 	// /**
 	//  * Create an object with a deserialize static method

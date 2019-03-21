@@ -47,19 +47,21 @@ local function isMixed(t)
 
 		_idxType = type(index)
 		if type(value) == "table" then
-			mixed = mixed and isMixed(value)
+			mixed = mixed and isMixed(value) and not (not getmetatable(value))
 		end
 	end
 
 	return mixed
 end
 
-function Serializer:IsSerializable(value)
+function Serializer.IsSerializable(value)
 	local _type = type(value)
 	if _type == "number" or _type == "boolean" or _type == "string" then
 		return true
 	elseif _type == "table" then
-		return not isMixed(value)
+		return not isMixed(value) and not getmetatable(value)
+	elseif _type == "userdata" and typeof(_type) ~= "userdata" then -- Instances / Value Types
+		return true
 	else
 		return false
 	end
