@@ -18,6 +18,9 @@ function isMessage(value: unknown): value is IMessage {
 	}
 }
 
+/**
+ * Similar to a ServerEvent, but works across all servers.
+ */
 export default class NetGlobalServerEvent implements INetXServerEvent {
 	private readonly instance: NetServerEvent;
 	private readonly event: NetGlobalEvent;
@@ -68,18 +71,37 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 		}
 	}
 
+	/**
+	 * SEnds an event to all servers in the game
+	 * @param args The args of the message
+	 */
 	public SendToAllServers<T extends Array<unknown>>(...args: T) {
 		this.event.SendToAllServers({ data: [...args] });
 	}
 
+	/**
+	 * Sends an event to the specified server
+	 * @param jobId The game.JobId of the target server
+	 * @param args The args of the message
+	 */
 	public SendToServer<T extends Array<unknown>>(jobId: string, ...args: T) {
 		this.event.SendToServer(jobId, { data: [...args] });
 	}
 
+	/**
+	 * Sends an event to the specified player (if they're in any of the game's servers)
+	 * @param userId The userId of the target player
+	 * @param args The args
+	 */
 	public SendToPlayer<T extends Array<unknown>>(userId: number, ...args: T) {
 		this.event.SendToAllServers({ data: [...args], targetId: userId });
 	}
 
+	/**
+	 * Sends an event to all the specified players (if they're in any of the game's servers)
+	 * @param userIds The list of user ids to send this message to
+	 * @param args The args of the message
+	 */
 	public SendToPlayers<T extends Array<unknown>>(userIds: Array<number>, ...args: T) {
 		this.event.SendToAllServers({ data: [...args], targetIds: userIds });
 	}

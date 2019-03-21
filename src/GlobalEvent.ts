@@ -68,14 +68,26 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 		return 150 + 60 * Players.GetPlayers().length;
 	}
 
+	/**
+	 * Gets the subscription limit
+	 */
 	public static GetSubscriptionLimit() {
 		return 5 + 2 * Players.GetPlayers().length;
 	}
 
+	/**
+	 * Sends a message to a specific server
+	 * @param jobId The game.JobId of the target server
+	 * @param message The message to send
+	 */
 	public SendToServer(jobId: string, message: unknown) {
 		this.SendToAllServers({ jobId, message });
 	}
 
+	/**
+	 * Sends a message to all servers
+	 * @param message The message to send
+	 */
 	public SendToAllServers(message: unknown): void {
 		const limit = NetGlobalEvent.GetMessageLimit();
 		if (globalEventMessageCounter >= limit) {
@@ -87,6 +99,10 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 		}
 	}
 
+	/**
+	 * Connects a function to a global event
+	 * @param handler The message handler
+	 */
 	public Connect(handler: (message: unknown) => void) {
 		const limit = NetGlobalEvent.GetSubscriptionLimit();
 		if (globalSubscriptionCounter >= limit) {
