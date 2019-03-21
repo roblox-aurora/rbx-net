@@ -1,16 +1,7 @@
 import throttler from "./Throttle";
 import Serializer from "./Serializer";
 import config from "./configuration";
-import {
-	findOrCreateRemote,
-	errorft,
-	getRemoteOrThrow,
-	waitForEvent,
-	functionExists,
-	waitForFunction,
-	eventExists,
-	ServerTickFunctions,
-} from "./internal";
+import { functionExists, eventExists, ServerTickFunctions } from "./internal";
 import NetServerEvent from "./ServerEvent";
 import NetClientEvent from "./ClientEvent";
 import NetClientFunction from "./ClientFunction";
@@ -19,8 +10,6 @@ import NetServerThrottledFunction from "./ServerThrottledFunction";
 import NetServerThrottledEvent from "./ServerThrottledEvent";
 import NetGlobalEvent from "./GlobalEvent";
 import NetGlobalServerEvent from "./GlobalServerEvent";
-
-const Players = game.GetService("Players");
 
 const runService = game.GetService("RunService");
 

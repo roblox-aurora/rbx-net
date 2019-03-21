@@ -1,6 +1,4 @@
-type FilterFlags<Base, Condition> = {
-	[Key in keyof Base]: Base[Key] extends Condition ? Key : never
-};
+type FilterFlags<Base, Condition> = { [Key in keyof Base]: Base[Key] extends Condition ? Key : never };
 
 type AllowedNames<Base, Condition> = FilterFlags<Base, Condition>[keyof Base];
 
@@ -13,20 +11,17 @@ declare class Deserializable<T> {
 }
 
 interface DeserializeWrapper<T, U extends unknown[]> {
-	new(...param: U): T,
+	new (...param: U): T;
 	deserialize(serialized: Serializer.Serializable<T>): T;
 }
 
 declare namespace Serializer {
-	type Serializable<T> = {
-		[P in FilterFlags<T, string | number | boolean | Instance | Primitive[]>[keyof T]]: T[P];
-	};
+	type Serializable<T> = { [P in FilterFlags<T, string | number | boolean | Instance | Primitive[]>[keyof T]]: T[P] };
 
-	type ISerializable<T> = { serialize(): Serializable<T>, deserialize(serialized: Serializable<T>): void; }
+	type ISerializable<T> = { serialize(): Serializable<T>; deserialize(serialized: Serializable<T>): void };
 
-
-	/** 
-	 * Serializes an object 
+	/**
+	 * Serializes an object
 	 */
 	function Serialize<T, K extends keyof T>(object: T): Serializable<T>;
 
@@ -38,14 +33,17 @@ declare namespace Serializer {
 	/**
 	 * Deserialize using a static method
 	 */
-	function Deserialize<T>(object: Serializable<T>, target: { new(...args: any[]): T, deserialize(object: Serializable<T>): T }): T;
+	function Deserialize<T>(
+		object: Serializable<T>,
+		target: { new (...args: any[]): T; deserialize(object: Serializable<T>): T },
+	): T;
 
 	/**
 	 * Deserialize by reference
 	 */
 	function Deserialize<T>(object: Serializable<T>, target: T): void;
 
-
+	function IsSerializable<T>(value: T): boolean;
 
 	// /**
 	//  * Create an object with a deserialize static method
@@ -64,8 +62,6 @@ declare namespace Serializer {
 	//  */
 	// function makeDeserializable<T, U extends any[]>(classObject: { new(...args: U): T }, ...constructorArg: U): DeserializeWrapper<T, U>;
 }
-
-
 
 export as namespace Serializer;
 export = Serializer;
