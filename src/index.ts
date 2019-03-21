@@ -87,6 +87,7 @@ export namespace Net {
 
 	export const Serialize = Serializer.Serialize;
 	export const Deserialize = Serializer.Deserialize;
+	export const IsSerializable = Serializer.IsSerializable;
 
 	/**
 	 * Create a function
