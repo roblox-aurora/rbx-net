@@ -1,5 +1,4 @@
 import cache from "GuidCache";
-import Net from "index";
 
 export = () => {
 	describe("guid cache", () => {

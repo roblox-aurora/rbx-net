@@ -37,7 +37,7 @@ local testEZFolder = newFolder("TestEZ", ReplicatedStorage, "vendor/testez/lib")
 local TestEZ = habitat:require(testEZFolder)
 
 
-local results = TestEZ.TestBootstrap:run({ rbxNet }, TestEZ.Reporters.TextReporter)
+local results = TestEZ.TestBootstrap:run({ rbxNet.Test }, TestEZ.Reporters.TextReporter)
 
 
 

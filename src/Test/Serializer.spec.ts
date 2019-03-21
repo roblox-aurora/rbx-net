@@ -1,4 +1,3 @@
-import Net from "index";
 import { Serializable } from "Serializer";
 import Serializer from "Serializer";
 
@@ -13,7 +12,7 @@ export = () => {
 			}
 
 			const person = new Person("Testing");
-			const serializedPerson = Net.Serialize(person);
+			const serializedPerson = Serializer.Serialize(person);
 			expect(serializedPerson.name).to.equal("Testing");
 		});
 
@@ -30,7 +29,7 @@ export = () => {
 			}
 
 			const person = new Person("Testing 2");
-			const serializedPerson = Net.Serialize(person);
+			const serializedPerson = Serializer.Serialize(person);
 			expect(serializedPerson.name).to.equal("Testing 2");
 		});
 	});
