@@ -2,8 +2,8 @@ local MockMessagingService = {}
 
 local topics = {}
 
-function MockMessagingService:PublishAsync(topic, message)
-	local topic = topics[topic]
+function MockMessagingService:PublishAsync(topicName, message)
+	local topic = topics[topicName]
 	if topic then
 		topic:Fire(
 			{
@@ -14,11 +14,11 @@ function MockMessagingService:PublishAsync(topic, message)
 	end
 end
 
-function MockMessagingService:SubscribeAsync(topic, callback)
-	local topic = topics[topic]
+function MockMessagingService:SubscribeAsync(topicName, callback)
+	local topic = topics[topicName]
 	if not topic then
 		topic = Instance.new("BindableEvent", script)
-		topic.Name = topic
+		topic.Name = topicName
 	end
 
 	return topic.Event.Connect(callback)
