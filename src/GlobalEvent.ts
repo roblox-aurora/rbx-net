@@ -1,4 +1,4 @@
-import { ServerTickFunctions } from "./internal";
+import { ServerTickFunctions, isLuaTable } from "./internal";
 
 const MessagingService = game.GetService("MessagingService");
 const Players = game.GetService("Players");
@@ -6,6 +6,20 @@ const Players = game.GetService("Players");
 interface IQueuedMessage {
 	name: string;
 	message: unknown;
+}
+
+export interface IServerMessage {
+	jobId: string;
+	message: unknown;
+}
+
+function isJobTargetMessage(value: unknown): value is IServerMessage {
+	if (isLuaTable(value)) {
+		const hasData = value.has("jobId");
+		return !value.isEmpty() && (hasData && typeOf(value.get("jobId")) === "string");
+	} else {
+		return false;
+	}
 }
 
 const globalMessageQueue = new Array<IQueuedMessage>();
@@ -32,20 +46,20 @@ function processMessageQueue() {
 }
 
 /**
+ * Message Size: 1kB
+ * MessagesPerMin: 150 + 60 * NUMPLAYERS
+ * MessagesPerTopicMin: 30M
+ * MessagesPerUniversePerMin: 30M
+ * SubsPerServer: 5 + 2 * numPlayers
+ * SubsPerUniverse: 10K
+ */
+
+/**
  * An event that works across all servers
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
 export default class NetGlobalEvent implements INetXMessageEvent {
 	constructor(private name: string) {}
-
-	/**
-	 * Message Size: 1kB
-	 * MessagesPerMin: 150 + 60 * NUMPLAYERS
-	 * MessagesPerTopicMin: 30M
-	 * MessagesPerUniversePerMin: 30M
-	 * SubsPerServer: 5 + 2 * numPlayers
-	 * SubsPerUniverse: 10K
-	 */
 
 	/**
 	 * Gets the message limit
@@ -56,6 +70,10 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 
 	public static GetSubscriptionLimit() {
 		return 5 + 2 * Players.GetPlayers().length;
+	}
+
+	public SendToServer(jobId: string, message: unknown) {
+		this.SendToAllServers({ jobId, message });
 	}
 
 	public SendToAllServers(message: unknown): void {
@@ -76,7 +94,15 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 		}
 
 		globalSubscriptionCounter++;
-		return MessagingService.SubscribeAsync(this.name, handler);
+		return MessagingService.SubscribeAsync(this.name, (recieved: unknown) => {
+			if (isJobTargetMessage(recieved)) {
+				if (game.JobId === recieved.jobId) {
+					handler(recieved.message);
+				}
+			} else {
+				handler(recieved);
+			}
+		});
 	}
 }
 

@@ -22,6 +22,11 @@ export function getGlobalRemote(name: string) {
 	return `G~${name}`;
 }
 
+/** @internal */
+export function isLuaTable(value: unknown): value is Map<unknown, unknown> {
+	return typeIs(value, "table");
+}
+
 const REMOTES_FOLDER_NAME = "Remotes";
 const FUNCTIONS_FOLDER_NAME = "Functions";
 const EVENTS_FOLDER_NAME = "Events";

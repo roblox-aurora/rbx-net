@@ -1,16 +1,12 @@
 import NetServerEvent from "./ServerEvent";
 import NetGlobalEvent from "./GlobalEvent";
-import { getGlobalRemote, IS_CLIENT } from "./internal";
+import { getGlobalRemote, IS_CLIENT, isLuaTable } from "./internal";
 const Players = game.GetService("Players");
 
 export interface IMessage {
 	data: Array<unknown>;
 	targetId?: number;
 	targetIds?: Array<number>;
-}
-
-function isLuaTable(value: unknown): value is Map<unknown, unknown> {
-	return typeIs(value, "table");
 }
 
 function isMessage(value: unknown): value is IMessage {
@@ -74,6 +70,10 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 
 	public SendToAllServers<T extends Array<unknown>>(...args: T) {
 		this.event.SendToAllServers({ data: [...args] });
+	}
+
+	public SendToServer<T extends Array<unknown>>(jobId: string, ...args: T) {
+		this.event.SendToServer(jobId, { data: [...args] });
 	}
 
 	public SendToPlayer<T extends Array<unknown>>(userId: number, ...args: T) {
