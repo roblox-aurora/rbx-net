@@ -1,7 +1,9 @@
 import { ServerTickFunctions, isLuaTable } from "./internal";
+import MockMessagingService from "./MockMessagingService";
 
 const MessagingService = game.GetService("MessagingService");
 const Players = game.GetService("Players");
+const IS_STUDIO = game.GetService("RunService").IsStudio();
 
 interface IQueuedMessage {
 	Name: string;
@@ -121,7 +123,7 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 
 			// Since this yields
 			Promise.spawn(() => {
-				MessagingService.PublishAsync(this.name, message);
+				((IS_STUDIO && MockMessagingService) || MessagingService).PublishAsync(this.name, message);
 			});
 		}
 	}
@@ -137,19 +139,22 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 		}
 
 		globalSubscriptionCounter++;
-		return MessagingService.SubscribeAsync(this.name, (recieved: ISubscriptionMessage) => {
-			const { Sent } = recieved;
+		return ((IS_STUDIO && MockMessagingService) || MessagingService).SubscribeAsync(
+			this.name,
+			(recieved: ISubscriptionMessage) => {
+				const { Sent } = recieved;
 
-			if (isJobTargetMessage(recieved)) {
-				const { Data } = recieved;
+				if (isJobTargetMessage(recieved)) {
+					const { Data } = recieved;
 
-				if (game.JobId === Data.JobId) {
-					handler(Data.InnerData, Sent);
+					if (game.JobId === Data.JobId) {
+						handler(Data.InnerData, Sent);
+					}
+				} else {
+					handler(recieved.Data, Sent);
 				}
-			} else {
-				handler(recieved.Data, Sent);
-			}
-		});
+			},
+		);
 	}
 }
 
