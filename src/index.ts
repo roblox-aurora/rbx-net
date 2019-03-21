@@ -73,8 +73,8 @@ export namespace Net {
 	export const ClientFunction = NetClientFunction;
 	export type ClientFunction = NetClientEvent;
 
-	export const ServerFunciton = NetServerFunction;
-	export type ServerFunciton = NetServerFunction;
+	export const ServerFunction = NetServerFunction;
+	export type ServerFunction = NetServerFunction;
 
 	export const GlobalEvent = NetGlobalEvent;
 	export type GlobalEvent = NetGlobalEvent;
