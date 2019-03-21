@@ -21,7 +21,7 @@ function MockMessagingService:SubscribeAsync(topicName, callback)
 		topic.Name = topicName
 	end
 
-	return topic.Event.Connect(callback)
+	return topic.Event:Connect(callback)
 end
 
 return MockMessagingService
