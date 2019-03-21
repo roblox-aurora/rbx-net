@@ -4,22 +4,45 @@ const MessagingService = game.GetService("MessagingService");
 const Players = game.GetService("Players");
 
 interface IQueuedMessage {
-	name: string;
-	message: unknown;
+	Name: string;
+	Data: unknown;
 }
 
-export interface IServerMessage {
-	jobId: string;
-	message: unknown;
+export interface ISubscriptionMessage {
+	Data: unknown;
+	Sent: number;
 }
 
-function isJobTargetMessage(value: unknown): value is IServerMessage {
+interface IJobData {
+	JobId: string;
+	InnerData: string;
+}
+
+export interface ISubscriptionJobIdMessage extends ISubscriptionMessage {
+	Data: IJobData;
+}
+
+/**
+ * Checks if a value matches that of a subscription message
+ * @param value The value
+ */
+export function isSubscriptionMessage(value: unknown): value is ISubscriptionMessage {
 	if (isLuaTable(value)) {
-		const hasData = value.has("jobId");
-		return !value.isEmpty() && (hasData && typeOf(value.get("jobId")) === "string");
+		const hasData = value.has("Data");
+		return hasData;
 	} else {
 		return false;
 	}
+}
+
+function isJobTargetMessage(value: unknown): value is ISubscriptionJobIdMessage {
+	if (isSubscriptionMessage(value)) {
+		if (isLuaTable(value.Data)) {
+			return value.Data.has("jobId");
+		}
+	}
+
+	return false;
 }
 
 const globalMessageQueue = new Array<IQueuedMessage>();
@@ -35,7 +58,7 @@ function processMessageQueue() {
 
 		while (globalMessageQueue.length > 0) {
 			const message = globalMessageQueue.pop()!;
-			MessagingService.PublishAsync(message.name, message.message);
+			MessagingService.PublishAsync(message.Name, message.Data);
 			globalEventMessageCounter++;
 		}
 
@@ -88,14 +111,18 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 	 * Sends a message to all servers
 	 * @param message The message to send
 	 */
-	public SendToAllServers(message: unknown): void {
+	public SendToAllServers(message: unknown) {
 		const limit = NetGlobalEvent.GetMessageLimit();
 		if (globalEventMessageCounter >= limit) {
 			warn(`[rbx-net] Exceeded message limit of ${limit}, adding to queue...`);
-			globalMessageQueue.push({ name: this.name, message });
+			globalMessageQueue.push({ Name: this.name, Data: message });
 		} else {
 			globalEventMessageCounter++;
-			MessagingService.PublishAsync(this.name, message);
+
+			// Since this yields
+			Promise.spawn(() => {
+				MessagingService.PublishAsync(this.name, message);
+			});
 		}
 	}
 
@@ -103,20 +130,24 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 	 * Connects a function to a global event
 	 * @param handler The message handler
 	 */
-	public Connect(handler: (message: unknown) => void) {
+	public Connect(handler: (message: unknown, time: number) => void) {
 		const limit = NetGlobalEvent.GetSubscriptionLimit();
 		if (globalSubscriptionCounter >= limit) {
 			error(`[rbx-net] Exceeded Subscription limit of ${limit}!`);
 		}
 
 		globalSubscriptionCounter++;
-		return MessagingService.SubscribeAsync(this.name, (recieved: unknown) => {
+		return MessagingService.SubscribeAsync(this.name, (recieved: ISubscriptionMessage) => {
+			const { Sent } = recieved;
+
 			if (isJobTargetMessage(recieved)) {
-				if (game.JobId === recieved.jobId) {
-					handler(recieved.message);
+				const { Data } = recieved;
+
+				if (game.JobId === Data.JobId) {
+					handler(Data.InnerData, Sent);
 				}
 			} else {
-				handler(recieved);
+				handler(recieved.Data, Sent);
 			}
 		});
 	}

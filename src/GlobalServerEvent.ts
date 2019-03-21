@@ -1,21 +1,26 @@
 import NetServerEvent from "./ServerEvent";
-import NetGlobalEvent from "./GlobalEvent";
+import NetGlobalEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./GlobalEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "./internal";
 const Players = game.GetService("Players");
 
 export interface IMessage {
-	data: Array<unknown>;
-	targetId?: number;
-	targetIds?: Array<number>;
+	InnerData: Array<unknown>;
+	TargetId?: number;
+	TargetIds?: Array<number>;
 }
 
-function isMessage(value: unknown): value is IMessage {
-	if (isLuaTable(value)) {
-		const hasData = value.has("data");
-		return !value.isEmpty() && (hasData && typeOf(value.get("data")) === "table");
-	} else {
-		return false;
+export interface ISubscriptionTargetedMessage extends ISubscriptionMessage {
+	Data: IMessage;
+}
+
+function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTargetedMessage {
+	if (isSubscriptionMessage(value)) {
+		if (isLuaTable(value.Data)) {
+			return value.Data.has("InnerData");
+		}
 	}
+
+	return false;
 }
 
 /**
@@ -31,8 +36,8 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
 		this.event.Connect(message => {
-			if (isMessage(message)) {
-				this.recievedMessage(message);
+			if (isTargetedSubscriptionMessage(message)) {
+				this.recievedMessage(message.Data);
 			} else {
 				warn(`[rbx-net] Recieved malformed message for GlobalServerEvent: ${name}`);
 			}
@@ -56,18 +61,18 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 	}
 
 	private recievedMessage(message: IMessage) {
-		if (message.targetIds) {
-			const players = this.getPlayersMatchingId(message.targetIds);
+		if (message.TargetIds) {
+			const players = this.getPlayersMatchingId(message.TargetIds);
 			if (players) {
-				this.instance.SendToPlayers(players as Array<Player>, ...message.data);
+				this.instance.SendToPlayers(players as Array<Player>, ...message.InnerData);
 			}
-		} else if (message.targetId) {
-			const player = this.getPlayersMatchingId(message.targetId);
+		} else if (message.TargetId) {
+			const player = this.getPlayersMatchingId(message.TargetId);
 			if (player) {
-				this.instance.SendToPlayer(player as Player, ...message.data);
+				this.instance.SendToPlayer(player as Player, ...message.InnerData);
 			}
 		} else {
-			this.instance.SendToAllPlayers(...message.data);
+			this.instance.SendToAllPlayers(...message.InnerData);
 		}
 	}
 
