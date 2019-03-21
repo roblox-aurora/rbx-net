@@ -35,7 +35,7 @@ Why use RBX-NET?
 
 ## Global Messaging ++
 - Using `GlobalServerEvent`, you can fire global events to specific players or groups of players within other servers. `GlobalEvent` is the MessagingService equivalent for rbx-net.
-- rbx-net handles the rate limits for MessagingService itself.
+- rbx-net handles the rate limits for MessagingService itself, and will queue any requests that go over the limit and send them when the limit expires.
 
 ## Caching
 - Remote Function values can be cached, meaning that any subsequent requests will not perform unnecessary requests.
