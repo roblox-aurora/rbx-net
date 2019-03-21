@@ -38,6 +38,9 @@ Why use RBX-NET?
 - You can also target specific JobIds (servers)
 - rbx-net handles the rate limits for MessagingService itself, and will queue any requests that go over the limit and send them when the limit expires.
 
+## Serialization Helpers
+- Functions to help with serialization / deserialization of values.
+
 ## Caching
 - Remote Function values can be cached, meaning that any subsequent requests will not perform unnecessary requests.
 
