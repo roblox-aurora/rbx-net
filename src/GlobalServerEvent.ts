@@ -94,7 +94,13 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 	 * @param args The args
 	 */
 	public SendToPlayer<T extends Array<unknown>>(userId: number, ...args: T) {
-		this.event.SendToAllServers({ data: [...args], targetId: userId });
+		const player = Players.GetPlayerByUserId(userId);
+		// If the player exists in this instance, just send it straight to them.
+		if (player) {
+			this.instance.SendToPlayer(player, ...args);
+		} else {
+			this.event.SendToAllServers({ data: [...args], targetId: userId });
+		}
 	}
 
 	/**
@@ -103,6 +109,17 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 	 * @param args The args of the message
 	 */
 	public SendToPlayers<T extends Array<unknown>>(userIds: Array<number>, ...args: T) {
-		this.event.SendToAllServers({ data: [...args], targetIds: userIds });
+		// Check to see if any of these users are in this server first, and handle accordingly.
+		for (const targetId of userIds) {
+			const player = Players.GetPlayerByUserId(targetId);
+			if (player) {
+				this.instance.SendToPlayer(player, ...args);
+				userIds.remove(targetId);
+			}
+		}
+
+		if (userIds.length > 0) {
+			this.event.SendToAllServers({ data: [...args], targetIds: userIds });
+		}
 	}
 }
