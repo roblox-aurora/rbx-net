@@ -65,13 +65,28 @@ export namespace Net {
 	});
 
 	export const ServerEvent = NetServerEvent;
+	export type ServerEvent = NetServerEvent;
+
 	export const ClientEvent = NetClientEvent;
+	export type ClientEvent = NetClientEvent;
+
 	export const ClientFunction = NetClientFunction;
+	export type ClientFunction = NetClientEvent;
+
 	export const ServerFunciton = NetServerFunction;
+	export type ServerFunciton = NetServerFunction;
+
 	export const GlobalEvent = NetGlobalEvent;
+	export type GlobalEvent = NetGlobalEvent;
+
 	export const GlobalServerEvent = NetGlobalServerEvent;
+	export type GlobalServerEvent = NetGlobalServerEvent;
+
 	export const ServerThrottledEvent = NetServerThrottledEvent;
+	export type ServerThrottledEvent = NetServerThrottledEvent;
+
 	export const ServerThrottledFunction = NetServerThrottledFunction;
+	export type ServerThrottledFunction = NetServerThrottledFunction;
 
 	export function IsClient() {
 		return IS_CLIENT;
