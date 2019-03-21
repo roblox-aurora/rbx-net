@@ -19,7 +19,7 @@ export const MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
 
 /** @internal */
 export function getGlobalRemote(name: string) {
-	return `G~${name}`;
+	return `$${name}`;
 }
 
 /** @internal */
