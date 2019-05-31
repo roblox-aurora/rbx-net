@@ -28,10 +28,6 @@ interface RbxNetConfigItem {
 let throttleResetTimer = 60;
 let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via {remote}";
 
-function keyIs<K extends keyof RbxNetConfigItem>(k: K, v: any): k is K {
-	return k === v;
-}
-
 namespace NetConfig {
 	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
 		assert(IS_SERVER, "Cannot modify configuration on client!");

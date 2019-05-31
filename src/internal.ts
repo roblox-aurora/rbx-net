@@ -95,7 +95,7 @@ export function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 	} else if (type === "RemoteFunction") {
 		targetFolder = functionFolder;
 	} else {
-		throw "Invalid type: " + type;
+		return error("Invalid type: " + type);
 	}
 
 	return targetFolder;
