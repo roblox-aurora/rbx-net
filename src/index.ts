@@ -20,7 +20,7 @@ const IS_STUDIO = runService.IsStudio();
 /**
  * Typescript Networking Library for ROBLOX
  */
-export namespace Net {
+namespace Net {
 	interface VersionType {
 		major: number;
 		minor: number;
@@ -247,7 +247,4 @@ export namespace Net {
 	}
 }
 
-export default Net;
-
-/** @internal */
-export const LuaNet = Net;
+export = Net;
