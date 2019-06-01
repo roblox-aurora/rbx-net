@@ -12,7 +12,7 @@ function Serializer.Serialize(object)
 	local serialized = {}
 	for index, value in next, object do
 		if type(value) == "table" then
-			serialized[index] = self:serialize(value)
+			serialized[index] = Serializer.Serialize(value)
 		else
 			serialized[index] = value
 		end

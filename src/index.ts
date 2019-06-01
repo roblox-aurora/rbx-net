@@ -40,9 +40,9 @@ namespace Net {
 	 * @internal
 	 */
 	export const VERSION: VersionInformation = {
-		number: { major: 0, minor: 6, revision: 1 },
-		date: 190205,
-		tag: "beta",
+		number: { major: 1, minor: 0, revision: 4 },
+		date: 190602,
+		tag: "release",
 	};
 
 	setmetatable(VERSION, {

@@ -23,7 +23,7 @@ declare namespace Serializer {
 	/**
 	 * Serializes an object
 	 */
-	function Serialize<T, K extends keyof T>(object: T): Serializable<T>;
+	function Serialize<T>(object: T): Serializable<T>;
 
 	/**
 	 * Deserialize using a deserializer function
