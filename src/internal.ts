@@ -114,7 +114,7 @@ export function findRemote<K extends keyof RemoteTypes>(type: K, name: string): 
 		guidCache.Lock();
 	}
 
-	return existing;
+	return existing as RemoteTypes[K] | undefined;
 }
 
 /** @internal */
@@ -147,7 +147,7 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: s
 
 		remote.Name = name;
 		remote.Parent = getRemoteFolder(type);
-		return remote;
+		return remote as RemoteTypes[K];
 	}
 }
 

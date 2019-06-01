@@ -1,4 +1,4 @@
-import throttle from "Throttle";
+import throttle from "net.Throttle";
 
 const Players = game.GetService("Players");
 const LocalPlayer = Players.LocalPlayer!;
@@ -38,4 +38,4 @@ export = () => {
 			expect(counter2.Get(LocalPlayer)).to.equal(0);
 		});
 	});
-}
+};

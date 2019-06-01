@@ -1,5 +1,5 @@
-import { Serializable, Serialize } from "Serializer";
-import Serializer from "Serializer";
+import { Serializable, Serialize } from "net.Serializer";
+import Serializer from "net.Serializer";
 
 export = () => {
 	describe("serialization", () => {

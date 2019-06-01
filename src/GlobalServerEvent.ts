@@ -123,7 +123,7 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 			}
 		}
 
-		if (userIds.length > 0) {
+		if (userIds.length() > 0) {
 			this.event.SendToAllServers({ data: [...args], targetIds: userIds });
 		}
 	}

@@ -28,10 +28,14 @@ interface RbxNetConfigItem {
 let throttleResetTimer = 60;
 let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via {remote}";
 
+function keyIs<K extends keyof RbxNetConfigItem>(k: K, v: any): k is K {
+	return k === v;
+}
+
 namespace NetConfig {
 	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
 		assert(IS_SERVER, "Cannot modify configuration on client!");
-		if (key === "ServerThrottleResetTimer") {
+		if (key === "ServerThrottleMessage") {
 			throttleResetTimer = value as number;
 		} else if (key === "ServerThrottleMessage") {
 			rateLimitReachedMessage = value as string;
@@ -47,14 +51,14 @@ namespace NetConfig {
 	export function GetConfiguration<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
 		if (key === "ServerThrottleResetTimer") {
 			assert(IS_SERVER, "ServerThrottleResetTimer is not used on the client!");
-			return throttleResetTimer;
+			return throttleResetTimer as RbxNetConfigItem[K];
 		} else if (key === "ServerThrottleMessage") {
 			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!");
-			return rateLimitReachedMessage;
+			return rateLimitReachedMessage as RbxNetConfigItem[K];
 		} else if (key === "EXPERIMENTAL_RemoteGuidEnabled") {
-			return guidCache.enabled;
+			return guidCache.enabled as RbxNetConfigItem[K];
 		} else {
-			return undefined;
+			return undefined as RbxNetConfigItem[K];
 		}
 	}
 }

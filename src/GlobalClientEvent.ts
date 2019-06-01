@@ -1,5 +1,5 @@
-import { getGlobalRemote as getGlobalRemoteId } from "internal";
-import NetClientEvent from "ClientEvent";
+import { getGlobalRemote as getGlobalRemoteId } from "./internal";
+import NetClientEvent from "./ClientEvent";
 
 /**
  * Client counter-part to GlobalServerEvent

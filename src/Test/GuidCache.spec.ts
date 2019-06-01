@@ -1,4 +1,4 @@
-import cache from "GuidCache";
+import cache from "net.GUIDCache";
 
 export = () => {
 	describe("guid cache", () => {
