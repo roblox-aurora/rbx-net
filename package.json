@@ -1,18 +1,22 @@
 {
-	"name": "rbx-net",
-	"version": "0.6.0",
+	"name": "@rbxts/net",
+	"version": "1.0.2",
+	"private": false,
 	"description": "Networking Library for roblox-ts",
 	"main": "./out/init.lua",
 	"typings": "./out/index.d.ts",
 	"scripts": {
-		"prepublish": "npm run build",
-		"cleanup": "rm -rf ./out",
-		"build": "npm run cleanup && rbxtsc"
+		"test": "rbxtsc && lua ./out/Test/spec.lua",
+		"cleanup": "rm -rf ./out && rm -rf ./dist",
+		"declaration-fixes": "sh declarationfix.sh",
+		"build": "npm run cleanup && rbxtsc && npm run declaration-fixes",
+		"buildrbxm": "npm run cleanup && rbxtsc && npm run rbxm",
+		"rbxm": "mkdir -p ./dist && rojo build --output ./dist/rbx-net.rbxm ./lua.project.json"
 	},
 	"author": "vorlias",
 	"license": "MIT",
 	"devDependencies": {
-		"rbx-types": "^1.0.126"
+		"@rbxts/types": "^1.0.192"
 	},
 	"dependencies": {},
 	"repository": {

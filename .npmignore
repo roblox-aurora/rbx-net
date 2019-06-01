@@ -1,6 +1,6 @@
-src
-tsconfig.json
-include
-tslint.json
-rojo.json
-package-lock.json
+*
+!out/*.lua
+!out/**/*.lua
+!out/*.d.ts
+!out/**/*.d.ts
+out/Test/**/*
