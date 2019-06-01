@@ -8,10 +8,8 @@
 	"scripts": {
 		"test": "rbxtsc && lua ./out/Test/spec.lua",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
-		"declaration-fixes": "sh declarationfix.sh",
 		"build": "npm run cleanup && rbxtsc && npm run declaration-fixes",
-		"buildrbxm": "npm run cleanup && rbxtsc && npm run rbxm",
-		"rbxm": "mkdir -p ./dist && rojo build --output ./dist/rbx-net.rbxm ./lua.project.json"
+		"build:rbxm": "mkdir dist && rbxtsc && rojo build --output dist/net.rbxmx"
 	},
 	"author": "vorlias",
 	"license": "MIT",
