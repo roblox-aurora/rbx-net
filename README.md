@@ -4,7 +4,7 @@
 <div align="center">
 	<h1>Roblox Networking Library (Typescript)</h1>
     	<a href="https://www.npmjs.com/package/rbx-net">
-		<img src="https://badge.fury.io/js/rbx-net.svg"></img>
+		<img src="https://badge.fury.io/js/%40rbxts%2Fnet.svg"></img>
 	</a>
 </div>
 
