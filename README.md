@@ -21,7 +21,12 @@ It's as simple as
 
 Then you can easily import it using
 ```ts
-import Net from 'rbx-net';
+import Net from "net";
+```
+
+or
+```ts
+import Net from "@rbxts/net";
 ```
 
 Why use RBX-NET?
