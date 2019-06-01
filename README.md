@@ -17,7 +17,7 @@ This requires [roblox-ts](https://github.com/roblox-ts/roblox-ts) as it is a rob
 Installation
 =============
 It's as simple as
-`npm i rbx-net`.
+`npm i @rbxts/net`.
 
 Then you can easily import it using
 ```ts

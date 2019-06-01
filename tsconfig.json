@@ -1,17 +1,29 @@
 {
 	"compilerOptions": {
-		"outDir": "out",
-		"rootDir": "src",
-		"baseUrl": "src",
-		"module": "commonjs",
-		"target": "es6",
-		"strict": true,
-		"noLib": true,
-		"stripInternal": true,
-		"downlevelIteration": true,
-		"declaration": true,
+		// required
 		"allowSyntheticDefaultImports": true,
-		"types": ["rbx-types"],
-		"typeRoots": ["./src/Serializer"]
+		"isolatedModules": true,
+		"downlevelIteration": true,
+		"module": "commonjs",
+		"noLib": true,
+		"strict": true,
+		"target": "es6",
+		"typeRoots": [ "node_modules/@rbxts" ],
+
+		// required, configurable
+		"rootDir": "src",
+		"outDir": "out",
+
+		// optional
+		"baseUrl": "src",
+		"declaration": false,
+
+		// optional, non-configurable
+		"jsx": "react",
+		"jsxFactory": "Roact.createElement",
+
+		"paths": {
+			"*": ["../node_modules/@rbxts/*"],
+		}
 	}
 }
