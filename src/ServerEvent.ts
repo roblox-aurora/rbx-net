@@ -60,7 +60,7 @@ export default class NetServerEvent implements IServerNetEvent {
 			for (const player of otherPlayers) {
 				this.instance.FireClient(player, ...args);
 			}
-		} else if (typeIs(blacklist, "object")) {
+		} else if (typeIs(blacklist, "table")) {
 			for (const player of Players.GetPlayers()) {
 				if (blacklist.indexOf(player) === -1) {
 					this.instance.FireClient(player, ...args);
