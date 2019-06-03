@@ -58,7 +58,7 @@ function processMessageQueue() {
 		globalSubscriptionCounter = 0;
 		lastQueueTick = tick();
 
-		while (globalMessageQueue.length() > 0) {
+		while (globalMessageQueue.size() > 0) {
 			const message = globalMessageQueue.pop()!;
 			MessagingService.PublishAsync(message.Name, message.Data);
 			globalEventMessageCounter++;
@@ -90,14 +90,14 @@ export default class NetGlobalEvent implements INetXMessageEvent {
 	 * Gets the message limit
 	 */
 	public static GetMessageLimit() {
-		return 150 + 60 * Players.GetPlayers().length();
+		return 150 + 60 * Players.GetPlayers().size();
 	}
 
 	/**
 	 * Gets the subscription limit
 	 */
 	public static GetSubscriptionLimit() {
-		return 5 + 2 * Players.GetPlayers().length();
+		return 5 + 2 * Players.GetPlayers().size();
 	}
 
 	/**
