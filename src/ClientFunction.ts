@@ -36,28 +36,28 @@ export default class NetClientFunction<SR extends any> {
 	/**
 	 * The callback
 	 */
-	public get Callback(): Callback {
+	public getCallback(): Callback {
 		return this.instance.OnClientInvoke;
 	}
 
 	/**
 	 * Set the callback function when called by the server
 	 */
-	public set Callback(func: Callback) {
+	public setCallback(func: Callback) {
 		this.instance.OnClientInvoke = func;
 	}
 
 	/**
 	 * The remoteFunction instance
 	 */
-	public get Instance() {
+	public getInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The client cache in seconds
 	 */
-	public get Cache() {
+	public getCache() {
 		const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 		if (cache) {
 			return cache.Value;
@@ -72,7 +72,7 @@ export default class NetClientFunction<SR extends any> {
 	 * @returns the result of the call to the server
 	 */
 	public CallServer<T extends Array<any>>(...args: T): SR {
-		if (this.lastPing < os.time() + this.Cache) {
+		if (this.lastPing < os.time() + this.getCache()) {
 			const result = this.instance.InvokeServer(...args);
 			this.cached = result;
 

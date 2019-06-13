@@ -23,14 +23,6 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	}
 
 	/**
-	 * The RBXScriptSignal for this RemoteEvent
-	 */
-	public get Event() {
-		error("Use 'Connect' instead foor ServerThrottledEvent!");
-		return this.instance.OnServerEvent;
-	}
-
-	/**
 	 * Connect a fucntion to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
@@ -54,7 +46,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	/**
 	 * The number of requests allowed per minute per user
 	 */
-	public set RateLimit(requestsPerMinute: number) {
+	public setRateLimit(requestsPerMinute: number) {
 		this.maxRequestsPerMinute = requestsPerMinute;
 
 		let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
@@ -67,7 +59,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 		}
 	}
 
-	public get RateLimit() {
+	public getRateLimit() {
 		return this.maxRequestsPerMinute;
 	}
 }

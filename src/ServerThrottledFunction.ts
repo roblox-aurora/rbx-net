@@ -25,7 +25,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 		clientValue.Value = rateLimit;
 	}
 
-	public set Callback(callback: Callback) {
+	public setCallback(callback: Callback) {
 		this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 			const maxRequests = this.maxRequestsPerMinute;
 			const clientRequestCount = this.clientRequests.Get(player);
@@ -45,7 +45,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 	/**
 	 * The number of requests allowed per minute per user
 	 */
-	public set RateLimit(requestsPerMinute: number) {
+	public setRateLimit(requestsPerMinute: number) {
 		this.maxRequestsPerMinute = requestsPerMinute;
 
 		let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
@@ -58,7 +58,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 		}
 	}
 
-	public get RateLimit() {
+	public getRateLimit() {
 		return this.maxRequestsPerMinute;
 	}
 }

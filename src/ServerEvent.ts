@@ -22,14 +22,14 @@ export default class NetServerEvent implements IServerNetEvent {
 	/**
 	 * The RemoteEvent instance
 	 */
-	public get Instance() {
+	public getInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The RBXScriptSignal for this RemoteEvent
 	 */
-	public get Event() {
+	public getEvent() {
 		return this.instance.OnServerEvent;
 	}
 
@@ -38,7 +38,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect<T extends Array<unknown>>(callback: (sourcePlayer: Player, ...args: T) => void) {
-		this.Event.Connect(callback as Callback);
+		this.getEvent().Connect(callback as Callback);
 	}
 
 	/**

@@ -22,28 +22,28 @@ export default class NetServerFunction<CR extends any = any> {
 	/**
 	 * The callback function
 	 */
-	public get Callback(): Callback {
+	public getCallback(): Callback {
 		return this.instance.OnServerInvoke;
 	}
 
 	/**
 	 * Set the callback function when called by the client
 	 */
-	public set Callback(func: Callback) {
+	public setCallback(func: Callback) {
 		this.instance.OnServerInvoke = func;
 	}
 
 	/**
 	 * The RemoteFunction instance
 	 */
-	public get Instance() {
+	public getInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The client cache in seconds
 	 */
-	public get ClientCache() {
+	public getClientCache() {
 		const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 		if (cache) {
 			return cache.Value;
@@ -56,7 +56,7 @@ export default class NetServerFunction<CR extends any = any> {
 	 * Sets a client cache timer in seconds
 	 * @param time seconds to cache on client
 	 */
-	public set ClientCache(time: number) {
+	public setClientCache(time: number) {
 		const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 		if (!cache) {
 			const cacheTimer = new Instance("NumberValue", this.instance);

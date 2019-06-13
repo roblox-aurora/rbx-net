@@ -1,6 +1,4 @@
-declare interface INetEvent {
-	readonly Instance: RemoteEvent;
-}
+declare interface INetEvent {}
 
 declare interface IServerNetEvent extends INetEvent {
 	SendToPlayers<T extends Array<any>>(players: Array<Player>, ...args: T): void;
