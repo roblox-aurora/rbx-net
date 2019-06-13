@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/net",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"private": false,
 	"description": "Networking Library for roblox-ts",
 	"main": "./out/init.lua",
