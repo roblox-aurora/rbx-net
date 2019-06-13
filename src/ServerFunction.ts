@@ -34,6 +34,19 @@ export default class NetServerFunction<CR extends any = any> {
 	}
 
 	/**
+	 * # use setCallback!
+	 * This is now deprecated, as setters and getters will be removed in a future roblox-ts release!
+	 *
+	 * @deprecated
+	 */
+	public set Callback(func: Callback) {
+		warn(
+			"[rbx-net] use ClientFunction.setCallback(x) instead of " +
+				" ClientFunction.Callback = x, as this will be removed in a future version!",
+		);
+		this.instance.OnServerInvoke = func;
+	}
+	/**
 	 * The RemoteFunction instance
 	 */
 	public getInstance() {
