@@ -23,7 +23,6 @@
 
 		"paths": {
 			"*": ["../node_modules/@rbxts/*"],
-			"net.GUIDCache": ["../src/GuidCache"],
 			"net.Throttle": ["../src/Throttle"],
 			"net.Serializer": ["../src/Serializer"]
 		}

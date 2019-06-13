@@ -1,5 +1,3 @@
-import guidCache from "./GuidCache";
-
 const replicatedStorage = game.GetService("ReplicatedStorage");
 const runService = game.GetService("RunService");
 
@@ -103,16 +101,8 @@ export function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
 
 /** @internal */
 export function findRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] | undefined {
-	if (guidCache.enabled) {
-		name = guidCache.GetIdFromName(type, name);
-	}
-
 	const targetFolder = getRemoteFolder(type);
 	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
-
-	if (IS_SERVER && !guidCache.lock) {
-		guidCache.Lock();
-	}
 
 	return existing as RemoteTypes[K] | undefined;
 }
