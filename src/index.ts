@@ -17,6 +17,13 @@ const IS_CLIENT = (__LEMUR__ && !runService.IsServer()) || runService.IsClient()
 const IS_SERVER = runService.IsServer();
 const IS_STUDIO = runService.IsStudio();
 
+interface ICreateFunctionOptions {
+	name: string;
+	callback?: Callback;
+	cacheSeconds?: number;
+	rateLimit?: number;
+}
+
 /**
  * Typescript Networking Library for ROBLOX
  */
@@ -40,7 +47,7 @@ namespace Net {
 	 * @internal
 	 */
 	export const VERSION: VersionInformation = {
-		number: { major: 1, minor: 0, revision: 4 },
+		number: { major: 1, minor: 0, revision: 12 },
 		date: 190602,
 		tag: "release",
 	};
@@ -91,12 +98,31 @@ namespace Net {
 
 	/**
 	 * Create a function
-	 * @param name The name of the function
+	 * @param nameOrOptions The name of the function
 	 * @rbxts server
 	 */
-	export function CreateFunction<CR extends any>(name: string): NetServerFunction<CR> {
+	export function CreateFunction<CR extends any>(
+		nameOrOptions: string | ICreateFunctionOptions,
+	): NetServerFunction<CR> {
 		if (IS_SERVER) {
-			return new NetServerFunction<CR>(name);
+			if (typeIs(nameOrOptions, "string")) {
+				return new NetServerFunction<CR>(nameOrOptions);
+			} else {
+				const fn =
+					nameOrOptions.rateLimit !== undefined
+						? new NetServerThrottledFunction(nameOrOptions.name, nameOrOptions.rateLimit)
+						: new NetServerFunction(nameOrOptions.name);
+
+				if (nameOrOptions.callback) {
+					fn.setCallback(nameOrOptions.callback);
+				}
+
+				if (nameOrOptions.cacheSeconds) {
+					fn.setClientCache(nameOrOptions.cacheSeconds);
+				}
+
+				return fn;
+			}
 		} else {
 			error("Net.createFunction can only be used on the server!");
 			throw "";

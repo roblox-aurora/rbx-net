@@ -8,12 +8,6 @@ export default class NetServerFunction<CR extends any = any> {
 	/** @internal */
 	protected instance: RemoteFunction;
 
-	/**
-	 * Creates a new instance of a server function (Will also create the corresponding remote if it does not exist!)
-	 * @param name The name of this server function
-	 * @param rateLimit The number of requests allowed per minute per client (0 = none)
-	 * @throws If not created on server
-	 */
 	constructor(name: string) {
 		this.instance = findOrCreateRemote("RemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
@@ -31,21 +25,9 @@ export default class NetServerFunction<CR extends any = any> {
 	 */
 	public setCallback(func: Callback) {
 		this.instance.OnServerInvoke = func;
+		return this;
 	}
 
-	/**
-	 * # use setCallback!
-	 * This is now deprecated, as setters and getters will be removed in a future roblox-ts release!
-	 *
-	 * @deprecated
-	 */
-	public set Callback(func: Callback) {
-		warn(
-			"[rbx-net] use ClientFunction.setCallback(x) instead of " +
-				" ClientFunction.Callback = x, as this will be removed in a future version!",
-		);
-		this.instance.OnServerInvoke = func;
-	}
 	/**
 	 * The RemoteFunction instance
 	 */
@@ -78,6 +60,8 @@ export default class NetServerFunction<CR extends any = any> {
 		} else {
 			cache.Value = time;
 		}
+
+		return this;
 	}
 
 	/**

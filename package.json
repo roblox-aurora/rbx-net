@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/net",
-	"version": "1.0.10",
+	"version": "1.0.12",
 	"private": false,
 	"description": "Networking Library for roblox-ts",
 	"main": "./out/init.lua",
@@ -13,7 +13,7 @@
 	"author": "vorlias",
 	"license": "MIT",
 	"devDependencies": {
-		"@rbxts/types": "^1.0.210"
+		"@rbxts/types": "^1.0.235"
 	},
 	"dependencies": {},
 	"repository": {

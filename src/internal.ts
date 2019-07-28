@@ -86,40 +86,40 @@ export function waitForFunction(name: string, timeOut: number): RemoteFunction |
 }
 
 /** @internal */
-export function getRemoteFolder<K extends keyof RemoteTypes>(type: K): Folder {
+export function getRemoteFolder<K extends keyof RemoteTypes>(remoteType: K): Folder {
 	let targetFolder: Folder;
-	if (type === "RemoteEvent") {
+	if (remoteType === "RemoteEvent") {
 		targetFolder = eventFolder;
-	} else if (type === "RemoteFunction") {
+	} else if (remoteType === "RemoteFunction") {
 		targetFolder = functionFolder;
 	} else {
-		return error("Invalid type: " + type);
+		return error("Invalid type: " + remoteType);
 	}
 
 	return targetFolder;
 }
 
 /** @internal */
-export function findRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] | undefined {
-	const targetFolder = getRemoteFolder(type);
+export function findRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] | undefined {
+	const targetFolder = getRemoteFolder(remoteType);
 	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
 
 	return existing as RemoteTypes[K] | undefined;
 }
 
 /** @internal */
-export function getRemoteOrThrow<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
-	const existing = findRemote(type, name);
+export function getRemoteOrThrow<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] {
+	const existing = findRemote(remoteType, name);
 	if (existing) {
 		return existing;
 	} else {
-		throw `Could not find Remote of type ${type} called "${name}"`;
+		throw `Could not find Remote of type ${remoteType} called "${name}"`;
 	}
 }
 
 /** @internal */
-export function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: string): RemoteTypes[K] {
-	const existing = findRemote(type, name);
+export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] {
+	const existing = findRemote(remoteType, name);
 	if (existing) {
 		return existing;
 	} else {
@@ -129,14 +129,14 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(type: K, name: s
 
 		let remote: RemoteEvent | RemoteFunction;
 
-		if (type === "RemoteEvent" || type === "RemoteFunction") {
-			remote = new Instance(type);
+		if (remoteType === "RemoteEvent" || remoteType === "RemoteFunction") {
+			remote = new Instance(remoteType);
 		} else {
-			throw `Invalid Remote Type: ${type}`;
+			throw `Invalid Remote Type: ${remoteType}`;
 		} // stfu
 
 		remote.Name = name;
-		remote.Parent = getRemoteFolder(type);
+		remote.Parent = getRemoteFolder(remoteType);
 		return remote as RemoteTypes[K];
 	}
 }
