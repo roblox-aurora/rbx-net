@@ -10,7 +10,7 @@ import {
  * A function on the client
  * @rbxts client
  */
-export default class NetClientFunction<SR extends any> {
+export default class NetClientFunction<SR extends unknown> {
 	/** @internal */
 	private lastPing = -1;
 	/** @internal */
@@ -44,20 +44,6 @@ export default class NetClientFunction<SR extends any> {
 	 * Set the callback function when called by the server
 	 */
 	public setCallback(func: Callback) {
-		this.instance.OnClientInvoke = func;
-	}
-
-	/**
-	 * # use setCallback!
-	 * This is now deprecated, as setters and getters will be removed in a future roblox-ts release!
-	 *
-	 * @deprecated
-	 */
-	public set Callback(func: Callback) {
-		warn(
-			"[rbx-net] use ClientFunction.setCallback(x) instead of " +
-				" ClientFunction.Callback = x, as this will be removed in a future version!",
-		);
 		this.instance.OnClientInvoke = func;
 	}
 

@@ -40,6 +40,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 				return callback(player, ...args);
 			}
 		};
+		return this;
 	}
 
 	/**
