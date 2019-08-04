@@ -1,5 +1,4 @@
 import { getRemoteOrThrow, IS_CLIENT, waitForEvent, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "./internal";
-import { NetEventListeners } from "./EventConnection";
 
 /**
  * An event on the client
