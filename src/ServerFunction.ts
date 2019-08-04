@@ -71,6 +71,10 @@ export default class NetServerFunction<CR extends any = any> {
 	 * @param args The arguments to call the function with
 	 */
 	public async CallPlayerAsync<T extends Array<any>>(player: Player, ...args: T): Promise<CR> {
+		warn(
+			"[rbx-net] CallPlayerAsync is possibly going to be removed\n" +
+				"\tsee https://github.com/roblox-aurora/rbx-net/issues/13 for more details.",
+		);
 		return this.instance.InvokeClient(player, ...args) as any;
 	}
 }
