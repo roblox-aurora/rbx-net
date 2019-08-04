@@ -1,4 +1,5 @@
 import { getRemoteOrThrow, IS_CLIENT, waitForEvent, MAX_CLIENT_WAITFORCHILD_TIMEOUT } from "./internal";
+import { NetEventListeners } from "./EventConnection";
 
 /**
  * An event on the client
@@ -46,7 +47,7 @@ export default class NetClientEvent implements IClientNetEvent {
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect<T extends Array<any>>(callback: (...args: T) => void) {
-		this.getEvent().Connect(callback as Callback);
+		return this.getEvent().Connect(callback as Callback);
 	}
 
 	/**

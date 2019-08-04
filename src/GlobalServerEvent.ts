@@ -29,13 +29,14 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 export default class NetGlobalServerEvent implements INetXServerEvent {
 	private readonly instance: NetServerEvent;
 	private readonly event: NetGlobalEvent;
+	private readonly eventHandler: RBXScriptConnection;
 
 	constructor(name: string) {
 		this.instance = new NetServerEvent(getGlobalRemote(name));
 		this.event = new NetGlobalEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
-		this.event.Connect(message => {
+		this.eventHandler = this.event.Connect(message => {
 			if (isTargetedSubscriptionMessage(message)) {
 				this.recievedMessage(message.Data);
 			} else {
@@ -74,6 +75,15 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 		} else {
 			this.instance.SendToAllPlayers(...message.InnerData);
 		}
+	}
+
+	/**
+	 * Disconnects this event handler
+	 *
+	 * **NOTE**: Once disconnected, you will have to re-create this object to recieve the messages again.
+	 */
+	public Disconnect() {
+		this.eventHandler.Disconnect();
 	}
 
 	/**

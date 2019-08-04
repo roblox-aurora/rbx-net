@@ -27,7 +27,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
-		this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
+		return this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
 			const maxRequests = this.maxRequestsPerMinute;
 			const clientRequestCount = this.clientRequests.Get(player);
 			if (clientRequestCount >= maxRequests) {

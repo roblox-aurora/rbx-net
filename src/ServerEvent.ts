@@ -38,7 +38,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect<T extends Array<unknown>>(callback: (sourcePlayer: Player, ...args: T) => void) {
-		this.getEvent().Connect(callback as Callback);
+		return this.getEvent().Connect(callback as Callback);
 	}
 
 	/**
