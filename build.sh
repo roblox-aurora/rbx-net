@@ -97,11 +97,13 @@ function build_rbxmx {
 function build_lua {
     compile
     echo "[net-build] compiling lua output..."
+    rm -rf lualib
     mkdir -p lualib
     cp -r out/* lualib
     cp -r include lualib/vendor
 
-    find dist/lua -name '*.d.ts' -delete
+    find lualib -name '*.d.ts' -delete
+    rm -rf lualib/Test
 
     echo "[net-build] Output to ./lualib"
 }
