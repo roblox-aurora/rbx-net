@@ -32,12 +32,12 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	/**
 	 * Set the callback function when called by the client
 	 */
-	public setCallback<R extends any>(func: (player: Player, ...args: StaticArguments<C>) => R) {
+	public setCallback<R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) {
 		if (this.propTypes !== undefined) {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 				if (t_assert(this.propTypes!, args)) {
 					// @ts-ignore ... again. unfortunately.
-					func(player, ...args);
+					return func(player, ...args);
 				} else {
 					error("Client failed type checks", 2);
 				}
