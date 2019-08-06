@@ -45,7 +45,7 @@ Then in your `*.project.json` folder, simply point it to `<targetfolder>/lualib`
 
 Roblox Model
 -------------
-You can find the `.rbxmx` file in releases, or the latest from [here](https://github.com/roblox-aurora/rbx-net/tree/master/dist/net.rbxmx)
+You can find the `.rbxmx` file in releases.
 
 Why use Net?
 ============
