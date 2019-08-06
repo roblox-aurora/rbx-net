@@ -106,6 +106,13 @@ function build_lua {
     echo "[net-build] Output to ./dist/lua"
 }
 
+function lua_to_git {
+    #git add dist
+    git add dist
+    git commit -m "Copying to lua-rojo"
+    git subtree push --prefix dist origin lua-rojo
+}
+
 if ! [ -z "$RBXMX" ]; then
     build_rbxmx
 fi

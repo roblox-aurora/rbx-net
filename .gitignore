@@ -1,4 +1,4 @@
 node_modules
 include
 out
-#dist
+dist/lua
