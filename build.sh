@@ -97,20 +97,19 @@ function build_rbxmx {
 function build_lua {
     compile
     echo "[net-build] compiling lua output..."
-    mkdir -p dist/lua
-    cp -r out/* dist/lua
-    cp -r include dist/lua/vendor
+    mkdir -p lualib
+    cp -r out/* lualib
+    cp -r include lualib/vendor
 
     find dist/lua -name '*.d.ts' -delete
 
-    echo "[net-build] Output to ./dist/lua"
+    echo "[net-build] Output to ./lualib"
 }
 
 function lua_to_git {
     #git add dist
-    git add dist
-    git commit -m "Copying to lua-rojo"
-    git subtree push --prefix dist origin lua-rojo
+    git add lualib
+    git subtree push --prefix dist origin lua
 }
 
 if ! [ -z "$RBXMX" ]; then
