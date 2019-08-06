@@ -21,7 +21,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
 
-		if (recievedPropTypes) {
+		if (recievedPropTypes.size() > 0) {
 			this.propTypes = recievedPropTypes;
 		}
 	}

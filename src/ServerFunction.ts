@@ -1,16 +1,25 @@
-import { findOrCreateRemote, IS_CLIENT } from "./internal";
+import { findOrCreateRemote, IS_CLIENT, StaticArguments, t_assert } from "./internal";
+
+function t_string(value: unknown): value is string {
+	return true;
+}
 
 /**
  * A function on the server
  * @rbxts server
  */
-export default class NetServerFunction<CR extends any = any> {
+export default class NetServerFunction<CR extends any = any, C extends Array<any> = Array<unknown>> {
 	/** @internal */
 	protected instance: RemoteFunction;
+	protected propTypes: C | undefined;
 
-	constructor(name: string) {
+	constructor(name: string, ...recievedPropTypes: C) {
 		this.instance = findOrCreateRemote("RemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
+
+		if (recievedPropTypes.size() > 0) {
+			this.propTypes = recievedPropTypes;
+		}
 	}
 
 	/**
@@ -23,8 +32,22 @@ export default class NetServerFunction<CR extends any = any> {
 	/**
 	 * Set the callback function when called by the client
 	 */
-	public setCallback(func: Callback) {
-		this.instance.OnServerInvoke = func;
+	public setCallback<R extends any>(func: (player: Player, ...args: StaticArguments<C>) => R) {
+		if (this.propTypes !== undefined) {
+			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
+
+				// @ts-ignore beacuse any[] for some reason
+				if (t_assert(this.propTypes!, ...args)) {
+					// @ts-ignore ... again. unfortunately.
+					func(player, ...args);
+				} else {
+					error("Client failed type checks", 2);
+				}
+			};
+		} else {
+			this.instance.OnServerInvoke = (func as unknown) as Callback;
+		}
+
 		return this;
 	}
 
