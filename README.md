@@ -8,14 +8,17 @@
 	</a>
 </div>
 
-TypeScript version of [ModRemote](https://github.com/Vorlias/ROBLOX-ModRemote) for roblox-ts.
-
 Requirements
 =============
-### [Roblox Typescript Compiler](https://github.com/roblox-ts/roblox-ts) >= `0.1.1`
+If using roblox-ts
+-----------
+### [Roblox Typescript Compiler](https://github.com/roblox-ts/roblox-ts) >= `0.2.10`
 
-Installation
+Usage
 =============
+Typescript (Roblox-TS)
+-------------
+
 It's as simple as
 `npm i @rbxts/net`.
 
@@ -28,6 +31,21 @@ or
 ```ts
 import Net from "@rbxts/net";
 ```
+
+Rojo (non-rotriever)
+-------------
+Unfortunately, there are only two options here. Using it as a git submodule (ick!) or copying the lualib folder to your project.
+Either way, until rotriever is a thing; those are your two options.
+
+### Submodule
+`git submodule add https://github.com/roblox-aurora/rbx-net.git <targetfolder>`
+e.g. if you wanted it in modules/net: `git submodule add https://github.com/roblox-aurora/rbx-net.git modules/net`
+
+Then in your `*.project.json` folder, simply point it to `<targetfolder>/lualib` for the Lua output (e.g. in the above example, `modules/net/lualib`.
+
+Roblox Model
+-------------
+You can find the `.rbxmx` file in releases, or the latest from [here](https://github.com/roblox-aurora/rbx-net/tree/master/dist/net.rbxmx)
 
 Why use Net?
 ============
