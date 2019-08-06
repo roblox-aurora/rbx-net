@@ -26,7 +26,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		}
 	}
 
-	public WithStaticCalls<F0 extends F>(...callPropTypes: F0): NetServerEvent<C, F0> {
+	public WithStrictCall<F0 extends F>(...callPropTypes: F0): NetServerEvent<C, F0> {
 		this.callTypes = callPropTypes;
 		return (this as unknown) as NetServerEvent<C, F0>;
 	}
@@ -53,7 +53,8 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		if (this.propTypes !== undefined) {
 			return this.getEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
 				if (t_assert(this.propTypes!, args)) {
-					callback(sourcePlayer, ...(args as StaticArguments<C>));
+					// @ts-ignore
+					callback(sourcePlayer, ...args);
 				}
 			});
 		} else {
@@ -66,7 +67,13 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 * @param args The arguments to send to the players
 	 */
 	public SendToAllPlayers(...args: StaticArguments<F>) {
-		this.instance.FireAllClients(...args);
+		if (this.callTypes !== undefined) {
+			if (!t_assert(this.callTypes, args)) {
+				return;
+			}
+		}
+
+		this.instance.FireAllClients(...(args as Array<unknown>));
 	}
 
 	/**
@@ -75,15 +82,21 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 * @param args The arguments
 	 */
 	public SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: StaticArguments<F>) {
+		if (this.callTypes !== undefined) {
+			if (!t_assert(this.callTypes, args)) {
+				return;
+			}
+		}
+
 		if (typeIs(blacklist, "Instance")) {
 			const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
 			for (const player of otherPlayers) {
-				this.instance.FireClient(player, ...args);
+				this.instance.FireClient(player, ...(args as Array<unknown>));
 			}
 		} else if (typeIs(blacklist, "table")) {
 			for (const player of Players.GetPlayers()) {
 				if (blacklist.indexOf(player) === -1) {
-					this.instance.FireClient(player, ...args);
+					this.instance.FireClient(player, ...(args as Array<unknown>));
 				}
 			}
 		}
@@ -95,7 +108,13 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 * @param args The arguments to send to the player
 	 */
 	public SendToPlayer(player: Player, ...args: StaticArguments<F>) {
-		this.instance.FireClient(player, ...args);
+		if (this.callTypes !== undefined) {
+			if (!t_assert(this.callTypes, args)) {
+				return;
+			}
+		}
+
+		this.instance.FireClient(player, ...(args as Array<unknown>));
 	}
 
 	/**
@@ -104,8 +123,15 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 * @param args The arugments to send to these players
 	 */
 	public SendToPlayers(players: Array<Player>, ...args: StaticArguments<F>) {
+		if (this.callTypes !== undefined) {
+			if (!t_assert(this.callTypes, args)) {
+				return;
+			}
+		}
+
 		for (const player of players) {
-			this.SendToPlayer(player, ...args);
+			// @ts-ignore
+			this.SendToPlayer(player, ...(args as Array<unknown>));
 		}
 	}
 }
