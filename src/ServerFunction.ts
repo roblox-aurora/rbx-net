@@ -35,9 +35,7 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	public setCallback<R extends any>(func: (player: Player, ...args: StaticArguments<C>) => R) {
 		if (this.propTypes !== undefined) {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
-
-				// @ts-ignore beacuse any[] for some reason
-				if (t_assert(this.propTypes!, ...args)) {
+				if (t_assert(this.propTypes!, args)) {
 					// @ts-ignore ... again. unfortunately.
 					func(player, ...args);
 				} else {
