@@ -106,13 +106,6 @@ function build_lua {
     echo "[net-build] Output to ./dist/lua"
 }
 
-function lua_to_git {
-    #git add dist
-    git add dist
-    git commit -m "Dist subtree commit"
-    git subtree push --prefix dist origin lua
-}
-
 if ! [ -z "$RBXMX" ]; then
     build_rbxmx
 fi
