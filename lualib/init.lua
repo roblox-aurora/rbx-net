@@ -1,5 +1,6 @@
+local IS_LUA_MODULE = true
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:39 PM New Zealand Standard Time
+-- August 6, 2019, 7:32 PM New Zealand Standard Time
 
 local TS = require(script.vendor.RuntimeLib);
 local exports;
@@ -25,22 +26,33 @@ Net = Net or {} do
 	local _1 = Net;
 	local SetConfiguration = config.SetConfiguration;
 	local GetConfiguration = config.GetConfiguration;
-	local VERSION = {
-		number = {
-			major = 1;
-			minor = 0;
-			revision = 12;
-		};
-		date = 190602;
-		tag = "release";
+	local VERSION = {};
+	VERSION.number = {
+		major = 1;
+		minor = 0;
+		revision = 13;
 	};
+	VERSION.date = 190602;
+	local _2;
+	if IS_LUA_MODULE ~= nil then
+		_2 = "lua";
+	else
+		_2 = "ts";
+	end;
+	VERSION.tag = _2;
 	setmetatable(VERSION, {
 		__tostring = function(self)
-			local _2 = self.number;
-			local major = _2.major;
-			local minor = _2.minor;
-			local revision = _2.revision;
-			return tostring(major) .. "." .. tostring(minor) .. "." .. tostring(revision);
+			local _3 = self.number;
+			local major = _3.major;
+			local minor = _3.minor;
+			local revision = _3.revision;
+			local _4;
+			if IS_LUA_MODULE ~= nil then
+				_4 = "-lua";
+			else
+				_4 = "";
+			end;
+			return tostring(major) .. "." .. tostring(minor) .. "." .. tostring(revision) .. _4;
 		end;
 	});
 	local ServerEvent = NetServerEvent;

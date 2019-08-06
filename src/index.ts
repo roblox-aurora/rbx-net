@@ -47,16 +47,16 @@ namespace Net {
 	 * @internal
 	 */
 	export const VERSION: VersionInformation = {
-		number: { major: 1, minor: 0, revision: 12 },
+		number: { major: 1, minor: 0, revision: 13 },
 		date: 190602,
-		tag: "release",
+		tag: IS_LUA_MODULE !== undefined ? "lua" : "ts",
 	};
 
 	setmetatable(VERSION, {
 		__tostring: self => {
 			const { major, minor, revision } = self.number;
 
-			return `${major}.${minor}.${revision}`;
+			return `${major}.${minor}.${revision}${IS_LUA_MODULE !== undefined ? "-lua" : ""}`;
 		},
 	});
 

@@ -88,6 +88,11 @@ function build_lua {
     find lualib -name '*.d.ts' -delete
     rm -rf lualib/Test
 
+    echo 'local IS_LUA_MODULE = true' > /tmp/header.lua
+    cat lualib/init.lua >> /tmp/header.lua
+    cp /tmp/header.lua lualib/init.lua
+    rm /tmp/header.lua
+
     echo "[net-build] Output to ./lualib"
 }
 

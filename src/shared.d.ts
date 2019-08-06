@@ -4,3 +4,4 @@ declare interface RemoteTypes {
 }
 
 declare const __LEMUR__: true | undefined;
+declare const IS_LUA_MODULE: true | undefined;
