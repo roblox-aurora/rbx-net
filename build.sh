@@ -62,7 +62,7 @@ COMPILED=NO
 function compile {
     if [[ $COMPILED == NO ]]; then
         echo "[net-build] compiling to bundle..."
-        rbxtsc -r lua.project.json
+        rbxtsc -r luaproject.json
         echo "[net-build] compiled."
         COMPILED=YES
 
@@ -73,7 +73,7 @@ function compile {
 function build_rbxmx {
     compile
     echo "[net-build] building rbxmx..."
-    rojo build lua.project.json --output dist/net.rbxmx
+    rojo build luaproject.json --output dist/net.rbxmx
     echo "[net-build] Output to ./dist/net.rbxmx"
 }
 
