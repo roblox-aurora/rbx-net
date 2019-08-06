@@ -8,7 +8,8 @@
 	"scripts": {
 		"test": "rbxtsc && lua ./out/Test/spec.lua",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
-		"build": "npm run cleanup && rbxtsc"
+		"build": "npm run cleanup && rbxtsc",
+		"binary": "mkdir -p dist && rbxtsc -r lua.project.json && rojo build lua.project.json --output dist/net.rbxmx"
 	},
 	"author": "vorlias",
 	"license": "MIT",

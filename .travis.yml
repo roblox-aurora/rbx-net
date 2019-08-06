@@ -1,0 +1,13 @@
+language: node_js
+cache: npm
+node_js:
+ - "11"
+branches:
+  only:
+   - master
+script:
+  - git config --global user.email "travis@travis-ci.org"
+  - git config --global user.name "Travis CI"
+  
+  - npm install -g roblox-ts
+  - rbxtsc

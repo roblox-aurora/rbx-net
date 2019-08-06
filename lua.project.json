@@ -1,0 +1,9 @@
+{
+	"name": "Net",
+	"tree": {
+		"$path": "out",
+		"vendor": {
+			"$path": "include"
+		}
+	}
+}
