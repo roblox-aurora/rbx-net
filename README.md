@@ -10,13 +10,13 @@
 
 Requirements
 =============
-If using roblox-ts
+Typescript/NPM
 -----------
 ### [Roblox Typescript Compiler](https://github.com/roblox-ts/roblox-ts) >= `0.2.10`
 
 Usage
 =============
-Typescript (Roblox-TS)
+Typescript via NPM
 -------------
 
 It's as simple as
@@ -32,7 +32,7 @@ or
 import Net from "@rbxts/net";
 ```
 
-Rojo (non-rotriever)
+Rojo (Submodule or Manual)
 -------------
 Unfortunately, there are only two options here. Using it as a git submodule (ick!) or copying the lualib folder to your project.
 Either way, until rotriever is a thing; those are your two options.
