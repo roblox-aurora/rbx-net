@@ -1,11 +1,5 @@
 #!/bin/bash
-
-# GETOPTS START
-# saner programming env: these switches turn some bugs into errors
 set -o errexit -o pipefail -o noclobber -o nounset
-
-# -allow a command to fail with !’s side effect on errexit
-# -use return value from ${PIPESTATUS[0]}, because ! hosed $?
 ! getopt --test > /dev/null 
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     echo 'I’m sorry, `getopt --test` failed in this environment.'
@@ -18,16 +12,9 @@ LONGOPTS=rbxmx,lua,verbose,lua-git #output:
 LUA=""
 RBXMX=""
 PUBLISH=""
-TOGIT=""
 
-# -regarding ! and PIPESTATUS see above
-# -temporarily store output to be able to check for errors
-# -activate quoting/enhanced mode (e.g. by writing out “--options”)
-# -pass arguments only via   -- "$@"   to separate them correctly
 ! PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTS --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
-    # e.g. return value is 1
-    #  then getopt has complained about wrong arguments to stdout
     exit 2
 fi
 # read getopt’s output this way to handle the quoting right:
@@ -50,10 +37,6 @@ while true; do
             ;;
         -v|--verbose)
             VERBOSE=YES
-            shift
-            ;;
-        -g|--lua-git)
-            TOGIT=YES
             shift
             ;;
         --)
@@ -108,22 +91,12 @@ function build_lua {
     echo "[net-build] Output to ./lualib"
 }
 
-function lua_to_git {
-    #git add dist
-    git add lualib
-    git subtree push --prefix dist origin lua
-}
-
 if ! [ -z "$RBXMX" ]; then
     build_rbxmx
 fi
 
 if ! [ -z "$LUA" ]; then
     build_lua
-fi
-
-if ! [ -z "$TOGIT" ]; then
-    lua_to_git
 fi
 
 if ! [ -z "$PUBLISH" ]; then
