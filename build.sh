@@ -18,6 +18,7 @@ LONGOPTS=rbxmx,lua,verbose,lua-git #output:
 LUA=""
 RBXMX=""
 PUBLISH=""
+TOGIT=""
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -99,16 +100,17 @@ function build_lua {
     mkdir -p dist/lua
     cp -r out/* dist/lua
     cp -r include dist/lua/vendor
+
+    find dist/lua -name '*.d.ts' -delete
+
     echo "[net-build] Output to ./dist/lua"
 }
 
 function lua_to_git {
-    git checkout lua
-    git checkout master -- dist
-    git add utils
-    git commit -m "Adding dist from master"
-
-    git checkout master
+    #git add dist
+    git add dist
+    git commit -m "Dist subtree commit"
+    git subtree push --prefix dist origin lua
 }
 
 if ! [ -z "$RBXMX" ]; then
