@@ -3,7 +3,7 @@
     <Properties>
       <string name="Name">Net</string>
       <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.vendor.RuntimeLib);
 local exports;
@@ -183,7 +183,7 @@ return exports;
       <Properties>
         <string name="Name">ClientEvent</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -234,7 +234,7 @@ return exports;
       <Properties>
         <string name="Name">ClientFunction</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -307,7 +307,7 @@ return exports;
       <Properties>
         <string name="Name">GlobalClientEvent</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -340,7 +340,7 @@ return exports;
       <Properties>
         <string name="Name">GlobalEvent</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -458,7 +458,7 @@ return exports;
       <Properties>
         <string name="Name">GlobalServerEvent</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -712,7 +712,7 @@ return Serializer
       <Properties>
         <string name="Name">ServerEvent</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -788,7 +788,7 @@ return exports;
       <Properties>
         <string name="Name">ServerFunction</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -853,7 +853,7 @@ return exports;
       <Properties>
         <string name="Name">ServerThrottledEvent</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -924,7 +924,7 @@ return exports;
       <Properties>
         <string name="Name">ServerThrottledFunction</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -1002,7 +1002,7 @@ return exports;
         <Properties>
           <string name="Name">RequestCounter.spec</string>
           <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.Parent.vendor.RuntimeLib);
 local exports;
@@ -1044,7 +1044,7 @@ return exports;
         <Properties>
           <string name="Name">Serializer.spec</string>
           <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local TS = require(script.Parent.Parent.vendor.RuntimeLib);
 local exports;
@@ -1380,7 +1380,7 @@ return Throttle
       <Properties>
         <string name="Name">configuration</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local exports;
 local NetConfig;
@@ -1421,7 +1421,7 @@ return exports;
       <Properties>
         <string name="Name">internal</string>
         <string name="Source"><![CDATA[-- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 5:11 PM New Zealand Standard Time
+-- August 6, 2019, 5:15 PM New Zealand Standard Time
 
 local exports = {};
 local replicatedStorage = game:GetService("ReplicatedStorage");
