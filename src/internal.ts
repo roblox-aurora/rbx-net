@@ -141,7 +141,12 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 	}
 }
 
-export function t_assert(types: Array<TypeGuard<any>>, args: Array<unknown>) {
+export function t_assert(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
+	if (args === undefined) {
+		warn("[net-types] Argument length is zero");
+		return false;
+	}
+
 	if (args.size() < types.size()) {
 		warn(`[net-types] Argument length less than required: ${args.size()} < ${types.size()}`);
 		return false;
