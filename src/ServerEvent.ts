@@ -1,11 +1,17 @@
-import { findOrCreateRemote, IS_CLIENT } from "./internal";
+import { findOrCreateRemote, IS_CLIENT, CheckFn } from "./internal";
 const Players = game.GetService("Players");
+
+type CheckArgs<T> = T extends [CheckFn<infer A>]
+	? [A]
+	: T extends [CheckFn<infer A>, CheckFn<infer B>]
+	? [A, B]
+	: unknown[];
 
 /**
  * An event on the server
  * @rbxts server
  */
-export default class NetServerEvent implements IServerNetEvent {
+export default class NetServerEvent<T extends Array<any> = Array<unknown>> implements IServerNetEvent {
 	/** @internal */
 	protected instance: RemoteEvent;
 
@@ -14,7 +20,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * @param name The name of this server event
 	 * @throws If not created on server
 	 */
-	constructor(name: string) {
+	constructor(name: string, ...strictTypes: T) {
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
 	}
@@ -37,7 +43,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * Connect a fucntion to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
-	public Connect<T extends Array<unknown>>(callback: (sourcePlayer: Player, ...args: T) => void) {
+	public Connect(callback: (sourcePlayer: Player, ...args: CheckArgs<T>) => void) {
 		return this.getEvent().Connect(callback as Callback);
 	}
 
@@ -45,7 +51,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * Sends the specified arguments to all players
 	 * @param args The arguments to send to the players
 	 */
-	public SendToAllPlayers<T extends Array<any>>(...args: T) {
+	public SendToAllPlayers(...args: CheckArgs<T>) {
 		this.instance.FireAllClients(...args);
 	}
 
@@ -54,7 +60,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * @param blacklist The blacklist
 	 * @param args The arguments
 	 */
-	public SendToAllPlayersExcept<T extends Array<any>>(blacklist: Player | Array<Player>, ...args: T) {
+	public SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: CheckArgs<T>) {
 		if (typeIs(blacklist, "Instance")) {
 			const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
 			for (const player of otherPlayers) {
@@ -74,7 +80,7 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * @param player The player
 	 * @param args The arguments to send to the player
 	 */
-	public SendToPlayer<T extends Array<any>>(player: Player, ...args: T) {
+	public SendToPlayer(player: Player, ...args: CheckArgs<T>) {
 		this.instance.FireClient(player, ...args);
 	}
 
@@ -83,9 +89,22 @@ export default class NetServerEvent implements IServerNetEvent {
 	 * @param players The players
 	 * @param args The arugments to send to these players
 	 */
-	public SendToPlayers<T extends Array<any>>(players: Array<Player>, ...args: T) {
+	public SendToPlayers(players: Array<Player>, ...args: CheckArgs<T>) {
 		for (const player of players) {
 			this.SendToPlayer(player, ...args);
 		}
 	}
+}
+
+function t_string(value: unknown): value is string {
+	return typeof value === "string";
+}
+
+function t_number(value: unknown): value is number {
+	return typeof value === "number";
+}
+
+function test() {
+	const testing = new NetServerEvent("Test", t_string);
+	testing.SendToAllPlayers("I'm a string!");
 }

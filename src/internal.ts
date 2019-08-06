@@ -141,6 +141,8 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 	}
 }
 
+export type CheckFn<T> = (value: unknown) => value is T;
+
 if (IS_SERVER) {
 	game.GetService("RunService").Stepped.Connect((time, step) => {
 		for (const f of ServerTickFunctions) {

@@ -1,12 +1,12 @@
 declare interface INetEvent {}
 
 declare interface IServerNetEvent extends INetEvent {
-	SendToPlayers<T extends Array<any>>(players: Array<Player>, ...args: T): void;
-	SendToPlayer<T extends Array<any>>(player: Player, ...args: T): void;
-	SendToAllPlayers<T extends Array<any>>(...args: T): void;
-	SendToAllPlayersExcept<T extends Array<any>>(blacklist: Player | Array<Player>, ...args: T): void;
+	SendToPlayers(players: Array<Player>, ...args: any[]): void;
+	SendToPlayer(player: Player, ...args: any[]): void;
+	SendToAllPlayers(...args: any[]): void;
+	SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: any[]): void;
 
-	Connect<T extends Array<unknown>>(callback: (player: Player, ...arguments: T) => void): void;
+	Connect(callback: (player: Player, ...arguments: any[]) => void): void;
 }
 
 declare interface IClientNetEvent extends INetEvent {
