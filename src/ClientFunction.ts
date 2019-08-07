@@ -34,20 +34,6 @@ export default class NetClientFunction<SR extends unknown> {
 	}
 
 	/**
-	 * The callback
-	 */
-	public getCallback(): Callback {
-		return this.instance.OnClientInvoke;
-	}
-
-	/**
-	 * Set the callback function when called by the server
-	 */
-	public setCallback(func: Callback) {
-		this.instance.OnClientInvoke = func;
-	}
-
-	/**
 	 * The remoteFunction instance
 	 */
 	public getInstance() {
