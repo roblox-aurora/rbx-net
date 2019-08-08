@@ -34,16 +34,34 @@ export default class NetClientFunction<SR extends unknown> {
 	}
 
 	/**
+	 * @deprecated
+	 * @see GetCache
+	 */
+	public readonly getCache = () => {
+		warn(`${this.instance.Name}::getCache is deprecated, use ${this.instance.Name}::GetCache instead!`);
+		return this.GetCache();
+	};
+
+	/**
+	 * @deprecated
+	 * @see GetInstance
+	 */
+	public readonly getInstance = () => {
+		warn(`${this.instance.Name}::getInstance is deprecated, use ${this.instance.Name}::GetInstance instead!`);
+		return this.GetInstance();
+	};
+
+	/**
 	 * The remoteFunction instance
 	 */
-	public getInstance() {
+	public GetInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The client cache in seconds
 	 */
-	public getCache() {
+	public GetCache() {
 		const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 		if (cache) {
 			return cache.Value;
@@ -58,7 +76,7 @@ export default class NetClientFunction<SR extends unknown> {
 	 * @returns the result of the call to the server
 	 */
 	public CallServer<T extends Array<any>>(...args: T): SR {
-		if (this.lastPing < os.time() + this.getCache()) {
+		if (this.lastPing < os.time() + this.GetCache()) {
 			const result = this.instance.InvokeServer(...args);
 			this.cached = result;
 

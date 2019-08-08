@@ -34,14 +34,14 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	/**
 	 * The RemoteEvent instance
 	 */
-	public getInstance() {
+	public GetInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The RBXScriptSignal for this RemoteEvent
 	 */
-	public getEvent() {
+	public GetEvent() {
 		return this.instance.OnServerEvent;
 	}
 
@@ -51,14 +51,14 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 */
 	public Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void) {
 		if (this.propTypes !== undefined) {
-			return this.getEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
+			return this.GetEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
 				if (t_assert(this.propTypes!, args)) {
 					// @ts-ignore
 					callback(sourcePlayer, ...args);
 				}
 			});
 		} else {
-			return this.getEvent().Connect(callback as Callback);
+			return this.GetEvent().Connect(callback as Callback);
 		}
 	}
 

@@ -30,14 +30,14 @@ export default class NetClientEvent implements IClientNetEvent {
 	/**
 	 * The RemoteEvent instance
 	 */
-	public getInstance() {
+	public GetInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The RBXScriptConnection
 	 */
-	public getEvent() {
+	public GetEvent() {
 		return this.instance.OnClientEvent;
 	}
 
@@ -46,7 +46,7 @@ export default class NetClientEvent implements IClientNetEvent {
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect<T extends Array<any>>(callback: (...args: T) => void) {
-		return this.getEvent().Connect(callback as Callback);
+		return this.GetEvent().Connect(callback as Callback);
 	}
 
 	/**

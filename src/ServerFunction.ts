@@ -23,16 +23,52 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	}
 
 	/**
+	 * @deprecated
+	 * @see GetCallback
+	 */
+	public readonly getCallback = () => {
+		warn(`${this.instance.Name}::getCallback is deprecated, use ${this.instance.Name}::GetCallback instead!`);
+		return this.GetCallback();
+	};
+
+	/**
+	 * @deprecated
+	 * @see GetClientCache
+	 */
+	public readonly getClientCache = () => {
+		warn(`${this.instance.Name}::getClientCache is deprecated, use ${this.instance.Name}::GetClientCache instead!`);
+		return this.GetClientCache();
+	};
+
+	/**
+	 * @deprecated
+	 * @see SetCallback
+	 */
+	public readonly setCallback = <R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) => {
+		warn(`${this.instance.Name}::setCallback is deprecated, use ${this.instance.Name}::SetCallback instead!`);
+		return this.SetCallback(func);
+	};
+
+	/**
+	 * @deprecated
+	 * @see SetClientCache
+	 */
+	public readonly setClientCache = (timeout: number) => {
+		warn(`${this.instance.Name}::setClientCache is deprecated, use ${this.instance.Name}::SetClientCache instead!`);
+		return this.SetClientCache(timeout);
+	};
+
+	/**
 	 * The callback function
 	 */
-	public getCallback(): Callback {
+	public GetCallback(): Callback {
 		return this.instance.OnServerInvoke;
 	}
 
 	/**
 	 * Set the callback function when called by the client
 	 */
-	public setCallback<R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) {
+	public SetCallback<R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) {
 		if (this.propTypes !== undefined) {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 				if (t_assert(this.propTypes!, args)) {
@@ -52,14 +88,14 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	/**
 	 * The RemoteFunction instance
 	 */
-	public getInstance() {
+	public GetInstance() {
 		return this.instance;
 	}
 
 	/**
 	 * The client cache in seconds
 	 */
-	public getClientCache() {
+	public GetClientCache() {
 		const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 		if (cache) {
 			return cache.Value;
@@ -72,7 +108,7 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	 * Sets a client cache timer in seconds
 	 * @param time seconds to cache on client
 	 */
-	public setClientCache(time: number) {
+	public SetClientCache(time: number) {
 		const cache = this.instance.FindFirstChild("Cache") as NumberValue;
 		if (!cache) {
 			const cacheTimer = new Instance("NumberValue", this.instance);
