@@ -1,10 +1,13 @@
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 7:32 PM New Zealand Standard Time
+-- August 10, 2019, 6:58 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local _0 = TS.import(script.Parent, "internal");
-local findOrCreateRemote, IS_CLIENT = _0.findOrCreateRemote, _0.IS_CLIENT;
+local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
+local function t_string(value)
+	return true;
+end;
 local NetServerFunction;
 do
 	NetServerFunction = setmetatable({}, {
@@ -16,21 +19,55 @@ do
 		self:constructor(...);
 		return self;
 	end;
-	function NetServerFunction:constructor(name)
+	function NetServerFunction:constructor(name, ...)
+		local recievedPropTypes = { ... };
+		self.getCallback = function()
+			warn(self.instance.Name .. "::getCallback is deprecated, use " .. self.instance.Name .. "::GetCallback instead!");
+			return self:GetCallback();
+		end;
+		self.getClientCache = function()
+			warn(self.instance.Name .. "::getClientCache is deprecated, use " .. self.instance.Name .. "::GetClientCache instead!");
+			return self:GetClientCache();
+		end;
+		self.setCallback = function(func)
+			warn(self.instance.Name .. "::setCallback is deprecated, use " .. self.instance.Name .. "::SetCallback instead!");
+			return self:SetCallback(func);
+		end;
+		self.setClientCache = function(timeout)
+			warn(self.instance.Name .. "::setClientCache is deprecated, use " .. self.instance.Name .. "::SetClientCache instead!");
+			return self:SetClientCache(timeout);
+		end;
 		self.instance = findOrCreateRemote("RemoteFunction", name);
 		assert(not IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
+		if #recievedPropTypes > 0 then
+			self.propTypes = recievedPropTypes;
+		end;
 	end;
-	function NetServerFunction:getCallback()
+	function NetServerFunction:GetCallback()
 		return self.instance.OnServerInvoke;
 	end;
-	function NetServerFunction:setCallback(func)
-		self.instance.OnServerInvoke = func;
+	function NetServerFunction:SetCallback(func)
+		if self.instance.OnServerInvoke ~= nil then
+			error("[rbx-net] The callback for " .. self.instance.Name .. " is already set.\n" .. "\t* Changing this callback may lead to a different behaviour than expected from the client. " .. "Thus, it is not allowed.");
+		end;
+		if self.propTypes ~= nil then
+			self.instance.OnServerInvoke = function(player, ...)
+				local args = { ... };
+				if t_assert(self.propTypes, args) then
+					return func(player, unpack(args));
+				else
+					error("Client failed type checks", 2);
+				end;
+			end;
+		else
+			self.instance.OnServerInvoke = func;
+		end;
 		return self;
 	end;
-	function NetServerFunction:getInstance()
+	function NetServerFunction:GetInstance()
 		return self.instance;
 	end;
-	function NetServerFunction:getClientCache()
+	function NetServerFunction:GetClientCache()
 		local cache = self.instance:FindFirstChild("Cache");
 		if cache then
 			return cache.Value;
@@ -38,7 +75,7 @@ do
 			return 0;
 		end;
 	end;
-	function NetServerFunction:setClientCache(time)
+	function NetServerFunction:SetClientCache(time)
 		local cache = self.instance:FindFirstChild("Cache");
 		if not cache then
 			local cacheTimer = Instance.new("NumberValue", self.instance);
@@ -49,11 +86,6 @@ do
 		end;
 		return self;
 	end;
-	NetServerFunction.CallPlayerAsync = TS.async(function(self, player, ...)
-		local args = { ... };
-		warn("[rbx-net] CallPlayerAsync is possibly going to be removed\n" .. "\tsee https://github.com/roblox-aurora/rbx-net/issues/13 for more details.");
-		return self.instance:InvokeClient(player, unpack(args));
-	end);
 end;
 exports.default = NetServerFunction;
 return exports;

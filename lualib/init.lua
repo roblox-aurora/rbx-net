@@ -1,6 +1,6 @@
 local IS_LUA_MODULE = true
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 7:32 PM New Zealand Standard Time
+-- August 10, 2019, 6:58 PM New Zealand Standard Time
 
 local TS = require(script.vendor.RuntimeLib);
 local exports;
@@ -84,10 +84,10 @@ Net = Net or {} do
 					fn = NetServerFunction.new(nameOrOptions.name);
 				end;
 				if nameOrOptions.callback then
-					fn:setCallback(nameOrOptions.callback);
+					fn.setCallback(nameOrOptions.callback);
 				end;
 				if nameOrOptions.cacheSeconds then
-					fn:setClientCache(nameOrOptions.cacheSeconds);
+					fn.setClientCache(nameOrOptions.cacheSeconds);
 				end;
 				return fn;
 			end;

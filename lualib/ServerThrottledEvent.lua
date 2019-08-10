@@ -1,5 +1,5 @@
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 7:32 PM New Zealand Standard Time
+-- August 10, 2019, 6:58 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -23,6 +23,14 @@ do
 	function NetServerThrottledEvent:constructor(name, rateLimit)
 		super.constructor(self, name);
 		self.maxRequestsPerMinute = 0;
+		self.setRateLimit = function(requestsPerMinute)
+			warn(self.instance.Name .. "::setRateLimit is deprecated, use " .. self.instance.Name .. "::SetRateLimit instead!");
+			return self:SetRateLimit(requestsPerMinute);
+		end;
+		self.getRateLimit = function()
+			warn(self.instance.Name .. "::getRateLimit is deprecated, use " .. self.instance.Name .. "::GetRateLimit instead!");
+			return self:GetRateLimit();
+		end;
 		self.maxRequestsPerMinute = rateLimit;
 		self.clientRequests = throttler:Get("Event~" .. name);
 		local clientValue = Instance.new("IntValue", self.instance);
@@ -46,7 +54,7 @@ do
 			end;
 		end);
 	end;
-	function NetServerThrottledEvent:setRateLimit(requestsPerMinute)
+	function NetServerThrottledEvent:SetRateLimit(requestsPerMinute)
 		self.maxRequestsPerMinute = requestsPerMinute;
 		local clientValue = self.instance:FindFirstChild("RateLimit");
 		if clientValue then
@@ -57,7 +65,7 @@ do
 			clientValue.Value = requestsPerMinute;
 		end;
 	end;
-	function NetServerThrottledEvent:getRateLimit()
+	function NetServerThrottledEvent:GetRateLimit()
 		return self.maxRequestsPerMinute;
 	end;
 end;

@@ -1,5 +1,5 @@
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 7:32 PM New Zealand Standard Time
+-- August 10, 2019, 6:58 PM New Zealand Standard Time
 
 local exports = {};
 local replicatedStorage = game:GetService("ReplicatedStorage");
@@ -94,6 +94,29 @@ local function findOrCreateRemote(remoteType, name)
 		return remote;
 	end;
 end;
+local function t_assert(types, args)
+	if args == nil then
+		warn("[net-types] Argument length is zero");
+		return false;
+	end;
+	if #args < #types then
+		warn("[net-types] Argument length less than required: " .. tostring(#args) .. " < " .. tostring(#types));
+		return false;
+	end;
+	do
+		local i = 0;
+		while i < #types do
+			local typeCheck = types[i + 1];
+			local value = args[i + 1];
+			if not typeCheck(value) then
+				warn("[net-types] Argument at index " .. tostring(i) .. " was invalid type.");
+				return false;
+			end;
+			i = i + 1;
+		end;
+	end;
+	return true;
+end;
 if IS_SERVER then
 	game:GetService("RunService").Stepped:Connect(function(time, step)
 		for _0 = 1, #ServerTickFunctions do
@@ -118,4 +141,5 @@ exports.getRemoteFolder = getRemoteFolder;
 exports.findRemote = findRemote;
 exports.getRemoteOrThrow = getRemoteOrThrow;
 exports.findOrCreateRemote = findOrCreateRemote;
+exports.t_assert = t_assert;
 return exports;

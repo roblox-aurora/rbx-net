@@ -1,5 +1,5 @@
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 7:32 PM New Zealand Standard Time
+-- August 10, 2019, 6:58 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -27,14 +27,14 @@ do
 		end;
 		return NetClientEvent.new(name);
 	end);
-	function NetClientEvent:getInstance()
+	function NetClientEvent:GetInstance()
 		return self.instance;
 	end;
-	function NetClientEvent:getEvent()
+	function NetClientEvent:GetEvent()
 		return self.instance.OnClientEvent;
 	end;
 	function NetClientEvent:Connect(callback)
-		return self:getEvent():Connect(callback);
+		return self:GetEvent():Connect(callback);
 	end;
 	function NetClientEvent:SendToServer(...)
 		local args = { ... };

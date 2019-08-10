@@ -1,5 +1,5 @@
 -- Compiled with https://roblox-ts.github.io v0.2.14
--- August 6, 2019, 7:32 PM New Zealand Standard Time
+-- August 10, 2019, 6:58 PM New Zealand Standard Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -24,13 +24,25 @@ do
 	function NetServerThrottledFunction:constructor(name, rateLimit)
 		super.constructor(self, name);
 		self.maxRequestsPerMinute = 0;
+		self.setCallback = function(func)
+			warn(self.instance.Name .. "::setCallback is deprecated, use " .. self.instance.Name .. "::SetCallback instead!");
+			return self:SetCallback(func);
+		end;
+		self.setRateLimit = function(requestsPerMinute)
+			warn(self.instance.Name .. "::setRateLimit is deprecated, use " .. self.instance.Name .. "::SetRateLimit instead!");
+			return self:SetRateLimit(requestsPerMinute);
+		end;
+		self.getRateLimit = function()
+			warn(self.instance.Name .. "::getRateLimit is deprecated, use " .. self.instance.Name .. "::GetRateLimit instead!");
+			return self:GetRateLimit();
+		end;
 		self.maxRequestsPerMinute = rateLimit;
 		self.clientRequests = throttler:Get("Function~" .. name);
 		local clientValue = Instance.new("IntValue", self.instance);
 		clientValue.Name = "RateLimit";
 		clientValue.Value = rateLimit;
 	end;
-	function NetServerThrottledFunction:setCallback(callback)
+	function NetServerThrottledFunction:SetCallback(callback)
 		self.instance.OnServerInvoke = function(player, ...)
 			local args = { ... };
 			local maxRequests = self.maxRequestsPerMinute;
@@ -48,7 +60,7 @@ do
 		end;
 		return self;
 	end;
-	function NetServerThrottledFunction:setRateLimit(requestsPerMinute)
+	function NetServerThrottledFunction:SetRateLimit(requestsPerMinute)
 		self.maxRequestsPerMinute = requestsPerMinute;
 		local clientValue = self.instance:FindFirstChild("RateLimit");
 		if clientValue then
@@ -59,7 +71,7 @@ do
 			clientValue.Value = requestsPerMinute;
 		end;
 	end;
-	function NetServerThrottledFunction:getRateLimit()
+	function NetServerThrottledFunction:GetRateLimit()
 		return self.maxRequestsPerMinute;
 	end;
 	NetServerThrottledFunction.rates = {};
