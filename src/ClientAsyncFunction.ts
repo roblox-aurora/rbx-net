@@ -18,6 +18,15 @@ export default class NetClientAsyncFunction {
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Client!");
 	}
 
+	public SetCallTimeout(timeout: number) {
+		assert(timeout > 0, "timeout must be a positive number");
+		this.timeout = timeout;
+	}
+
+	public GetCallTimeout() {
+		return this.timeout;
+	}
+
 	public SetCallback(callback: (...args: Array<unknown>) => any) {
 		if (this.connector) {
 			this.connector.Disconnect();
