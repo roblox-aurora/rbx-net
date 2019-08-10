@@ -141,6 +141,73 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 	}
 }
 
+export function t_assert(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
+	if (args === undefined) {
+		warn("[net-types] Argument length is zero");
+		return false;
+	}
+
+	if (args.size() < types.size()) {
+		warn(`[net-types] Argument length less than required: ${args.size()} < ${types.size()}`);
+		return false;
+	}
+
+	for (let i = 0; i < types.size(); i++) {
+		const typeCheck = types[i];
+		const value = args[i];
+		if (!typeCheck(value)) {
+			warn(`[net-types] Argument at index ${i} was invalid type.`);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+export type TypeGuard<T> = (value: unknown) => value is T;
+
+export type StaticArguments<T> = T extends [TypeGuard<infer A>]
+	? [A]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>]
+	? [A, B]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>]
+	? [A, B, C]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>, TypeGuard<infer D>]
+	? [A, B, C, D]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>, TypeGuard<infer D>, TypeGuard<infer E>]
+	? [A, B, C, D, E]
+	: T extends [
+			TypeGuard<infer A>,
+			TypeGuard<infer B>,
+			TypeGuard<infer C>,
+			TypeGuard<infer D>,
+			TypeGuard<infer E>,
+			TypeGuard<infer F>
+	  ]
+	? [A, B, C, D, E, F]
+	: T extends [
+			TypeGuard<infer A>,
+			TypeGuard<infer B>,
+			TypeGuard<infer C>,
+			TypeGuard<infer D>,
+			TypeGuard<infer E>,
+			TypeGuard<infer F>,
+			TypeGuard<infer G>
+	  ]
+	? [A, B, C, D, E, F, G]
+	: T extends [
+			TypeGuard<infer A>,
+			TypeGuard<infer B>,
+			TypeGuard<infer C>,
+			TypeGuard<infer D>,
+			TypeGuard<infer E>,
+			TypeGuard<infer F>,
+			TypeGuard<infer G>,
+			TypeGuard<infer H>
+	  ]
+	? [A, B, C, D, E, F, G, H]
+	: Array<unknown>; // default, if user has more than 8 args then wtf they doing with their lives?!?
+
 if (IS_SERVER) {
 	game.GetService("RunService").Stepped.Connect((time, step) => {
 		for (const f of ServerTickFunctions) {

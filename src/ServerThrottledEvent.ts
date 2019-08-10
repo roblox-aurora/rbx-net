@@ -23,6 +23,24 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	}
 
 	/**
+	 * @deprecated
+	 * @see SetRateLimit
+	 */
+	public readonly setRateLimit = (requestsPerMinute: number) => {
+		warn(`${this.instance.Name}::setRateLimit is deprecated, use ${this.instance.Name}::SetRateLimit instead!`);
+		return this.SetRateLimit(requestsPerMinute);
+	};
+
+	/**
+	 * @deprecated
+	 * @see GetRateLimit
+	 */
+	public readonly getRateLimit = () => {
+		warn(`${this.instance.Name}::getRateLimit is deprecated, use ${this.instance.Name}::GetRateLimit instead!`);
+		return this.GetRateLimit();
+	};
+
+	/**
 	 * Connect a fucntion to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
@@ -46,7 +64,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	/**
 	 * The number of requests allowed per minute per user
 	 */
-	public setRateLimit(requestsPerMinute: number) {
+	public SetRateLimit(requestsPerMinute: number) {
 		this.maxRequestsPerMinute = requestsPerMinute;
 
 		let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
@@ -59,7 +77,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 		}
 	}
 
-	public getRateLimit() {
+	public GetRateLimit() {
 		return this.maxRequestsPerMinute;
 	}
 }

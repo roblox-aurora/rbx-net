@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/net",
-	"version": "1.0.13",
+	"version": "1.1.0",
 	"private": false,
 	"description": "Networking Library for roblox-ts",
 	"main": "./out/init.lua",
@@ -9,7 +9,7 @@
 		"test": "rbxtsc && lua ./out/Test/spec.lua",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
 		"build": "npm run cleanup && rbxtsc",
-		"binary": "mkdir -p dist && rbxtsc -r lua.project.json && rojo build lua.project.json --output dist/net.rbxmx"
+		"binary": "mkdir -p dist && rbxtsc -r luaproject.json && rojo build luaproject.json --output dist/net.rbxmx"
 	},
 	"author": "vorlias",
 	"license": "MIT",

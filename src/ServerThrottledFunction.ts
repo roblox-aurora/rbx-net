@@ -25,7 +25,34 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 		clientValue.Value = rateLimit;
 	}
 
-	public setCallback(callback: Callback) {
+	/**
+	 * @deprecated
+	 * @see SetCallback
+	 */
+	public readonly setCallback = (func: Callback) => {
+		warn(`${this.instance.Name}::setCallback is deprecated, use ${this.instance.Name}::SetCallback instead!`);
+		return this.SetCallback(func);
+	};
+
+	/**
+	 * @deprecated
+	 * @see SetRateLimit
+	 */
+	public readonly setRateLimit = (requestsPerMinute: number) => {
+		warn(`${this.instance.Name}::setRateLimit is deprecated, use ${this.instance.Name}::SetRateLimit instead!`);
+		return this.SetRateLimit(requestsPerMinute);
+	};
+
+	/**
+	 * @deprecated
+	 * @see GetRateLimit
+	 */
+	public readonly getRateLimit = () => {
+		warn(`${this.instance.Name}::getRateLimit is deprecated, use ${this.instance.Name}::GetRateLimit instead!`);
+		return this.GetRateLimit();
+	};
+
+	public SetCallback(callback: Callback) {
 		this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 			const maxRequests = this.maxRequestsPerMinute;
 			const clientRequestCount = this.clientRequests.Get(player);
@@ -46,7 +73,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 	/**
 	 * The number of requests allowed per minute per user
 	 */
-	public setRateLimit(requestsPerMinute: number) {
+	public SetRateLimit(requestsPerMinute: number) {
 		this.maxRequestsPerMinute = requestsPerMinute;
 
 		let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
@@ -59,7 +86,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 		}
 	}
 
-	public getRateLimit() {
+	public GetRateLimit() {
 		return this.maxRequestsPerMinute;
 	}
 }
