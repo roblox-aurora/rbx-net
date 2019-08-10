@@ -8,6 +8,7 @@
 		"strict": true,
 		"target": "es6",
 		"typeRoots": [ "node_modules/@rbxts" ],
+		"stripInternal": true,
 
 		// required, configurable
 		"rootDir": "src",

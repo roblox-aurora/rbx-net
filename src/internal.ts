@@ -141,6 +141,11 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 	}
 }
 
+export interface IAsyncListener {
+	connection: RBXScriptConnection;
+	timeout: number;
+}
+
 export function t_assert(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
 	if (args === undefined) {
 		warn("[net-types] Argument length is zero");

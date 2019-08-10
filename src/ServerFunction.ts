@@ -50,15 +50,6 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	};
 
 	/**
-	 * @deprecated
-	 * @see SetClientCache
-	 */
-	public readonly setClientCache = (timeout: number) => {
-		warn(`${this.instance.Name}::setClientCache is deprecated, use ${this.instance.Name}::SetClientCache instead!`);
-		return this.SetClientCache(timeout);
-	};
-
-	/**
 	 * The callback function
 	 */
 	public GetCallback(): Callback {
