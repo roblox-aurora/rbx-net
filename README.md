@@ -3,7 +3,7 @@
 </div>
 <div align="center">
 	<h1>Roblox Networking Library</h1>
-    	<a href="https://www.npmjs.com/package/rbx-net">
+    	<a href="https://www.npmjs.com/package/@rbxts/net">
 		<img src="https://badge.fury.io/js/%40rbxts%2Fnet.svg"></img>
 	</a>
 </div>
