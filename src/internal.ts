@@ -147,10 +147,10 @@ export function t_assert(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
 		return false;
 	}
 
-	if (args.size() < types.size()) {
-		warn(`[net-types] Argument length less than required: ${args.size()} < ${types.size()}`);
-		return false;
-	}
+	// if (args.size() < types.size()) {
+	// 	warn(`[net-types] Argument length less than required: ${args.size()} < ${types.size()}`);
+	// 	return false;
+	// }
 
 	for (let i = 0; i < types.size(); i++) {
 		const typeCheck = types[i];

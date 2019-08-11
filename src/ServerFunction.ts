@@ -69,13 +69,13 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	 * Set the callback function when called by the client
 	 */
 	public SetCallback<R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) {
-		if (this.instance.OnServerInvoke !== undefined) {
-			error(
-				`[rbx-net] The callback for ${this.instance.Name} is already set.\n` +
-					`\t* Changing this callback may lead to a different behaviour than expected from the client. ` +
-					`Thus, it is not allowed.`,
-			);
-		}
+		// if (this.instance.OnServerInvoke !== undefined) {
+		// 	error(
+		// 		`[rbx-net] The callback for ${this.instance.Name} is already set.\n` +
+		// 			`\t* Changing this callback may lead to a different behaviour than expected from the client. ` +
+		// 			`Thus, it is not allowed.`,
+		// 	);
+		// }
 
 		if (this.propTypes !== undefined) {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
