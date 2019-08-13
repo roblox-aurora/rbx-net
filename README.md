@@ -38,10 +38,10 @@ Unfortunately, there are only two options here. Using it as a git submodule (ick
 Either way, until rotriever is a thing; those are your two options.
 
 ### Submodule
-`git submodule add https://github.com/roblox-aurora/rbx-net.git <targetfolder>`
-e.g. if you wanted it in modules/net: `git submodule add https://github.com/roblox-aurora/rbx-net.git modules/net`
+`git submodule add https://github.com/roblox-aurora/rbx-net.git <targetfolder> -b lualib`
+e.g. if you wanted it in modules/net: `git submodule add https://github.com/roblox-aurora/rbx-net.git modules/net -b lualib`
 
-Then in your `*.project.json` folder, simply point it to `<targetfolder>/lualib` for the Lua output (e.g. in the above example, `modules/net/lualib`.
+Then in your `*.project.json` folder, simply point it to `<targetfolder>` for the Lua output (e.g. in the above example, `modules/net`.
 
 Roblox Model
 -------------
