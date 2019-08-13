@@ -9,12 +9,14 @@
 		"test": "rbxtsc && lua ./out/Test/spec.lua",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
 		"build": "npm run cleanup && rbxtsc",
-		"binary": "mkdir -p dist && rbxtsc -r luaproject.json && rojo build luaproject.json --output dist/net.rbxmx"
+		"binary": "mkdir -p dist && rbxtsc -r luaproject.json && rojo build luaproject.json --output dist/net.rbxmx",
+		"luadist": "./build.sh -l && gh-pages -d lualib -b lualib"
 	},
 	"author": "vorlias",
 	"license": "MIT",
 	"devDependencies": {
-		"@rbxts/types": "^1.0.235"
+		"@rbxts/types": "^1.0.235",
+		"gh-pages": "^2.1.1"
 	},
 	"dependencies": {},
 	"repository": {
