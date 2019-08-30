@@ -33,10 +33,13 @@ export default class NetClientAsyncFunction {
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnClientEvent.Connect((...args: Array<unknown>) => {
+		this.connector = this.instance.OnClientEvent.Connect(async (...args: Array<unknown>) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				const result: unknown = callback(...data);
+				let result: unknown = callback(...data);
+				if (result instanceof Promise) {
+					result = await result;
+				}
 				this.instance.FireServer(eventId, [result]);
 			} else {
 				warn("Recieved message without eventId");
