@@ -14,7 +14,7 @@ export default class NetClientAsyncFunction {
 	private listeners = new Map<string, IAsyncListener>();
 
 	constructor(name: string) {
-		this.instance = getRemoteOrThrow("RemoteEvent", `${name}~Async`);
+		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Client!");
 	}
 

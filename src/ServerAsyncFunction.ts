@@ -14,7 +14,7 @@ export default class NetServerAsyncFunction {
 	private connector: RBXScriptConnection | undefined;
 
 	constructor(name: string) {
-		this.instance = findOrCreateRemote("RemoteEvent", `${name}~Async`);
+		this.instance = findOrCreateRemote("AsyncRemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerAsyncFunction on the Client!");
 	}
 

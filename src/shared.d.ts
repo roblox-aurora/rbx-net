@@ -1,6 +1,7 @@
 declare interface RemoteTypes {
 	RemoteEvent: RemoteEvent;
 	RemoteFunction: RemoteFunction;
+	AsyncRemoteFunction: RemoteEvent;
 }
 
 declare const __LEMUR__: true | undefined;

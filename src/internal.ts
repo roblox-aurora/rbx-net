@@ -28,10 +28,12 @@ export function isLuaTable(value: unknown): value is Map<unknown, unknown> {
 const REMOTES_FOLDER_NAME = "Remotes";
 const FUNCTIONS_FOLDER_NAME = "Functions";
 const EVENTS_FOLDER_NAME = "Events";
+const ASYNC_FUNCTIONS_FOLDER_NAME = "AsyncFunctions";
 
 let remoteFolder: Folder;
 let eventFolder: Folder;
 let functionFolder: Folder;
+let asyncFunctionFolder: Folder;
 
 /** @internal */
 export const ServerTickFunctions = new Array<() => void>();
@@ -51,6 +53,7 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
 eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
+asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
 
 /**
  * Errors with variables formatted in a message
@@ -58,7 +61,7 @@ eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
  * @param vars variables to pass to the error message
  */
 export function errorft(message: string, vars: { [name: string]: unknown }) {
-	message = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
 		return vars[token] || token;
 	});
 
@@ -92,6 +95,8 @@ export function getRemoteFolder<K extends keyof RemoteTypes>(remoteType: K): Fol
 		targetFolder = eventFolder;
 	} else if (remoteType === "RemoteFunction") {
 		targetFolder = functionFolder;
+	} else if (remoteType === "AsyncRemoteFunction") {
+		targetFolder = asyncFunctionFolder;
 	} else {
 		return error("Invalid type: " + remoteType);
 	}
@@ -129,8 +134,12 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 
 		let remote: RemoteEvent | RemoteFunction;
 
-		if (remoteType === "RemoteEvent" || remoteType === "RemoteFunction") {
-			remote = new Instance(remoteType);
+		if (remoteType === "RemoteEvent") {
+			remote = new Instance("RemoteEvent");
+		} else if (remoteType === "AsyncRemoteFunction") {
+			remote = new Instance("RemoteEvent");
+		} else if (remoteType === "RemoteFunction") {
+			remote = new Instance("RemoteFunction");
 		} else {
 			throw `Invalid Remote Type: ${remoteType}`;
 		} // stfu
@@ -187,7 +196,7 @@ export type StaticArguments<T> = T extends [TypeGuard<infer A>]
 			TypeGuard<infer C>,
 			TypeGuard<infer D>,
 			TypeGuard<infer E>,
-			TypeGuard<infer F>
+			TypeGuard<infer F>,
 	  ]
 	? [A, B, C, D, E, F]
 	: T extends [
@@ -197,7 +206,7 @@ export type StaticArguments<T> = T extends [TypeGuard<infer A>]
 			TypeGuard<infer D>,
 			TypeGuard<infer E>,
 			TypeGuard<infer F>,
-			TypeGuard<infer G>
+			TypeGuard<infer G>,
 	  ]
 	? [A, B, C, D, E, F, G]
 	: T extends [
@@ -208,7 +217,7 @@ export type StaticArguments<T> = T extends [TypeGuard<infer A>]
 			TypeGuard<infer E>,
 			TypeGuard<infer F>,
 			TypeGuard<infer G>,
-			TypeGuard<infer H>
+			TypeGuard<infer H>,
 	  ]
 	? [A, B, C, D, E, F, G, H]
 	: Array<unknown>; // default, if user has more than 8 args then wtf they doing with their lives?!?
