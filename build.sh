@@ -70,6 +70,14 @@ function compile {
     fi
 }
 
+function generate_toml {
+    echo "name = \"rbx-net\"
+author = \"Vorlias\"
+license = \"\"
+content_root = \"\"
+version = \"$(cat package.json | jq -r '.version')\"" >> lualib/rotriever.toml
+}
+
 function build_rbxmx {
     compile
     echo "[net-build] building rbxmx..."
@@ -102,6 +110,7 @@ fi
 
 if ! [ -z "$LUA" ]; then
     build_lua
+    generate_toml
 fi
 
 if ! [ -z "$PUBLISH" ]; then

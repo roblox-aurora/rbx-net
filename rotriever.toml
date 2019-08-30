@@ -1,5 +1,0 @@
-name = "rbx-net"
-author = "Vorlias"
-license = ""
-content_root = "dist/lua"
-version = "1.0.13"
