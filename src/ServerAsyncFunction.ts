@@ -36,11 +36,14 @@ export default class NetServerAsyncFunction {
 		this.connector = this.instance.OnServerEvent.Connect(async (player, ...args: Array<unknown>) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				let result: unknown = callback(...data);
-				if (result instanceof Promise) {
-					result = await result;
+				const result: unknown | Promise<unknown> = callback(...data);
+				if (Promise.is(result)) {
+					await result.then(promiseResult => {
+						this.instance.FireClient(player, eventId, [promiseResult]);
+					});
+				} else {
+					this.instance.FireClient(player, eventId, [result]);
 				}
-				this.instance.FireClient(player, eventId, [result]);
 			} else {
 				warn("[rbx-net-async] Recieved message without eventId");
 			}
