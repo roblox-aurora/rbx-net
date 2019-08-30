@@ -49,7 +49,7 @@ namespace Net {
 	 * @internal
 	 */
 	export const VERSION: VersionInformation = {
-		number: { major: 1, minor: 0, revision: 13 },
+		number: { major: 1, minor: 2, revision: 0 },
 		date: 190602,
 		tag: IS_LUA_MODULE !== undefined ? "lua" : "ts",
 	};
