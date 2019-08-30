@@ -1,0 +1,34 @@
+site_name: Roblox Networking Library
+repo_name: GitHub
+repo_url: https://github.com/roblox-aurora/rbx-net
+nav:
+    - Home: index.md
+    - Installation:
+        - Install for TypeScript: robloxts-install.md
+        - Install for Lua: lua-install.md
+    - Guide:
+        - Events: events.md
+    - API Reference: api-reference.md
+theme:
+    # feature:
+    #  tabs: true
+    name: material
+    palette:
+        primary: blue3
+        accent: blue
+    logo:
+        icon: wifi
+markdown_extensions:
+    - admonition
+    - attr_list
+    - pymdownx.details:
+    - pymdownx.inlinehilite:
+    - pymdownx.tasklist:
+    - pymdownx.superfences:
+        preserve_tabs: true
+    - codehilite:
+          guess_lang: false
+    - toc:
+          permalink: true
+extra_css:
+  - 'styles/extra.css'
