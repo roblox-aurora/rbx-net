@@ -15,7 +15,7 @@ export default class NetClientAsyncFunction {
 
 	constructor(name: string) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
-		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Client!");
+		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
 
 	public SetCallTimeout(timeout: number) {

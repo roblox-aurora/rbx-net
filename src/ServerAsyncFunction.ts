@@ -1,4 +1,4 @@
-import { findOrCreateRemote, IS_CLIENT, IAsyncListener } from "./internal";
+import { findOrCreateRemote, IS_CLIENT, IAsyncListener, t_assert, StaticArguments } from "./internal";
 import { DebugEnabled, DebugLog, DebugWarn } from "./configuration";
 
 const HttpService = game.GetService("HttpService");
@@ -7,15 +7,20 @@ const HttpService = game.GetService("HttpService");
  * An event that behaves like a function
  * @rbxts server
  */
-export default class NetServerAsyncFunction {
+export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown>> {
 	private instance: RemoteEvent;
 	private timeout = 10;
 	private listeners = new Map<string, IAsyncListener>();
 	private connector: RBXScriptConnection | undefined;
+	protected propTypes: C | undefined;
 
-	constructor(name: string) {
+	constructor(name: string, ...recievedPropTypes: C) {
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerAsyncFunction on the Client!");
+
+		if (recievedPropTypes.size() > 0) {
+			this.propTypes = recievedPropTypes;
+		}
 	}
 
 	public GetCallTimeout() {
@@ -27,7 +32,7 @@ export default class NetServerAsyncFunction {
 		this.timeout = timeout;
 	}
 
-	public SetCallback(callback: (...args: Array<unknown>) => any) {
+	public SetCallback(callback: (...args: StaticArguments<C>) => any) {
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
@@ -35,19 +40,26 @@ export default class NetServerAsyncFunction {
 
 		this.connector = this.instance.OnServerEvent.Connect(async (player, ...args: Array<unknown>) => {
 			const [eventId, data] = args;
-			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				const result: unknown | Promise<unknown> = callback(...data);
-				if (Promise.is(result)) {
-					result.then(promiseResult => {
-						this.instance.FireClient(player, eventId, [promiseResult]);
-					}).catch((err: string) => {
-						warn("[rbx-net] Failed to send response to client: " + err);
-					});
+
+			if (this.propTypes === undefined || t_assert(this.propTypes, args)) {
+				if (typeIs(eventId, "string") && typeIs(data, "table")) {
+					const result: unknown | Promise<unknown> = callback(...(data as StaticArguments<C>));
+					if (Promise.is(result)) {
+						result
+							.then(promiseResult => {
+								this.instance.FireClient(player, eventId, [promiseResult]);
+							})
+							.catch((err: string) => {
+								warn("[rbx-net] Failed to send response to client: " + err);
+							});
+					} else {
+						this.instance.FireClient(player, eventId, [result]);
+					}
 				} else {
-					this.instance.FireClient(player, eventId, [result]);
+					warn("[rbx-net-async] Recieved message without eventId");
 				}
 			} else {
-				warn("[rbx-net-async] Recieved message without eventId");
+				error("Client failed type checks", 2);
 			}
 		});
 	}
