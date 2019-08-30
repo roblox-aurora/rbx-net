@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/net",
-	"version": "1.1.2",
+	"version": "1.2.0",
 	"private": false,
 	"description": "Networking Library for roblox-ts",
 	"main": "./out/init.lua",
@@ -10,6 +10,7 @@
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
 		"build": "npm run cleanup && rbxtsc",
 		"binary": "mkdir -p dist && rbxtsc -r luaproject.json && rojo build luaproject.json --output dist/net.rbxmx",
+		"publish:alpha": "rbxtsc && npm publish --tag alpha"
 		"luadist": "./build.sh -l && gh-pages -d lualib -b lualib"
 	},
 	"author": "vorlias",

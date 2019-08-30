@@ -10,6 +10,8 @@ import NetServerThrottledFunction from "./ServerThrottledFunction";
 import NetServerThrottledEvent from "./ServerThrottledEvent";
 import NetGlobalEvent from "./GlobalEvent";
 import NetGlobalServerEvent from "./GlobalServerEvent";
+import NetServerAsyncFunction from "./ServerAsyncFunction";
+import NetClientAsyncFunction from "./ClientAsyncFunction";
 
 const runService = game.GetService("RunService");
 
@@ -40,6 +42,7 @@ namespace Net {
 	}
 
 	export const SetConfiguration = config.SetConfiguration;
+	export const SetClientConfiguration = config.SetClientConfiguration;
 	export const GetConfiguration = config.GetConfiguration;
 
 	/**
@@ -69,8 +72,14 @@ namespace Net {
 	export const ClientFunction = NetClientFunction;
 	export type ClientFunction = NetClientEvent;
 
+	export const ClientAsyncFunction = NetClientAsyncFunction;
+	export type ClientAsyncFunction = NetClientAsyncFunction;
+
 	export const ServerFunction = NetServerFunction;
 	export type ServerFunction = NetServerFunction;
+
+	export const ServerAsyncFunction = NetServerAsyncFunction;
+	export type ServerAsyncFunction = NetServerAsyncFunction;
 
 	export const GlobalEvent = NetGlobalEvent;
 	export type GlobalEvent = NetGlobalEvent;
@@ -114,11 +123,11 @@ namespace Net {
 						: new NetServerFunction(nameOrOptions.name);
 
 				if (nameOrOptions.callback) {
-					fn.setCallback(nameOrOptions.callback);
+					fn.SetCallback(nameOrOptions.callback);
 				}
 
 				if (nameOrOptions.cacheSeconds) {
-					fn.setClientCache(nameOrOptions.cacheSeconds);
+					fn.SetClientCache(nameOrOptions.cacheSeconds);
 				}
 
 				return fn;
