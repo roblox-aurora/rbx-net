@@ -38,8 +38,10 @@ export default class NetServerAsyncFunction {
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
 				const result: unknown | Promise<unknown> = callback(...data);
 				if (Promise.is(result)) {
-					await result.then(promiseResult => {
+					result.then(promiseResult => {
 						this.instance.FireClient(player, eventId, [promiseResult]);
+					}).catch((err: string) => {
+						warn("[rbx-net] Failed to send response to client: " + err);
 					});
 				} else {
 					this.instance.FireClient(player, eventId, [result]);
