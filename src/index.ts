@@ -17,7 +17,6 @@ const runService = game.GetService("RunService");
 
 const IS_CLIENT = (__LEMUR__ && !runService.IsServer()) || runService.IsClient();
 const IS_SERVER = runService.IsServer();
-const IS_STUDIO = runService.IsStudio();
 
 interface ICreateFunctionOptions {
 	name: string;
@@ -265,10 +264,6 @@ namespace Net {
 				reject("Could not find Server Function: " + name + " (did you create it?)");
 			}
 		});
-	}
-
-	if (IS_STUDIO) {
-		print("[rbx-net] Loaded rbx-net", `v${VERSION}`);
 	}
 
 	if (IS_SERVER) {
