@@ -69,7 +69,7 @@ Checks that the object is serializable
 
 ## Classes
 
-### [NetServerEvent](/class/NetServerEvent) {: .tag .server }
+### [NetServerEvent](/rbx-net/class/NetServerEvent) {: .tag .server }
 The server version of an event.
 
 ```ts
@@ -96,27 +96,27 @@ local event = Net.ServerEvent.new("NameHere")
 local event = Net.CreateEvent("NameHere")
 ```
 
-### [NetServerFunction](/class/NetServerFunction) {: .tag .server }
+### [NetServerFunction](/rbx-net/class/NetServerFunction) {: .tag .server }
 The server version of a function.
 
-### [NetServerAsyncFunction](/class/NetServerAsyncFunction) {: .tag .server }
+### [NetServerAsyncFunction](/rbx-net/class/NetServerAsyncFunction) {: .tag .server }
 Added in 1.2.0
 {: .added}
 
-### [NetGlobalServerEvent](/class/NetGlobalServerEvent) {: .tag .server }
+### [NetGlobalServerEvent](/rbx-net/class/NetGlobalServerEvent) {: .tag .server }
 Added in 1.0.13
 {: .added}
 
-### [NetServerThrottledEvent](/class/NetServerThrottledEvent) {: .tag .server }
+### [NetServerThrottledEvent](/rbx-net/class/NetServerThrottledEvent) {: .tag .server }
 
-### [NetServerThrottledFunction](/class/NetServerThrottledFunction) {: .tag .server }
+### [NetServerThrottledFunction](/rbx-net/class/NetServerThrottledFunction) {: .tag .server }
 
-### [NetGlobalEvent](/class/NetGlobalEvent) {: .tag .server }
+### [NetGlobalEvent](/rbx-net/class/NetGlobalEvent) {: .tag .server }
 Added in 1.0.13
 {: .added}
 
 
-### [NetClientEvent](/class/NetClientEvent) {: .tag .client }
+### [NetClientEvent](/rbx-net/class/NetClientEvent) {: .tag .client }
 The client version of an event.
 
 ```ts
@@ -147,9 +147,9 @@ local event = Net.WaitForClientEventAsync("NameHere"):andThen(function(event)
 end)
 ```
 
-### [NetClientFunction](/class/NetClientFunction) {: .tag .client }
+### [NetClientFunction](/rbx-net/class/NetClientFunction) {: .tag .client }
 The client version of a function.
 
-### [NetClientAsyncFunction](/class/NetClientAsyncFunction) {: .tag .client }
+### [NetClientAsyncFunction](/rbx-net/class/NetClientAsyncFunction) {: .tag .client }
 Added in 1.2.0
 {: .added}
