@@ -14,8 +14,8 @@ export default class NetClientAsyncFunction {
 	private listeners = new Map<string, IAsyncListener>();
 
 	constructor(name: string) {
-		this.instance = getRemoteOrThrow("RemoteEvent", `${name}~Async`);
-		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Client!");
+		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
+		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
 
 	public SetCallTimeout(timeout: number) {
@@ -33,18 +33,28 @@ export default class NetClientAsyncFunction {
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnClientEvent.Connect((...args: Array<unknown>) => {
+		this.connector = this.instance.OnClientEvent.Connect(async (...args: Array<unknown>) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				const result: unknown = callback(...data);
-				this.instance.FireServer(eventId, [result]);
+				const result: unknown | Promise<unknown> = callback(...data);
+				if (Promise.is(result)) {
+					result
+						.then(promiseResult => {
+							this.instance.FireServer(eventId, promiseResult);
+						})
+						.catch((err: string) => {
+							warn("[rbx-net] Failed to send response to server: " + err);
+						});
+				} else {
+					this.instance.FireServer(eventId, result);
+				}
 			} else {
 				warn("Recieved message without eventId");
 			}
 		});
 	}
 
-	public async CallServerAsync(...args: Array<unknown>): Promise<Array<unknown>> {
+	public async CallServerAsync(...args: Array<unknown>): Promise<unknown> {
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 
@@ -54,7 +64,7 @@ export default class NetClientAsyncFunction {
 			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
 				const [eventId, data] = recvArgs;
 
-				if (typeIs(eventId, "string") && typeIs(data, "table")) {
+				if (typeIs(eventId, "string") && data !== undefined) {
 					if (eventId === id) {
 						DebugLog("Disconnected CallServerAsync EventId", eventId);
 						connection.Disconnect();
