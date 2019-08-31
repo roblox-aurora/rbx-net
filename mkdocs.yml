@@ -8,7 +8,21 @@ nav:
         - Install for Lua: lua-install.md
     - Guide:
         - Events: events.md
-    - API Reference: api-reference.md
+    - API Reference:
+      - Net namespace: api-reference.md
+      - Server Classes:
+        - ServerEvent: class/NetServerEvent.md
+        - ServerFunction: class/NetServerFunction.md
+        - ServerThrottledFunction: class/NetServerThrottledFunction.md
+        - ServerThrottledEvent: class/NetServerThrottledEvent.md
+        - GlobalEvent: class/NetGlobalClientEvent.md
+        - GlobalServerEvent: class/NetGlobalClientEvent.md
+        - ServerAsyncFunction: class/NetServerAsyncFunction.md
+      - Client Classes:
+        - ClientEvent: class/NetClientEvent.md
+        - ClientFunction: class/NetClientFunction.md
+        - GlobalClientEvent: class/NetGlobalClientEvent.md
+        - ClientAsyncFunction: class/NetClientAsyncFunction.md
 theme:
     # feature:
     #  tabs: true

@@ -69,7 +69,7 @@ Checks that the object is serializable
 
 ## Classes
 
-### [NetServerEvent]() {: .tag .server }
+### [NetServerEvent](/class/NetServerEvent) {: .tag .server }
 The server version of an event.
 
 ```ts
@@ -96,27 +96,27 @@ local event = Net.ServerEvent.new("NameHere")
 local event = Net.CreateEvent("NameHere")
 ```
 
-### [NetServerFunction]() {: .tag .server }
+### [NetServerFunction](/class/NetServerFunction) {: .tag .server }
 The server version of a function.
 
-### [NetServerAsyncFunction]() {: .tag .server }
+### [NetServerAsyncFunction](/class/NetServerAsyncFunction) {: .tag .server }
 Added in 1.2.0
 {: .added}
 
-### [NetGlobalServerEvent]() {: .tag .server }
+### [NetGlobalServerEvent](/class/NetGlobalServerEvent) {: .tag .server }
 Added in 1.0.13
 {: .added}
 
-### [NetServerThrottledEvent]() {: .tag .server }
+### [NetServerThrottledEvent](/class/NetServerThrottledEvent) {: .tag .server }
 
-### [NetServerThrottledFunction]() {: .tag .server }
+### [NetServerThrottledFunction](/class/NetServerThrottledFunction) {: .tag .server }
 
-### [NetGlobalEvent]() {: .tag .server }
+### [NetGlobalEvent](/class/NetGlobalEvent) {: .tag .server }
 Added in 1.0.13
 {: .added}
 
 
-### [NetClientEvent]() {: .tag .client }
+### [NetClientEvent](/class/NetClientEvent) {: .tag .client }
 The client version of an event.
 
 ```ts
@@ -147,9 +147,9 @@ local event = Net.WaitForClientEventAsync("NameHere"):andThen(function(event)
 end)
 ```
 
-### [NetClientFunction]() {: .tag .client }
+### [NetClientFunction](/class/NetClientFunction) {: .tag .client }
 The client version of a function.
 
-### [NetClientAsyncFunction]() {: .tag .client }
+### [NetClientAsyncFunction](/class/NetClientAsyncFunction) {: .tag .client }
 Added in 1.2.0
 {: .added}
