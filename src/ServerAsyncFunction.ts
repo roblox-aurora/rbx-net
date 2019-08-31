@@ -1,5 +1,5 @@
 import { findOrCreateRemote, IS_CLIENT, IAsyncListener, t_assert, StaticArguments } from "./internal";
-import { DebugEnabled, DebugLog, DebugWarn } from "./configuration";
+import { DebugLog, DebugWarn } from "./configuration";
 
 const HttpService = game.GetService("HttpService");
 
@@ -47,13 +47,13 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 					if (Promise.is(result)) {
 						result
 							.then(promiseResult => {
-								this.instance.FireClient(player, eventId, [promiseResult]);
+								this.instance.FireClient(player, eventId, promiseResult);
 							})
 							.catch((err: string) => {
 								warn("[rbx-net] Failed to send response to client: " + err);
 							});
 					} else {
-						this.instance.FireClient(player, eventId, [result]);
+						this.instance.FireClient(player, eventId, result);
 					}
 				} else {
 					warn("[rbx-net-async] Recieved message without eventId");
@@ -64,7 +64,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 		});
 	}
 
-	public async CallPlayerAsync(player: Player, ...args: Array<unknown>): Promise<Array<unknown>> {
+	public async CallPlayerAsync(player: Player, ...args: Array<unknown>): Promise<unknown> {
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireClient(player, id, { ...args });
 
@@ -75,7 +75,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 				(fromPlayer: Player, ...recvArgs: Array<unknown>) => {
 					const [eventId, data] = recvArgs;
 
-					if (typeIs(eventId, "string") && typeIs(data, "table")) {
+					if (typeIs(eventId, "string") && data !== undefined) {
 						if (player === player && eventId === id) {
 							DebugLog("Disconnected CallPlayerAsync EventId", eventId);
 							connection.Disconnect();

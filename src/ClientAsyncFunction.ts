@@ -38,13 +38,15 @@ export default class NetClientAsyncFunction {
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
 				const result: unknown | Promise<unknown> = callback(...data);
 				if (Promise.is(result)) {
-					result.then(promiseResult => {
-						this.instance.FireServer(eventId, [promiseResult]);
-					}).catch((err: string) => {
-						warn("[rbx-net] Failed to send response to server: " + err);
-					});
+					result
+						.then(promiseResult => {
+							this.instance.FireServer(eventId, promiseResult);
+						})
+						.catch((err: string) => {
+							warn("[rbx-net] Failed to send response to server: " + err);
+						});
 				} else {
-					this.instance.FireServer(eventId, [result]);
+					this.instance.FireServer(eventId, result);
 				}
 			} else {
 				warn("Recieved message without eventId");
@@ -52,7 +54,7 @@ export default class NetClientAsyncFunction {
 		});
 	}
 
-	public async CallServerAsync(...args: Array<unknown>): Promise<Array<unknown>> {
+	public async CallServerAsync(...args: Array<unknown>): Promise<unknown> {
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 
@@ -62,7 +64,7 @@ export default class NetClientAsyncFunction {
 			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
 				const [eventId, data] = recvArgs;
 
-				if (typeIs(eventId, "string") && typeIs(data, "table")) {
+				if (typeIs(eventId, "string") && data !== undefined) {
 					if (eventId === id) {
 						DebugLog("Disconnected CallServerAsync EventId", eventId);
 						connection.Disconnect();
