@@ -24,11 +24,6 @@ It's as simple as
 
 Then you can easily import it using
 ```ts
-import Net from "net";
-```
-
-or
-```ts
 import Net from "@rbxts/net";
 ```
 
