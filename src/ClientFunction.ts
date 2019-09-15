@@ -32,25 +32,6 @@ export default class NetClientFunction<SR extends unknown> {
 
 		return new NetClientFunction<R>(name);
 	}
-
-	/**
-	 * @deprecated
-	 * @see GetCache
-	 */
-	public readonly getCache = () => {
-		warn(`${this.instance.Name}::getCache is deprecated, use ${this.instance.Name}::GetCache instead!`);
-		return this.GetCache();
-	};
-
-	/**
-	 * @deprecated
-	 * @see GetInstance
-	 */
-	public readonly getInstance = () => {
-		warn(`${this.instance.Name}::getInstance is deprecated, use ${this.instance.Name}::GetInstance instead!`);
-		return this.GetInstance();
-	};
-
 	/**
 	 * The remoteFunction instance
 	 */

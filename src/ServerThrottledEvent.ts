@@ -1,5 +1,5 @@
 import NetServerEvent from "./ServerEvent";
-import { RequestCounter, errorft } from "./internal";
+import { RequestCounter, errorft, StaticArguments } from "./internal";
 import throttler from "./Throttle";
 import { GetConfiguration } from "./configuration";
 
@@ -7,12 +7,12 @@ import { GetConfiguration } from "./configuration";
  * A server event that can be rate limited
  * @rbxts server
  */
-export default class NetServerThrottledEvent extends NetServerEvent {
+export default class NetServerThrottledEvent<C extends Array<any> = Array<unknown>> extends NetServerEvent<C> {
 	private maxRequestsPerMinute: number = 0;
 	private clientRequests: RequestCounter;
 
-	constructor(name: string, rateLimit: number) {
-		super(name);
+	constructor(name: string, rateLimit: number, ...recievedPropTypes: C) {
+		super(name, ...recievedPropTypes);
 		this.maxRequestsPerMinute = rateLimit;
 
 		this.clientRequests = throttler.Get(`Event~${name}`);
@@ -23,28 +23,10 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	}
 
 	/**
-	 * @deprecated
-	 * @see SetRateLimit
-	 */
-	public readonly setRateLimit = (requestsPerMinute: number) => {
-		warn(`${this.instance.Name}::setRateLimit is deprecated, use ${this.instance.Name}::SetRateLimit instead!`);
-		return this.SetRateLimit(requestsPerMinute);
-	};
-
-	/**
-	 * @deprecated
-	 * @see GetRateLimit
-	 */
-	public readonly getRateLimit = () => {
-		warn(`${this.instance.Name}::getRateLimit is deprecated, use ${this.instance.Name}::GetRateLimit instead!`);
-		return this.GetRateLimit();
-	};
-
-	/**
 	 * Connect a fucntion to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
-	public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
+	public Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void) {
 		return this.instance.OnServerEvent.Connect((player: Player, ...args: Array<any>) => {
 			const maxRequests = this.maxRequestsPerMinute;
 			const clientRequestCount = this.clientRequests.Get(player);
@@ -56,7 +38,8 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 				});
 			} else {
 				this.clientRequests.Increment(player);
-				callback(player, ...(args as T));
+				// @ts-ignore ... again. unfortunately.
+				callback(player, ...args);
 			}
 		});
 	}

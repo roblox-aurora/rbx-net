@@ -109,12 +109,10 @@ namespace Net {
 	 * @param nameOrOptions The name of the function
 	 * @rbxts server
 	 */
-	export function CreateFunction<CR extends any>(
-		nameOrOptions: string | ICreateFunctionOptions,
-	): NetServerFunction<CR> {
+	export function CreateFunction(nameOrOptions: string | ICreateFunctionOptions): NetServerFunction {
 		if (IS_SERVER) {
 			if (typeIs(nameOrOptions, "string")) {
-				return new NetServerFunction<CR>(nameOrOptions);
+				return new NetServerFunction(nameOrOptions);
 			} else {
 				const fn =
 					nameOrOptions.rateLimit !== undefined
@@ -132,8 +130,7 @@ namespace Net {
 				return fn;
 			}
 		} else {
-			error("Net.createFunction can only be used on the server!");
-			throw "";
+			throw "Net.createFunction can only be used on the server!";
 		}
 	}
 
@@ -143,15 +140,11 @@ namespace Net {
 	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
 	 * @rbxts server
 	 */
-	export function CreateThrottledFunction<CR extends any>(
-		name: string,
-		rateLimit: number,
-	): NetServerThrottledFunction<CR> {
+	export function CreateThrottledFunction(name: string, rateLimit: number): NetServerThrottledFunction {
 		if (IS_SERVER) {
-			return new NetServerThrottledFunction<CR>(name, rateLimit);
+			return new NetServerThrottledFunction(name, rateLimit);
 		} else {
-			error("Net.createFunction can only be used on the server!");
-			throw "";
+			throw "Net.createFunction can only be used on the server!";
 		}
 	}
 
@@ -165,7 +158,6 @@ namespace Net {
 		if (IS_SERVER) {
 			return new NetServerThrottledEvent(name, rateLimit);
 		} else {
-			error("Net.createFunction can only be used on the server!");
 			throw "Net.createFunction can only be used on the server!";
 		}
 	}
@@ -179,7 +171,6 @@ namespace Net {
 		if (IS_SERVER) {
 			return new NetServerEvent(name);
 		} else {
-			error("Net.createFunction can only be used on the server!");
 			throw "Net.createFunction can only be used on the server!";
 		}
 	}
@@ -255,7 +246,7 @@ namespace Net {
 	}
 
 	/** @rbxts server */
-	export function GetServerFunctionAsync<CR extends any>(name: string): Promise<NetServerFunction<CR>> {
+	export function GetServerFunctionAsync(name: string): Promise<NetServerFunction> {
 		return new Promise((resolve, reject) => {
 			if (functionExists(name)) {
 				const newFunc = new NetServerFunction(name);

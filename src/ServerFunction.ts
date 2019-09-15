@@ -1,14 +1,10 @@
 import { findOrCreateRemote, IS_CLIENT, StaticArguments, t_assert } from "./internal";
 
-function t_string(value: unknown): value is string {
-	return true;
-}
-
 /**
  * A function on the server
  * @rbxts server
  */
-export default class NetServerFunction<CR extends any = any, C extends Array<any> = Array<unknown>> {
+export default class NetServerFunction<C extends Array<any> = Array<unknown>> {
 	/** @internal */
 	protected instance: RemoteFunction;
 	protected propTypes: C | undefined;
@@ -23,33 +19,6 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	}
 
 	/**
-	 * @deprecated
-	 * @see GetCallback
-	 */
-	public readonly getCallback = () => {
-		warn(`${this.instance.Name}::getCallback is deprecated, use ${this.instance.Name}::GetCallback instead!`);
-		return this.GetCallback();
-	};
-
-	/**
-	 * @deprecated
-	 * @see GetClientCache
-	 */
-	public readonly getClientCache = () => {
-		warn(`${this.instance.Name}::getClientCache is deprecated, use ${this.instance.Name}::GetClientCache instead!`);
-		return this.GetClientCache();
-	};
-
-	/**
-	 * @deprecated
-	 * @see SetCallback
-	 */
-	public readonly setCallback = <R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) => {
-		warn(`${this.instance.Name}::setCallback is deprecated, use ${this.instance.Name}::SetCallback instead!`);
-		return this.SetCallback(func);
-	};
-
-	/**
 	 * The callback function
 	 */
 	public GetCallback(): Callback {
@@ -60,14 +29,6 @@ export default class NetServerFunction<CR extends any = any, C extends Array<any
 	 * Set the callback function when called by the client
 	 */
 	public SetCallback<R extends unknown>(func: (player: Player, ...args: StaticArguments<C>) => R) {
-		// if (this.instance.OnServerInvoke !== undefined) {
-		// 	error(
-		// 		`[rbx-net] The callback for ${this.instance.Name} is already set.\n` +
-		// 			`\t* Changing this callback may lead to a different behaviour than expected from the client. ` +
-		// 			`Thus, it is not allowed.`,
-		// 	);
-		// }
-
 		if (this.propTypes !== undefined) {
 			this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 				if (t_assert(this.propTypes!, args)) {

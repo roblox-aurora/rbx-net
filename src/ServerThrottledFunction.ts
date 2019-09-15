@@ -1,4 +1,4 @@
-import { RequestCounter, errorft } from "./internal";
+import { RequestCounter, errorft, StaticArguments } from "./internal";
 import throttler from "./Throttle";
 import { GetConfiguration } from "./configuration";
 import NetServerFunction from "./ServerFunction";
@@ -7,15 +7,15 @@ import NetServerFunction from "./ServerFunction";
  * A server function that can be rate limited
  * @rbxts server
  */
-export default class NetServerThrottledFunction<CR extends any = any> extends NetServerFunction<CR> {
+export default class NetServerThrottledFunction<C extends Array<any> = Array<unknown>> extends NetServerFunction<C> {
 	/** @internal */
 	public static rates = new Map<string, Array<number>>();
 
 	private maxRequestsPerMinute: number = 0;
 	private clientRequests: RequestCounter;
 
-	constructor(name: string, rateLimit: number) {
-		super(name);
+	constructor(name: string, rateLimit: number, ...recievedPropTypes: C) {
+		super(name, ...recievedPropTypes);
 		this.maxRequestsPerMinute = rateLimit;
 
 		this.clientRequests = throttler.Get(`Function~${name}`);
@@ -25,34 +25,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 		clientValue.Value = rateLimit;
 	}
 
-	/**
-	 * @deprecated
-	 * @see SetCallback
-	 */
-	public readonly setCallback = (func: Callback) => {
-		warn(`${this.instance.Name}::setCallback is deprecated, use ${this.instance.Name}::SetCallback instead!`);
-		return this.SetCallback(func);
-	};
-
-	/**
-	 * @deprecated
-	 * @see SetRateLimit
-	 */
-	public readonly setRateLimit = (requestsPerMinute: number) => {
-		warn(`${this.instance.Name}::setRateLimit is deprecated, use ${this.instance.Name}::SetRateLimit instead!`);
-		return this.SetRateLimit(requestsPerMinute);
-	};
-
-	/**
-	 * @deprecated
-	 * @see GetRateLimit
-	 */
-	public readonly getRateLimit = () => {
-		warn(`${this.instance.Name}::getRateLimit is deprecated, use ${this.instance.Name}::GetRateLimit instead!`);
-		return this.GetRateLimit();
-	};
-
-	public SetCallback(callback: Callback) {
+	public SetCallback<R extends unknown>(callback: (player: Player, ...args: StaticArguments<C>) => R) {
 		this.instance.OnServerInvoke = (player: Player, ...args: Array<unknown>) => {
 			const maxRequests = this.maxRequestsPerMinute;
 			const clientRequestCount = this.clientRequests.Get(player);
@@ -64,6 +37,7 @@ export default class NetServerThrottledFunction<CR extends any = any> extends Ne
 				});
 			} else {
 				this.clientRequests.Increment(player);
+				// @ts-ignore ... again. unfortunately.
 				return callback(player, ...args);
 			}
 		};
