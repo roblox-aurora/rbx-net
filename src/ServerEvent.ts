@@ -46,7 +46,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	}
 
 	/**
-	 * Connect a fucntion to fire when the event is invoked by the client
+	 * Connect a function to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void) {

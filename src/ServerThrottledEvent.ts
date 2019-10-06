@@ -41,7 +41,7 @@ export default class NetServerThrottledEvent extends NetServerEvent {
 	};
 
 	/**
-	 * Connect a fucntion to fire when the event is invoked by the client
+	 * Connect a function to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect<T extends Array<any>>(callback: (sourcePlayer: Player, ...args: T) => void) {
