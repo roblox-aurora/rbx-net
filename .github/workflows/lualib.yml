@@ -53,6 +53,7 @@ jobs:
           echo "Removing test folder"
           rm -rf lualib/Test
           
+          cd lualib
           echo "Commiting to Git..."
           git add -A
           if ! git diff-index --quiet HEAD --; then
