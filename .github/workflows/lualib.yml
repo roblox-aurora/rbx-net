@@ -53,14 +53,14 @@ jobs:
           echo "Removing test folder"
           rm -rf lualib/Test
           
-          export PACKAGE_VERSION=`cat package.json | jq -r '.version'`
+          PACKAGE_VERSION=`cat package.json | jq -r '.version'`
           
           echo "Generate TOML"
           echo "name = \"rbx-net\"
           author = \"Vorlias\"
           license = \"MIT\"
           content_root = \"\"
-          version = \"$PACKAGE_VERSION\"" >> lualib/rotriever.toml
+          version = \"$PACKAGE_VERSION\"" > lualib/rotriever.toml
           
           cd lualib
           echo "Commiting to Git..."
