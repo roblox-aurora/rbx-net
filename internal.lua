@@ -1,24 +1,28 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local exports = {};
 local replicatedStorage = game:GetService("ReplicatedStorage");
 local runService = game:GetService("RunService");
 local IS_SERVER = runService:IsServer();
-local IS_CLIENT = (__LEMUR__ and not runService:IsServer()) or runService:IsClient();
+local _0 = __LEMUR__;
+local _1 = _0 and not (runService:IsServer());
+local IS_CLIENT = _1 or runService:IsClient();
 local MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10;
 local function getGlobalRemote(name)
 	return "$" .. name;
 end;
 local function isLuaTable(value)
-	return (typeof(value) == "table");
+	return (type(value) == "table");
 end;
 local REMOTES_FOLDER_NAME = "Remotes";
 local FUNCTIONS_FOLDER_NAME = "Functions";
 local EVENTS_FOLDER_NAME = "Events";
+local ASYNC_FUNCTIONS_FOLDER_NAME = "AsyncFunctions";
 local remoteFolder;
 local eventFolder;
 local functionFolder;
+local asyncFunctionFolder;
 local ServerTickFunctions = {};
 local function findOrCreateFolder(parent, name)
 	local folder = parent:FindFirstChild(name);
@@ -33,9 +37,11 @@ end;
 remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
 eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
+asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
 local function errorft(message, vars)
 	message = message:gsub("{([%w_][%w%d_]*)}", function(token)
-		return vars[token] or token;
+		local _2 = vars[token];
+		return (_2 ~= 0 and _2 == _2 and _2 ~= "" and _2) or token;
 	end);
 	error(message, 2);
 end;
@@ -57,6 +63,8 @@ local function getRemoteFolder(remoteType)
 		targetFolder = eventFolder;
 	elseif remoteType == "RemoteFunction" then
 		targetFolder = functionFolder;
+	elseif remoteType == "AsyncRemoteFunction" then
+		targetFolder = asyncFunctionFolder;
 	else
 		return error("Invalid type: " .. remoteType);
 	end;
@@ -80,12 +88,16 @@ local function findOrCreateRemote(remoteType, name)
 	if existing then
 		return existing;
 	else
-		if not IS_SERVER then
+		if not (IS_SERVER) then
 			error("Creation of Events or Functions must be done on server!");
 		end;
 		local remote;
-		if remoteType == "RemoteEvent" or remoteType == "RemoteFunction" then
-			remote = Instance.new(remoteType);
+		if remoteType == "RemoteEvent" then
+			remote = Instance.new("RemoteEvent");
+		elseif remoteType == "AsyncRemoteFunction" then
+			remote = Instance.new("RemoteEvent");
+		elseif remoteType == "RemoteFunction" then
+			remote = Instance.new("RemoteFunction");
 		else
 			error("Invalid Remote Type: " .. remoteType);
 		end;
@@ -104,7 +116,7 @@ local function t_assert(types, args)
 		while i < #types do
 			local typeCheck = types[i + 1];
 			local value = args[i + 1];
-			if not typeCheck(value) then
+			if not (typeCheck(value)) then
 				warn("[net-types] Argument at index " .. tostring(i) .. " was invalid type.");
 				return false;
 			end;
@@ -115,8 +127,8 @@ local function t_assert(types, args)
 end;
 if IS_SERVER then
 	game:GetService("RunService").Stepped:Connect(function(time, step)
-		for _0 = 1, #ServerTickFunctions do
-			local f = ServerTickFunctions[_0];
+		for _2 = 1, #ServerTickFunctions do
+			local f = ServerTickFunctions[_2];
 			f();
 		end;
 	end);

@@ -1,64 +1,69 @@
-local IS_LUA_MODULE = true
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.vendor.RuntimeLib);
 local exports;
 local Net;
-local throttler = TS.import(script, "Throttle");
-local Serializer = TS.import(script, "Serializer");
-local config = TS.import(script, "configuration");
-local _0 = TS.import(script, "internal");
+local throttler = TS.import(script, script, "Throttle");
+local Serializer = TS.import(script, script, "Serializer");
+local config = TS.import(script, script, "configuration");
+local _0 = TS.import(script, script, "internal");
 local functionExists, eventExists, ServerTickFunctions = _0.functionExists, _0.eventExists, _0.ServerTickFunctions;
-local NetServerEvent = TS.import(script, "ServerEvent").default;
-local NetClientEvent = TS.import(script, "ClientEvent").default;
-local NetClientFunction = TS.import(script, "ClientFunction").default;
-local NetServerFunction = TS.import(script, "ServerFunction").default;
-local NetServerThrottledFunction = TS.import(script, "ServerThrottledFunction").default;
-local NetServerThrottledEvent = TS.import(script, "ServerThrottledEvent").default;
-local NetGlobalEvent = TS.import(script, "GlobalEvent").default;
-local NetGlobalServerEvent = TS.import(script, "GlobalServerEvent").default;
+local NetServerEvent = TS.import(script, script, "ServerEvent").default;
+local NetClientEvent = TS.import(script, script, "ClientEvent").default;
+local NetClientFunction = TS.import(script, script, "ClientFunction").default;
+local NetServerFunction = TS.import(script, script, "ServerFunction").default;
+local NetServerThrottledFunction = TS.import(script, script, "ServerThrottledFunction").default;
+local NetServerThrottledEvent = TS.import(script, script, "ServerThrottledEvent").default;
+local NetGlobalEvent = TS.import(script, script, "GlobalEvent").default;
+local NetGlobalServerEvent = TS.import(script, script, "GlobalServerEvent").default;
+local NetServerAsyncFunction = TS.import(script, script, "ServerAsyncFunction").default;
+local NetClientAsyncFunction = TS.import(script, script, "ClientAsyncFunction").default;
 local runService = game:GetService("RunService");
-local IS_CLIENT = (__LEMUR__ and not runService:IsServer()) or runService:IsClient();
+local _1 = __LEMUR__;
+local _2 = _1 and not (runService:IsServer());
+local IS_CLIENT = _2 or runService:IsClient();
 local IS_SERVER = runService:IsServer();
-local IS_STUDIO = runService:IsStudio();
 Net = Net or {} do
-	local _1 = Net;
+	local _3 = Net;
 	local SetConfiguration = config.SetConfiguration;
+	local SetClientConfiguration = config.SetClientConfiguration;
 	local GetConfiguration = config.GetConfiguration;
 	local VERSION = {};
 	VERSION.number = {
 		major = 1;
-		minor = 0;
-		revision = 13;
+		minor = 2;
+		revision = 0;
 	};
 	VERSION.date = 190602;
-	local _2;
+	local _4;
 	if IS_LUA_MODULE ~= nil then
-		_2 = "lua";
+		_4 = "lua";
 	else
-		_2 = "ts";
+		_4 = "ts";
 	end;
-	VERSION.tag = _2;
+	VERSION.tag = _4;
 	setmetatable(VERSION, {
 		__tostring = function(self)
-			local _3 = self.number;
-			local major = _3.major;
-			local minor = _3.minor;
-			local revision = _3.revision;
-			local _4;
+			local _5 = self.number;
+			local major = _5.major;
+			local minor = _5.minor;
+			local revision = _5.revision;
+			local _6;
 			if IS_LUA_MODULE ~= nil then
-				_4 = "-lua";
+				_6 = "-lua";
 			else
-				_4 = "";
+				_6 = "";
 			end;
-			return tostring(major) .. "." .. tostring(minor) .. "." .. tostring(revision) .. _4;
+			return tostring(major) .. "." .. tostring(minor) .. "." .. tostring(revision) .. _6;
 		end;
 	});
 	local ServerEvent = NetServerEvent;
 	local ClientEvent = NetClientEvent;
 	local ClientFunction = NetClientFunction;
+	local ClientAsyncFunction = NetClientAsyncFunction;
 	local ServerFunction = NetServerFunction;
+	local ServerAsyncFunction = NetServerAsyncFunction;
 	local GlobalEvent = NetGlobalEvent;
 	local GlobalServerEvent = NetGlobalServerEvent;
 	local ServerThrottledEvent = NetServerThrottledEvent;
@@ -74,7 +79,7 @@ Net = Net or {} do
 	local IsSerializable = Serializer.IsSerializable;
 	local function CreateFunction(nameOrOptions)
 		if IS_SERVER then
-			if (typeof(nameOrOptions) == "string") then
+			if type(nameOrOptions) == "string" then
 				return NetServerFunction.new(nameOrOptions);
 			else
 				local fn;
@@ -84,10 +89,11 @@ Net = Net or {} do
 					fn = NetServerFunction.new(nameOrOptions.name);
 				end;
 				if nameOrOptions.callback then
-					fn.setCallback(nameOrOptions.callback);
+					fn:SetCallback(nameOrOptions.callback);
 				end;
-				if nameOrOptions.cacheSeconds then
-					fn.setClientCache(nameOrOptions.cacheSeconds);
+				local _5 = nameOrOptions.cacheSeconds;
+				if _5 ~= 0 and _5 == _5 and _5 then
+					fn:SetClientCache(nameOrOptions.cacheSeconds);
 				end;
 				return fn;
 			end;
@@ -146,9 +152,6 @@ Net = Net or {} do
 			end;
 		end);
 	end;
-	if IS_STUDIO then
-		print("[rbx-net] Loaded rbx-net", "v" .. tostring(VERSION));
-	end;
 	if IS_SERVER then
 		local lastTick = 0;
 		ServerTickFunctions[#ServerTickFunctions + 1] = function()
@@ -158,30 +161,33 @@ Net = Net or {} do
 			end;
 		end;
 	end;
-	_1.SetConfiguration = SetConfiguration;
-	_1.GetConfiguration = GetConfiguration;
-	_1.VERSION = VERSION;
-	_1.ServerEvent = ServerEvent;
-	_1.ClientEvent = ClientEvent;
-	_1.ClientFunction = ClientFunction;
-	_1.ServerFunction = ServerFunction;
-	_1.GlobalEvent = GlobalEvent;
-	_1.GlobalServerEvent = GlobalServerEvent;
-	_1.ServerThrottledEvent = ServerThrottledEvent;
-	_1.ServerThrottledFunction = ServerThrottledFunction;
-	_1.IsClient = IsClient;
-	_1.IsServer = IsServer;
-	_1.Serialize = Serialize;
-	_1.Deserialize = Deserialize;
-	_1.IsSerializable = IsSerializable;
-	_1.CreateFunction = CreateFunction;
-	_1.CreateThrottledFunction = CreateThrottledFunction;
-	_1.CreateThrottledEvent = CreateThrottledEvent;
-	_1.CreateEvent = CreateEvent;
-	_1.WaitForClientFunctionAsync = WaitForClientFunctionAsync;
-	_1.WaitForClientEventAsync = WaitForClientEventAsync;
-	_1.GetServerEventAsync = GetServerEventAsync;
-	_1.GetServerFunctionAsync = GetServerFunctionAsync;
+	_3.SetConfiguration = SetConfiguration;
+	_3.SetClientConfiguration = SetClientConfiguration;
+	_3.GetConfiguration = GetConfiguration;
+	_3.VERSION = VERSION;
+	_3.ServerEvent = ServerEvent;
+	_3.ClientEvent = ClientEvent;
+	_3.ClientFunction = ClientFunction;
+	_3.ClientAsyncFunction = ClientAsyncFunction;
+	_3.ServerFunction = ServerFunction;
+	_3.ServerAsyncFunction = ServerAsyncFunction;
+	_3.GlobalEvent = GlobalEvent;
+	_3.GlobalServerEvent = GlobalServerEvent;
+	_3.ServerThrottledEvent = ServerThrottledEvent;
+	_3.ServerThrottledFunction = ServerThrottledFunction;
+	_3.IsClient = IsClient;
+	_3.IsServer = IsServer;
+	_3.Serialize = Serialize;
+	_3.Deserialize = Deserialize;
+	_3.IsSerializable = IsSerializable;
+	_3.CreateFunction = CreateFunction;
+	_3.CreateThrottledFunction = CreateThrottledFunction;
+	_3.CreateThrottledEvent = CreateThrottledEvent;
+	_3.CreateEvent = CreateEvent;
+	_3.WaitForClientFunctionAsync = WaitForClientFunctionAsync;
+	_3.WaitForClientEventAsync = WaitForClientEventAsync;
+	_3.GetServerEventAsync = GetServerEventAsync;
+	_3.GetServerFunctionAsync = GetServerFunctionAsync;
 end;
 exports = Net;
 return exports;

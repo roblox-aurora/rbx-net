@@ -1,12 +1,12 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
-local NetServerEvent = TS.import(script.Parent, "ServerEvent").default;
-local errorft = TS.import(script.Parent, "internal").errorft;
-local throttler = TS.import(script.Parent, "Throttle");
-local GetConfiguration = TS.import(script.Parent, "configuration").GetConfiguration;
+local NetServerEvent = TS.import(script, script.Parent, "ServerEvent").default;
+local errorft = TS.import(script, script.Parent, "internal").errorft;
+local throttler = TS.import(script, script.Parent, "Throttle");
+local GetConfiguration = TS.import(script, script.Parent, "configuration").GetConfiguration;
 local NetServerThrottledEvent;
 do
 	local super = NetServerEvent;

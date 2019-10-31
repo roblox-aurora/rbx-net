@@ -1,12 +1,12 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
-local NetServerEvent = TS.import(script.Parent, "ServerEvent").default;
-local _0 = TS.import(script.Parent, "GlobalEvent");
-local NetGlobalEvent, isSubscriptionMessage, ISubscriptionMessage = _0.default, _0.isSubscriptionMessage, _0.ISubscriptionMessage;
-local _1 = TS.import(script.Parent, "internal");
+local NetServerEvent = TS.import(script, script.Parent, "ServerEvent").default;
+local _0 = TS.import(script, script.Parent, "GlobalEvent");
+local NetGlobalEvent, isSubscriptionMessage = _0.default, _0.isSubscriptionMessage;
+local _1 = TS.import(script, script.Parent, "internal");
 local getGlobalRemote, IS_CLIENT, isLuaTable = _1.getGlobalRemote, _1.IS_CLIENT, _1.isLuaTable;
 local Players = game:GetService("Players");
 local function isTargetedSubscriptionMessage(value)
@@ -31,7 +31,7 @@ do
 	function NetGlobalServerEvent:constructor(name)
 		self.instance = NetServerEvent.new(getGlobalRemote(name));
 		self.event = NetGlobalEvent.new(name);
-		assert(not IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
+		assert(not (IS_CLIENT), "Cannot create a Net.GlobalServerEvent on the Client!");
 		self.eventHandler = self.event:Connect(function(message)
 			if isTargetedSubscriptionMessage(message) then
 				self:recievedMessage(message.Data);
@@ -41,7 +41,7 @@ do
 		end);
 	end;
 	function NetGlobalServerEvent:getPlayersMatchingId(matching)
-		if (typeof(matching) == "number") then
+		if type(matching) == "number" then
 			return Players:GetPlayerByUserId(matching);
 		else
 			local players = {};
@@ -61,13 +61,16 @@ do
 			if players then
 				self.instance:SendToPlayers(players, unpack(message.InnerData));
 			end;
-		elseif message.TargetId then
-			local player = self:getPlayersMatchingId(message.TargetId);
-			if player then
-				self.instance:SendToPlayer(player, unpack(message.InnerData));
-			end;
 		else
-			self.instance:SendToAllPlayers(unpack(message.InnerData));
+			local _2 = message.TargetId;
+			if _2 ~= 0 and _2 == _2 and _2 then
+				local player = self:getPlayersMatchingId(message.TargetId);
+				if player then
+					self.instance:SendToPlayer(player, unpack(message.InnerData));
+				end;
+			else
+				self.instance:SendToAllPlayers(unpack(message.InnerData));
+			end;
 		end;
 	end;
 	function NetGlobalServerEvent:Disconnect()

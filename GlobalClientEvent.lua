@@ -1,10 +1,10 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
-local getGlobalRemoteId = TS.import(script.Parent, "internal").getGlobalRemote;
-local NetClientEvent = TS.import(script.Parent, "ClientEvent").default;
+local getGlobalRemoteId = TS.import(script, script.Parent, "internal").getGlobalRemote;
+local NetClientEvent = TS.import(script, script.Parent, "ClientEvent").default;
 local NetGlobalClientEvent;
 do
 	NetGlobalClientEvent = setmetatable({}, {

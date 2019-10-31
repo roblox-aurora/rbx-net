@@ -1,12 +1,12 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local NetGlobalEvent;
-local _0 = TS.import(script.Parent, "internal");
+local _0 = TS.import(script, script.Parent, "internal");
 local ServerTickFunctions, isLuaTable = _0.ServerTickFunctions, _0.isLuaTable;
-local MockMessagingService = TS.import(script.Parent, "MockMessagingService");
+local MockMessagingService = TS.import(script, script.Parent, "MockMessagingService");
 local MessagingService = game:GetService("MessagingService");
 local Players = game:GetService("Players");
 local IS_STUDIO = game:GetService("RunService"):IsStudio();
@@ -60,12 +60,14 @@ do
 	function NetGlobalEvent:constructor(name)
 		self.name = name;
 	end;
-	function NetGlobalEvent.GetMessageLimit(self)
+	-- static methods
+	function NetGlobalEvent:GetMessageLimit()
 		return 150 + 60 * #Players:GetPlayers();
 	end;
-	function NetGlobalEvent.GetSubscriptionLimit(self)
+	function NetGlobalEvent:GetSubscriptionLimit()
 		return 5 + 2 * #Players:GetPlayers();
 	end;
+	-- instance methods
 	function NetGlobalEvent:SendToServer(jobId, message)
 		self:SendToAllServers({
 			jobId = jobId;
@@ -83,7 +85,9 @@ do
 		else
 			globalEventMessageCounter = globalEventMessageCounter + 1;
 			TS.Promise.spawn(function()
-				((IS_STUDIO and MockMessagingService) or MessagingService):PublishAsync(self.name, message);
+				local _1 = IS_STUDIO;
+				local _2 = _1 and MockMessagingService;
+				(_2 or MessagingService):PublishAsync(self.name, message);
 			end);
 		end;
 	end;
@@ -93,7 +97,9 @@ do
 			error("[rbx-net] Exceeded Subscription limit of " .. tostring(limit) .. "!");
 		end;
 		globalSubscriptionCounter = globalSubscriptionCounter + 1;
-		return ((IS_STUDIO and MockMessagingService) or MessagingService):SubscribeAsync(self.name, function(recieved)
+		local _1 = IS_STUDIO;
+		local _2 = _1 and MockMessagingService;
+		return (_2 or MessagingService):SubscribeAsync(self.name, function(recieved)
 			local Sent = recieved.Sent;
 			if isJobTargetMessage(recieved) then
 				local Data = recieved.Data;

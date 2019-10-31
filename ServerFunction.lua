@@ -1,9 +1,9 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
-local _0 = TS.import(script.Parent, "internal");
+local _0 = TS.import(script, script.Parent, "internal");
 local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
 local function t_string(value)
 	return true;
@@ -33,12 +33,8 @@ do
 			warn(self.instance.Name .. "::setCallback is deprecated, use " .. self.instance.Name .. "::SetCallback instead!");
 			return self:SetCallback(func);
 		end;
-		self.setClientCache = function(timeout)
-			warn(self.instance.Name .. "::setClientCache is deprecated, use " .. self.instance.Name .. "::SetClientCache instead!");
-			return self:SetClientCache(timeout);
-		end;
 		self.instance = findOrCreateRemote("RemoteFunction", name);
-		assert(not IS_CLIENT, "Cannot create a Net.ServerFunction on the Client!");
+		assert(not (IS_CLIENT), "Cannot create a Net.ServerFunction on the Client!");
 		if #recievedPropTypes > 0 then
 			self.propTypes = recievedPropTypes;
 		end;
@@ -57,7 +53,7 @@ do
 				end;
 			end;
 		else
-			self.instance.OnServerInvoke = func;
+			self.instance.OnServerInvoke = (func);
 		end;
 		return self;
 	end;
@@ -74,7 +70,7 @@ do
 	end;
 	function NetServerFunction:SetClientCache(time)
 		local cache = self.instance:FindFirstChild("Cache");
-		if not cache then
+		if not (cache) then
 			local cacheTimer = Instance.new("NumberValue", self.instance);
 			cacheTimer.Value = time;
 			cacheTimer.Name = "Cache";

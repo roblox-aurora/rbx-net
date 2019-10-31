@@ -1,10 +1,10 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local NetClientFunction;
-local _0 = TS.import(script.Parent, "internal");
+local _0 = TS.import(script, script.Parent, "internal");
 local getRemoteOrThrow, IS_CLIENT, functionExists, waitForFunction, MAX_CLIENT_WAITFORCHILD_TIMEOUT = _0.getRemoteOrThrow, _0.IS_CLIENT, _0.functionExists, _0.waitForFunction, _0.MAX_CLIENT_WAITFORCHILD_TIMEOUT;
 do
 	NetClientFunction = setmetatable({}, {
@@ -31,13 +31,15 @@ do
 		assert(IS_CLIENT, "Cannot create a Net.ClientFunction on the Server!");
 		assert(functionExists(name), "The specified function '" .. name .. "' does not exist!");
 	end;
+	-- static methods
 	NetClientFunction.WaitFor = TS.async(function(self, name)
 		local fun = waitForFunction(name, MAX_CLIENT_WAITFORCHILD_TIMEOUT);
-		if not fun then
+		if not (fun) then
 			error("Failed to retrieve client Function!");
 		end;
 		return NetClientFunction.new(name);
 	end);
+	-- instance methods
 	function NetClientFunction:GetInstance()
 		return self.instance;
 	end;

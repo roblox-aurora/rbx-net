@@ -1,10 +1,10 @@
--- Compiled with https://roblox-ts.github.io v0.2.14
--- August 13, 2019, 4:51 PM New Zealand Standard Time
+-- Compiled with https://roblox-ts.github.io v0.2.15-commit-fd67c49.0
+-- October 31, 2019, 1:35 AM Coordinated Universal Time
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local NetServerEvent;
-local _0 = TS.import(script.Parent, "internal");
+local _0 = TS.import(script, script.Parent, "internal");
 local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
 local Players = game:GetService("Players");
 do
@@ -20,7 +20,7 @@ do
 	function NetServerEvent:constructor(name, ...)
 		local recievedPropTypes = { ... };
 		self.instance = findOrCreateRemote("RemoteEvent", name);
-		assert(not IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
+		assert(not (IS_CLIENT), "Cannot create a Net.ServerEvent on the Client!");
 		if #recievedPropTypes > 0 then
 			self.propTypes = recievedPropTypes;
 		end;
@@ -51,7 +51,7 @@ do
 	function NetServerEvent:SendToAllPlayers(...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not t_assert(self.callTypes, args) then
+			if not (t_assert(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
@@ -60,11 +60,11 @@ do
 	function NetServerEvent:SendToAllPlayersExcept(blacklist, ...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not t_assert(self.callTypes, args) then
+			if not (t_assert(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
-		if (typeof(blacklist) == "Instance") then
+		if typeof(blacklist) == "Instance" then
 			local otherPlayers = TS.array_filter(Players:GetPlayers(), function(p)
 				return p ~= blacklist;
 			end);
@@ -72,7 +72,7 @@ do
 				local player = otherPlayers[_1];
 				self.instance:FireClient(player, unpack((args)));
 			end;
-		elseif (typeof(blacklist) == "table") then
+		elseif type(blacklist) == "table" then
 			local _1 = Players:GetPlayers();
 			for _2 = 1, #_1 do
 				local player = _1[_2];
@@ -85,7 +85,7 @@ do
 	function NetServerEvent:SendToPlayer(player, ...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not t_assert(self.callTypes, args) then
+			if not (t_assert(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
@@ -94,7 +94,7 @@ do
 	function NetServerEvent:SendToPlayers(players, ...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not t_assert(self.callTypes, args) then
+			if not (t_assert(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
