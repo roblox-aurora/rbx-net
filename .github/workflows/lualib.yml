@@ -36,7 +36,7 @@ jobs:
           cd ..
           
           git clone --depth=50 --branch=lualib https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git lualib
-          rm -rf lualib/*
+          rm -rf lualib/*.lua
           cp -r rbx-net/out/* lualib
           
           mkdir -p lualib/vendor
