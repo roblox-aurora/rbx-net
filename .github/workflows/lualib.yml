@@ -33,6 +33,9 @@ jobs:
           
       - name: Copy files to LuaLib branch
         run: |
+          PACKAGE_VERSION=$(cat package.json | jq -r '.version')
+          echo "RbxNet Version: $PACKAGE_VERSION"
+          
           echo "Changing to parent directory"
           cd ..
           
@@ -53,15 +56,12 @@ jobs:
           echo "Removing test folder"
           rm -rf lualib/Test
           
-          PACKAGE_VERSION=$(cat package.json | jq -r '.version')
-          echo "Version: $PACKAGE_VERSION"
-          
           echo "Generate TOML"
           echo "name = \"rbx-net\"
           author = \"Vorlias\"
           license = \"MIT\"
           content_root = \"\"
-          version = \"$(cat package.json | jq -r '.version')\"" > lualib/rotriever.toml
+          version = \"$PACKAGE_VERSION\"" > lualib/rotriever.toml
           
           cd lualib
           echo "Commiting to Git..."
