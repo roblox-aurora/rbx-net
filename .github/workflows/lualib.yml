@@ -53,14 +53,15 @@ jobs:
           echo "Removing test folder"
           rm -rf lualib/Test
           
-          PACKAGE_VERSION=`cat package.json | jq -r '.version'`
+          PACKAGE_VERSION=$(cat package.json | jq -r '.version')
+          echo "Version: $PACKAGE_VERSION"
           
           echo "Generate TOML"
           echo "name = \"rbx-net\"
           author = \"Vorlias\"
           license = \"MIT\"
           content_root = \"\"
-          version = \"$PACKAGE_VERSION\"" > lualib/rotriever.toml
+          version = \"$(cat package.json | jq -r '.version')\"" > lualib/rotriever.toml
           
           cd lualib
           echo "Commiting to Git..."
@@ -68,7 +69,7 @@ jobs:
           if ! git diff-index --quiet HEAD --; then
             echo "Lua Build changed!"
             if [ "$GITHUB_EVENT_NAME" == "push" ]; then
-              git commit -m "Updated via push"
+              git commit -m "Updated manually (v$PACKAGE_VERSION)"
             else
               git commit -m "Updated via other method"
             fi
