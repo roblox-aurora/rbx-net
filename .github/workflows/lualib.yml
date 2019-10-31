@@ -33,19 +33,27 @@ jobs:
           
       - name: Copy files to LuaLib branch
         run: |
+          echo "Changing to parent directory"
           cd ..
           
+          echo "Cloning Net (branch: lualib)"
           git clone --depth=50 --branch=lualib https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git lualib
+          
+          echo "Remove existing .lua files"
           rm -rf lualib/*.lua
           cp -r rbx-net/out/* lualib
           
+          echo "Generating vendors from include"
           mkdir -p lualib/vendor
           cp -r rbx-net/include/* lualib/vendor
           
+          echo "Removing declaration files"
           find lualib -name '*.d.ts' -delete
           
+          echo "Removing test folder"
           rm -rf lualib/Test
           
+          echo "Commiting to Git..."
           git add -A
           if ! git diff-index --quiet HEAD --; then
             echo "Lua Build changed!"
@@ -55,6 +63,7 @@ jobs:
               git commit -m "Updated via other method"
             fi
             
+            echo "Pushing changes..."
             git push https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git HEAD:lualib
           fi
 
