@@ -64,6 +64,10 @@ jobs:
           version = \"$PACKAGE_VERSION\"" > lualib/rotriever.toml
           
           cd lualib
+          
+          echo "Strip comments..."
+          sed -i 's/\-\- .*//g' *.lua
+          
           echo "Commiting to Git..."
           git add -A
           if ! git diff-index --quiet HEAD --; then
