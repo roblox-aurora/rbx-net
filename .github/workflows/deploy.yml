@@ -1,0 +1,34 @@
+name: Deploy Release
+on:
+  push:
+    tags: 
+      - 'v*.*.*'
+
+
+jobs:
+  deploy:
+    if: github.repository == 'roblox-aurora/rbx-net' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@master
+      
+      - name: Install NodeJS
+        uses: actions/setup-node@master
+        with:
+          node-version: 10.x
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Install node_modules
+        run: |
+          npm install -g roblox-ts@next
+          npm install
+      
+      - name: Build
+        run: rbxtsc
+      
+      - name: Deploy
+        run: |
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
