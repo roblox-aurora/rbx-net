@@ -1,0 +1,80 @@
+name: Build LuaLib
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+  
+    steps:
+      - uses: actions/checkout@master
+      - name: Install NodeJS
+        uses: actions/setup-node@master
+        with:
+          node-version: 11.x
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install node_modules
+        run: |
+          npm install -g roblox-ts@next
+          npm install
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "noreply@github.com"
+        
+      - name: Generate Lua Bundle
+        run: |
+          rbxtsc -r luaproject.json
+          
+      - name: Copy files to LuaLib branch
+        run: |
+          PACKAGE_VERSION=$(cat package.json | jq -r '.version')
+          echo "RbxNet Version: $PACKAGE_VERSION"
+          
+          echo "Changing to parent directory"
+          cd ..
+          
+          echo "Cloning Net (branch: lualib)"
+          git clone --depth=50 --branch=lualib https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git lualib
+          
+          echo "Remove existing .lua files"
+          rm -rf lualib/*.lua
+          cp -r rbx-net/out/* lualib
+          
+          echo "Generating vendors from include"
+          mkdir -p lualib/vendor
+          cp -r rbx-net/include/* lualib/vendor
+          
+          echo "Removing declaration files"
+          find lualib -name '*.d.ts' -delete
+          
+          echo "Removing test folder"
+          rm -rf lualib/Test
+          
+          echo "Generate TOML"
+          echo "name = \"rbx-net\"
+          author = \"Vorlias\"
+          license = \"MIT\"
+          content_root = \"\"
+          version = \"$PACKAGE_VERSION\"" > lualib/rotriever.toml
+          
+          cd lualib
+          echo "Commiting to Git..."
+          git add -A
+          if ! git diff-index --quiet HEAD --; then
+            echo "Lua Build changed!"
+            if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+              git commit -m "Updated manually (v$PACKAGE_VERSION)"
+            else
+              git commit -m "Updated via other method"
+            fi
+            
+            echo "Pushing changes..."
+            git push https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git HEAD:lualib
+          fi
+
