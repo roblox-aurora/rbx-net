@@ -28,7 +28,7 @@ Run the command
 
 TypeScript via NPM (roblox-ts@latest | roblox-ts@0.2.14)
 ---------------
-`npm i @rbxts/net@1.2.0`
+`npm i @rbxts/net@1.0.13`
 
 Usage
 ----------
