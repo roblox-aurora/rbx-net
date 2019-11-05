@@ -32,7 +32,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 		this.timeout = timeout;
 	}
 
-	public SetCallback(callback: (...args: StaticArguments<C>) => any) {
+	public SetCallback(callback: (player: Player, ...args: StaticArguments<C>) => any) {
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
@@ -43,7 +43,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 
 			if (this.propTypes === undefined || t_assert(this.propTypes, args)) {
 				if (typeIs(eventId, "string") && typeIs(data, "table")) {
-					const result: unknown | Promise<unknown> = callback(...(data as StaticArguments<C>));
+					const result: unknown | Promise<unknown> = callback(player, ...(data as StaticArguments<C>));
 					if (Promise.is(result)) {
 						result
 							.then(promiseResult => {

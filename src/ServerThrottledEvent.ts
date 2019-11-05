@@ -38,8 +38,7 @@ export default class NetServerThrottledEvent<C extends Array<any> = Array<unknow
 				});
 			} else {
 				this.clientRequests.Increment(player);
-				// @ts-ignore ... again. unfortunately.
-				callback(player, ...args);
+				callback(player, ...((args as unknown) as StaticArguments<C>));
 			}
 		});
 	}
