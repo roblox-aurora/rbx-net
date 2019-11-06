@@ -6,7 +6,7 @@ local function isMixedTable(value)
 	local num = #value
 
 	if num > 0 then
-		-- This should always grab any non-numeric keys
+		
 		local lastIndex = next(value, #num)
 		if lastIndex ~= nil then
 			return true

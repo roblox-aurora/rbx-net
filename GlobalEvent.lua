@@ -1,5 +1,5 @@
--- Compiled with https://roblox-ts.github.io v0.2.15-commit-40ebc6b.0
--- November 1, 2019, 10:25 PM Coordinated Universal Time
+
+
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -38,7 +38,7 @@ local function processMessageQueue()
 		while #globalMessageQueue > 0 do
 			local _1 = #globalMessageQueue;
 			local message = globalMessageQueue[_1];
-			globalMessageQueue[_1] = nil; -- globalMessageQueue.pop
+			globalMessageQueue[_1] = nil; 
 			MessagingService:PublishAsync(message.Name, message.Data);
 			globalEventMessageCounter = globalEventMessageCounter + 1;
 		end;
@@ -60,14 +60,14 @@ do
 	function NetGlobalEvent:constructor(name)
 		self.name = name;
 	end;
-	-- static methods
+	
 	function NetGlobalEvent:GetMessageLimit()
 		return 150 + 60 * #Players:GetPlayers();
 	end;
 	function NetGlobalEvent:GetSubscriptionLimit()
 		return 5 + 2 * #Players:GetPlayers();
 	end;
-	-- instance methods
+	
 	function NetGlobalEvent:SendToServer(jobId, message)
 		self:SendToAllServers({
 			jobId = jobId;

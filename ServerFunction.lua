@@ -1,13 +1,10 @@
--- Compiled with https://roblox-ts.github.io v0.2.15-commit-40ebc6b.0
--- November 1, 2019, 10:25 PM Coordinated Universal Time
+
+
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local _0 = TS.import(script, script.Parent, "internal");
 local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
-local function t_string(value)
-	return true;
-end;
 local NetServerFunction;
 do
 	NetServerFunction = setmetatable({}, {
@@ -21,18 +18,6 @@ do
 	end;
 	function NetServerFunction:constructor(name, ...)
 		local recievedPropTypes = { ... };
-		self.getCallback = function()
-			warn(self.instance.Name .. "::getCallback is deprecated, use " .. self.instance.Name .. "::GetCallback instead!");
-			return self:GetCallback();
-		end;
-		self.getClientCache = function()
-			warn(self.instance.Name .. "::getClientCache is deprecated, use " .. self.instance.Name .. "::GetClientCache instead!");
-			return self:GetClientCache();
-		end;
-		self.setCallback = function(func)
-			warn(self.instance.Name .. "::setCallback is deprecated, use " .. self.instance.Name .. "::SetCallback instead!");
-			return self:SetCallback(func);
-		end;
 		self.instance = findOrCreateRemote("RemoteFunction", name);
 		assert(not (IS_CLIENT), "Cannot create a Net.ServerFunction on the Client!");
 		if #recievedPropTypes > 0 then

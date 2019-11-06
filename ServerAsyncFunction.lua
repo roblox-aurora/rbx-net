@@ -1,5 +1,5 @@
--- Compiled with https://roblox-ts.github.io v0.2.15-commit-40ebc6b.0
--- November 1, 2019, 10:25 PM Coordinated Universal Time
+
+
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -47,7 +47,7 @@ do
 			local data = args[2];
 			if (self.propTypes == nil) or (t_assert(self.propTypes, args)) then
 				if (type(eventId) == "string") and (type(data) == "table") then
-					local result = callback(unpack((data)));
+					local result = callback(player, unpack((data)));
 					if TS.Promise.is(result) then
 						result:andThen(function(promiseResult)
 							self.instance:FireClient(player, eventId, promiseResult);

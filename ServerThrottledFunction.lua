@@ -1,5 +1,5 @@
--- Compiled with https://roblox-ts.github.io v0.2.15-commit-40ebc6b.0
--- November 1, 2019, 10:25 PM Coordinated Universal Time
+
+
 
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
@@ -20,21 +20,10 @@ do
 		self:constructor(...);
 		return self;
 	end;
-	function NetServerThrottledFunction:constructor(name, rateLimit)
-		super.constructor(self, name);
+	function NetServerThrottledFunction:constructor(name, rateLimit, ...)
+		super.constructor(self, name, unpack(recievedPropTypes));
+		local recievedPropTypes = { ... };
 		self.maxRequestsPerMinute = 0;
-		self.setCallback = function(func)
-			warn(self.instance.Name .. "::setCallback is deprecated, use " .. self.instance.Name .. "::SetCallback instead!");
-			return self:SetCallback(func);
-		end;
-		self.setRateLimit = function(requestsPerMinute)
-			warn(self.instance.Name .. "::setRateLimit is deprecated, use " .. self.instance.Name .. "::SetRateLimit instead!");
-			return self:SetRateLimit(requestsPerMinute);
-		end;
-		self.getRateLimit = function()
-			warn(self.instance.Name .. "::getRateLimit is deprecated, use " .. self.instance.Name .. "::GetRateLimit instead!");
-			return self:GetRateLimit();
-		end;
 		self.maxRequestsPerMinute = rateLimit;
 		self.clientRequests = throttler:Get("Function~" .. name);
 		local clientValue = Instance.new("IntValue", self.instance);

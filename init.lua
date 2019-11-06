@@ -1,5 +1,5 @@
--- Compiled with https://roblox-ts.github.io v0.2.15-commit-40ebc6b.0
--- November 1, 2019, 10:25 PM Coordinated Universal Time
+
+
 
 local TS = require(script.vendor.RuntimeLib);
 local exports;
@@ -99,7 +99,6 @@ Net = Net or {} do
 			end;
 		else
 			error("Net.createFunction can only be used on the server!");
-			error("");
 		end;
 	end;
 	local function CreateThrottledFunction(name, rateLimit)
@@ -107,7 +106,6 @@ Net = Net or {} do
 			return NetServerThrottledFunction.new(name, rateLimit);
 		else
 			error("Net.createFunction can only be used on the server!");
-			error("");
 		end;
 	end;
 	local function CreateThrottledEvent(name, rateLimit)
@@ -115,14 +113,12 @@ Net = Net or {} do
 			return NetServerThrottledEvent.new(name, rateLimit);
 		else
 			error("Net.createFunction can only be used on the server!");
-			error("Net.createFunction can only be used on the server!");
 		end;
 	end;
 	local function CreateEvent(name)
 		if IS_SERVER then
 			return NetServerEvent.new(name);
 		else
-			error("Net.createFunction can only be used on the server!");
 			error("Net.createFunction can only be used on the server!");
 		end;
 	end;
