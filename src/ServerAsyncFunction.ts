@@ -41,8 +41,8 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 		this.connector = this.instance.OnServerEvent.Connect(async (player, ...args: Array<unknown>) => {
 			const [eventId, data] = args;
 
-			if (this.propTypes === undefined || t_assert(this.propTypes, args)) {
-				if (typeIs(eventId, "string") && typeIs(data, "table")) {
+			if (typeIs(eventId, "string") && typeIs(data, "table")) {
+				if (this.propTypes === undefined || t_assert(this.propTypes, data)) {
 					const result: unknown | Promise<unknown> = callback(player, ...(data as StaticArguments<C>));
 					if (Promise.is(result)) {
 						result
@@ -56,10 +56,10 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 						this.instance.FireClient(player, eventId, result);
 					}
 				} else {
-					warn("[rbx-net-async] Recieved message without eventId");
+					warn("[rbx-net] Client failed type checks");
 				}
 			} else {
-				error("Client failed type checks", 2);
+				warn("[rbx-net-async] Recieved message without eventId");
 			}
 		});
 	}
