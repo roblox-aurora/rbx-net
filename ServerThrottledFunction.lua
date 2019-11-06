@@ -21,8 +21,8 @@ do
 		return self;
 	end;
 	function NetServerThrottledFunction:constructor(name, rateLimit, ...)
-		super.constructor(self, name, unpack(recievedPropTypes));
 		local recievedPropTypes = { ... };
+		super.constructor(self, name, unpack(recievedPropTypes));
 		self.maxRequestsPerMinute = 0;
 		self.maxRequestsPerMinute = rateLimit;
 		self.clientRequests = throttler:Get("Function~" .. name);

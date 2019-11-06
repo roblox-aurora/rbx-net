@@ -45,8 +45,8 @@ do
 			local args = { ... };
 			local eventId = args[1];
 			local data = args[2];
-			if (self.propTypes == nil) or (t_assert(self.propTypes, args)) then
-				if (type(eventId) == "string") and (type(data) == "table") then
+			if (type(eventId) == "string") and (type(data) == "table") then
+				if (self.propTypes == nil) or (t_assert(self.propTypes, data)) then
 					local result = callback(player, unpack((data)));
 					if TS.Promise.is(result) then
 						result:andThen(function(promiseResult)
@@ -58,10 +58,10 @@ do
 						self.instance:FireClient(player, eventId, result);
 					end;
 				else
-					warn("[rbx-net-async] Recieved message without eventId");
+					warn("[rbx-net] Client failed type checks");
 				end;
 			else
-				error("Client failed type checks", 2);
+				warn("[rbx-net-async] Recieved message without eventId");
 			end;
 		end));
 	end;
