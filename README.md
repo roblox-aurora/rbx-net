@@ -12,23 +12,15 @@ Requirements
 =============
 Typescript/NPM
 -----------
-### [Roblox Typescript Compiler](https://github.com/roblox-ts/roblox-ts) > `0.2.14` (roblox-ts@next)
-
-If you want to use it with `roblox-ts@0.2.14`, the install instructions are below:
+### [Roblox Typescript Compiler](https://github.com/roblox-ts/roblox-ts) >= `0.3.0` (roblox-ts@latest)
 
 Usage
 =============
-Typescript via NPM (roblox-ts@next)
+Typescript via NPM (roblox-ts@latest)
 -------------
 
 Run the command
 `npm i @rbxts/net`
-
-
-
-TypeScript via NPM (roblox-ts@latest | roblox-ts@0.2.14)
----------------
-`npm i @rbxts/net@1.0.13`
 
 Usage
 ----------
