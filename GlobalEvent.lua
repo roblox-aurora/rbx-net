@@ -38,7 +38,7 @@ local function processMessageQueue()
 		while #globalMessageQueue > 0 do
 			local _1 = #globalMessageQueue;
 			local message = globalMessageQueue[_1];
-			globalMessageQueue[_1] = nil; 
+			globalMessageQueue[_1] = nil;
 			MessagingService:PublishAsync(message.Name, message.Data);
 			globalEventMessageCounter = globalEventMessageCounter + 1;
 		end;

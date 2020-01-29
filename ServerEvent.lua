@@ -76,7 +76,7 @@ do
 			local _1 = Players:GetPlayers();
 			for _2 = 1, #_1 do
 				local player = _1[_2];
-				if TS.array_indexOf(blacklist, player) == -1 then
+				if (table.find(blacklist, player) or 0) - 1 == -1 then
 					self.instance:FireClient(player, unpack((args)));
 				end;
 			end;

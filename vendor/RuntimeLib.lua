@@ -54,14 +54,18 @@ end
 TS.Symbol = Symbol
 TS.Symbol_iterator = Symbol("Symbol.iterator")
 
+local function isPlugin(object)
+	return RunService:IsStudio() and object:FindFirstAncestorWhichIsA("Plugin") ~= nil
+end
+
 -- module resolution
 function TS.getModule(object, moduleName)
 	if not __LEMUR__ and object:IsDescendantOf(ReplicatedFirst) then
-		warn("node_modules should not be used from ReplicatedFirst")
+		warn("roblox-ts packages should not be used from ReplicatedFirst!")
 	end
 
 	-- ensure modules have fully replicated
-	if not __LEMUR__ and RunService:IsClient() and not game:IsLoaded() then
+	if not __LEMUR__ and RunService:IsClient() and not isPlugin(object) and not game:IsLoaded() then
 		game.Loaded:Wait()
 	end
 
@@ -192,16 +196,25 @@ function TS.async(callback)
 	end
 end
 
+local function package(...)
+	return select("#", ...), {...}
+end
+
 function TS.await(promise)
 	if not Promise.is(promise) then
 		return promise
 	end
 
-	local ok, result = promise:await()
+	local size, result = package(promise:await())
+	local ok = table.remove(result, 1)
 	if ok then
-		return result
+		if size > 2 then
+			return result
+		else
+			return result[1]
+		end
 	else
-		error(ok == nil and "The awaited Promise was cancelled" or result, 2)
+		error(ok == nil and "The awaited Promise was cancelled" or (size > 2 and result[1] or result), 2)
 	end
 end
 
@@ -232,16 +245,27 @@ local function copy(object)
 	return result
 end
 
-local function deepCopy(object)
+local function deepCopyHelper(object, encountered)
 	local result = {}
+	encountered[object] = result
+
 	for k, v in pairs(object) do
-		if type(v) == "table" then
-			result[k] = deepCopy(v)
-		else
-			result[k] = v
+		if type(k) == "table" then
+			k = encountered[k] or deepCopyHelper(k, encountered)
 		end
+
+		if type(v) == "table" then
+			v = encountered[v] or deepCopyHelper(v, encountered)
+		end
+
+		result[k] = v
 	end
+
 	return result
+end
+
+local function deepCopy(object)
+	return deepCopyHelper(object, {})
 end
 
 local function deepEquals(a, b)
@@ -361,6 +385,45 @@ end
 
 TS.array_map = array_map
 
+function TS.array_mapFiltered(list, callback)
+    local new = {}
+    local index = 1
+
+    for i = 1, #list do
+        local result = callback(list[i], i - 1, list)
+
+        if result ~= nil then
+            new[index] = result
+            index = index + 1
+        end
+    end
+
+    return new
+end
+
+local function getArraySizeSlow(list)
+    local result = 0
+    for index in pairs(list) do
+        if index > result then
+            result = index
+        end
+    end
+    return result
+end
+
+function TS.array_filterUndefined(list)
+	local length = 0
+	local result = {}
+	for i = 1, getArraySizeSlow(list) do
+		local value = list[i]
+		if value ~= nil then
+			length = length + 1
+			result[length] = value
+		end
+	end
+	return result
+end
+
 function TS.array_filter(list, callback)
 	local result = {}
 	for i = 1, #list do
@@ -372,22 +435,9 @@ function TS.array_filter(list, callback)
 	return result
 end
 
-local function sortFallback(a, b)
-	return tostring(a) < tostring(b)
-end
-
 function TS.array_sort(list, callback)
-	local sorted = array_copy(list)
-
-	if callback then
-		table.sort(sorted, function(a, b)
-			return 0 < callback(a, b)
-		end)
-	else
-		table.sort(sorted, sortFallback)
-	end
-
-	return sorted
+	table.sort(list, callback)
+	return list
 end
 
 TS.array_toString = toString
@@ -504,7 +554,7 @@ end
 
 function TS.array_every(list, callback)
 	for i = 1, #list do
-		if callback(list[i], i - 1, list) == false then
+		if not callback(list[i], i - 1, list) then
 			return false
 		end
 	end
@@ -874,10 +924,6 @@ function TS.iterableCache(iter)
 		results[count] = _0.value
 	end
 	return results
-end
-
-local function package(...)
-	return select("#", ...), {...}
 end
 
 function TS.iterableFunctionCache(iter)
