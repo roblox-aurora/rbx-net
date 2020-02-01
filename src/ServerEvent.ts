@@ -1,12 +1,23 @@
 import { findOrCreateRemote, IS_CLIENT, TypeGuard, StaticArguments, t_assert } from "./internal";
 
+export interface ServerRecieverEvent<C> {
+	Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void): RBXScriptConnection;
+}
+
+export interface ServerSenderEvent<F> {
+	SendToAllPlayers(...args: StaticArguments<F>): void;
+	SendToPlayer(player: Player, ...args: StaticArguments<F>): void;
+	SendToPlayers(players: Array<Player>, ...args: StaticArguments<F>): void;
+	SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: StaticArguments<F>): void;
+}
+
 const Players = game.GetService("Players");
 /**
  * An event on the server
  * @rbxts server
  */
 export default class NetServerEvent<C extends Array<any> = Array<unknown>, F extends Array<any> = Array<unknown>>
-	implements IServerNetEvent {
+	implements IServerNetEvent, ServerRecieverEvent<C>, ServerSenderEvent<F> {
 	/** @internal */
 	protected instance: RemoteEvent;
 	protected propTypes: C | undefined;
@@ -24,6 +35,35 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		if (recievedPropTypes.size() > 0) {
 			this.propTypes = recievedPropTypes;
 		}
+	}
+
+	/**
+	 * Creates a RemoteEvent that's not managed by Net.
+	 *
+	 * Note: Any features like throttling, caching, type checking etc. will have to be handled by you.
+	 *
+	 * @param name The name
+	 */
+	public static Unmanaged(name: string) {
+		return findOrCreateRemote("RemoteEvent", name);
+	}
+
+	public static PureReciever<C extends Array<any> = Array<unknown>>(
+		name: string,
+		cb: (plr: Player, ...args: StaticArguments<C>) => void,
+		...recievedPropTypes: C
+	) {
+		const event = new NetServerEvent(name, ...recievedPropTypes);
+		event.Connect(cb);
+		return event as ServerRecieverEvent<C>;
+	}
+
+	public static PureSender<C extends Array<any> = Array<unknown>>(
+		name: string,
+		...recievedPropTypes: C
+	) {
+		const event = new NetServerEvent(name, ...recievedPropTypes);
+		return event as ServerSenderEvent<C>;
 	}
 
 	public WithStrictCall<F0 extends F>(...callPropTypes: F0): NetServerEvent<C, F0> {

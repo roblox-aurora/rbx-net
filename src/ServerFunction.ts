@@ -19,6 +19,17 @@ export default class NetServerFunction<C extends Array<any> = Array<unknown>> {
 	}
 
 	/**
+	 * Creates a RemoteFunction that's not managed by Net.
+	 *
+	 * Note: Any features like throttling, caching, type checking etc. will have to be handled by you.
+	 *
+	 * @param name The name
+	 */
+	public static Unmanaged(name: string) {
+		return findOrCreateRemote("RemoteFunction", name);
+	}
+
+	/**
 	 * The callback function
 	 */
 	public GetCallback(): Callback {

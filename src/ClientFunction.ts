@@ -32,6 +32,18 @@ export default class NetClientFunction<SR extends unknown> {
 
 		return new NetClientFunction<R>(name);
 	}
+
+	/**
+	 * Gets a RemoteFunction that's not managed by Net.
+	 *
+	 * Note: Any features like throttling, caching, type checking etc. will have to be handled by you.
+	 *
+	 * @param name The name
+	 */
+	public static Unmanaged(name: string) {
+		return getRemoteOrThrow("RemoteFunction", name);
+	}
+
 	/**
 	 * The remoteFunction instance
 	 */

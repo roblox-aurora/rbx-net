@@ -28,6 +28,17 @@ export default class NetClientEvent implements IClientNetEvent {
 	}
 
 	/**
+	 * Gets a RemoteEvent that's not managed by Net.
+	 *
+	 * Note: Any features like throttling, caching, type checking etc. will have to be handled by you.
+	 *
+	 * @param name The name
+	 */
+	public static Unmanaged(name: string) {
+		return getRemoteOrThrow("RemoteEvent", name);
+	}
+
+	/**
 	 * The RemoteEvent instance
 	 */
 	public GetInstance() {
