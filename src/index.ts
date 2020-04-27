@@ -69,7 +69,7 @@ namespace Net {
 	export type ClientEvent = NetClientEvent;
 
 	export const ClientFunction = NetClientFunction;
-	export type ClientFunction = NetClientEvent;
+	export type ClientFunction<SR = unknown> = NetClientFunction<SR>;
 
 	export const ClientAsyncFunction = NetClientAsyncFunction;
 	export type ClientAsyncFunction = NetClientAsyncFunction;
