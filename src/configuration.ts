@@ -42,7 +42,7 @@ namespace NetConfig {
 	/** @rbxts server */
 	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
 		assert(IS_SERVER, "Cannot set configuration on client!");
-		if (key === "ServerThrottleMessage") {
+		if (key === "ServerThrottleResetTimer") {
 			throttleResetTimer = value as number;
 		} else if (key === "ServerThrottleMessage") {
 			rateLimitReachedMessage = value as string;
