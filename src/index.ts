@@ -1,7 +1,7 @@
 import throttler from "./Throttle";
 import Serializer from "./Serializer";
 import config from "./configuration";
-import { functionExists, eventExists, ServerTickFunctions } from "./internal";
+import { functionExists, eventExists, ServerTickFunctions, TypeGuard, StaticArguments, TypeGuards } from "./internal";
 import NetServerEvent from "./ServerEvent";
 import NetClientEvent from "./ClientEvent";
 import NetClientFunction from "./ClientFunction";
@@ -265,6 +265,28 @@ namespace Net {
 				throttler.Clear();
 			}
 		});
+	}
+
+	/**
+	 * Creates a type guard array to be used in Net
+	 * @param value The types
+	 */
+	export function Types<T0 extends TypeGuard<any>>(type0: T0): [T0];
+	export function Types<T0 extends TypeGuard<any>, T1 extends TypeGuard<any>>(type0: T0, type1: T1): [T0, T1];
+	export function Types<T0 extends TypeGuard<any>, T1 extends TypeGuard<any>, T2 extends TypeGuard<any>>(
+		type0: T0,
+		type1: T1,
+		type2: T2,
+	): [T0, T1, T2];
+	export function Types<
+		T0 extends TypeGuard<any>,
+		T1 extends TypeGuard<any>,
+		T2 extends TypeGuard<any>,
+		T3 extends TypeGuard<any>
+	>(type0: T0, type1: T1, type2: T2, type3: T3): [T0, T1, T2, T3];
+
+	export function Types<T extends Array<TypeGuard<any>>>(...value: T): TypeGuards<T> {
+		return (value as Array<TypeGuard<any>>) as TypeGuards<T>;
 	}
 }
 

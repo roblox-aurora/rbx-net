@@ -1,4 +1,4 @@
-import { findOrCreateRemote, IS_CLIENT, TypeGuard, StaticArguments, t_assert } from "./internal";
+import { findOrCreateRemote, IS_CLIENT, TypeGuard, StaticArguments, t_assert, TypeGuards } from "./internal";
 
 export interface ServerRecieverEvent<C> {
 	Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void): RBXScriptConnection;
@@ -9,6 +9,24 @@ export interface ServerSenderEvent<F> {
 	SendToPlayer(player: Player, ...args: StaticArguments<F>): void;
 	SendToPlayers(players: Array<Player>, ...args: StaticArguments<F>): void;
 	SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: StaticArguments<F>): void;
+}
+
+type InferEvent<T> = T extends [TypeGuard<infer A>]
+	? NetServerEvent<[TypeGuard<A>]>
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>]
+	? NetServerEvent<[TypeGuard<A>, TypeGuard<B>]>
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>]
+	? NetServerEvent<[TypeGuard<A>, TypeGuard<B>, TypeGuard<C>]>
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>, TypeGuard<infer D>]
+	? NetServerEvent<[TypeGuard<A>, TypeGuard<B>, TypeGuard<C>, TypeGuard<D>]>
+	: NetServerEvent;
+
+type FilteredKeys<T, U> = { [P in keyof T]: T[P] extends U ? P : never }[keyof T];
+type UsableEvents<T> = { [Q in FilteredKeys<T, true | TypeGuards<any>>]: InferEvent<T[Q]> };
+
+interface EventList {
+	// tslint:disable-next-line: array-type
+	[name: string]: ((player: Player, ...args: unknown[]) => void) | true | Array<TypeGuard<any>>;
 }
 
 const Players = game.GetService("Players");
@@ -48,6 +66,23 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		return findOrCreateRemote("RemoteEvent", name);
 	}
 
+	public static Group<T extends EventList>(list: T): UsableEvents<T> {
+		const map = new Map<string, NetServerEvent>();
+		for (const [key, value] of Object.entries<EventList>(list)) {
+			if (typeIs(value, "table")) {
+				// @ts-ignore
+				const item = new NetServerEvent(key as string, ...value);
+				map.set(key as string, item);
+			} else if (typeIs(value, "boolean")) {
+				map.set(key as string, new NetServerEvent(key as string));
+			} else if (typeIs(value, "function")) {
+				const event = new NetServerEvent(key as string);
+				event.Connect(value);
+			}
+		}
+		return map as {[name: string]: any} as UsableEvents<T>;
+	}
+
 	public static PureReciever<C extends Array<any> = Array<unknown>>(
 		name: string,
 		cb: (plr: Player, ...args: StaticArguments<C>) => void,
@@ -58,10 +93,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		return event as ServerRecieverEvent<C>;
 	}
 
-	public static PureSender<C extends Array<any> = Array<unknown>>(
-		name: string,
-		...recievedPropTypes: C
-	) {
+	public static PureSender<C extends Array<any> = Array<unknown>>(name: string, ...recievedPropTypes: C) {
 		const event = new NetServerEvent(name, ...recievedPropTypes);
 		return event as ServerSenderEvent<C>;
 	}
@@ -92,6 +124,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	public Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void) {
 		if (this.propTypes !== undefined) {
 			return this.GetEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
+				// @ts-ignore ... again. unfortunately.
 				if (t_assert(this.propTypes!, args)) {
 					// @ts-ignore
 					callback(sourcePlayer, ...args);

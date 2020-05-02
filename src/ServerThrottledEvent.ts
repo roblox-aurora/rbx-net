@@ -49,7 +49,7 @@ export default class NetServerThrottledEvent<C extends Array<any> = Array<unknow
 	public SetRateLimit(requestsPerMinute: number) {
 		this.maxRequestsPerMinute = requestsPerMinute;
 
-		let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
+		let clientValue = this.instance.FindFirstChild("RateLimit") as IntValue;
 		if (clientValue) {
 			clientValue.Value = requestsPerMinute;
 		} else {

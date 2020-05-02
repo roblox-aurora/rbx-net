@@ -40,7 +40,7 @@ export const ServerTickFunctions = new Array<() => void>();
 
 /** @internal */
 export function findOrCreateFolder(parent: Instance, name: string): Folder {
-	let folder = parent.FindFirstChild<Folder>(name);
+	let folder = parent.FindFirstChild(name) as Folder;
 	if (folder) {
 		return folder;
 	} else {
@@ -61,6 +61,7 @@ asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NA
  * @param vars variables to pass to the error message
  */
 export function errorft(message: string, vars: { [name: string]: unknown }) {
+	// @ts-ignore
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
 		return vars[token] || token;
 	});
@@ -80,12 +81,12 @@ export function functionExists(name: string) {
 
 /** @internal */
 export function waitForEvent(name: string, timeOut: number): RemoteEvent | undefined {
-	return eventFolder.WaitForChild(name, timeOut);
+	return eventFolder.WaitForChild(name, timeOut) as RemoteEvent | undefined;
 }
 
 /** @internal */
 export function waitForFunction(name: string, timeOut: number): RemoteFunction | undefined {
-	return functionFolder.WaitForChild(name, timeOut);
+	return functionFolder.WaitForChild(name, timeOut) as RemoteFunction | undefined;
 }
 
 /** @internal */
@@ -179,6 +180,49 @@ export function t_assert(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
 }
 
 export type TypeGuard<T> = (value: unknown) => value is T;
+
+export type TypeGuards<T> = T extends [TypeGuard<infer A>]
+	? [TypeGuard<A>]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>]
+	? [TypeGuard<A>, TypeGuard<B>]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>]
+	? [A, B, C]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>, TypeGuard<infer D>]
+	? [A, B, C, D]
+	: T extends [TypeGuard<infer A>, TypeGuard<infer B>, TypeGuard<infer C>, TypeGuard<infer D>, TypeGuard<infer E>]
+	? [A, B, C, D, E]
+	: T extends [
+			TypeGuard<infer A>,
+			TypeGuard<infer B>,
+			TypeGuard<infer C>,
+			TypeGuard<infer D>,
+			TypeGuard<infer E>,
+			TypeGuard<infer F>,
+	  ]
+	? [A, B, C, D, E, F]
+	: T extends [
+			TypeGuard<infer A>,
+			TypeGuard<infer B>,
+			TypeGuard<infer C>,
+			TypeGuard<infer D>,
+			TypeGuard<infer E>,
+			TypeGuard<infer F>,
+			TypeGuard<infer G>,
+	  ]
+	? [A, B, C, D, E, F, G]
+	: T extends [
+			TypeGuard<infer A>,
+			TypeGuard<infer B>,
+			TypeGuard<infer C>,
+			TypeGuard<infer D>,
+			TypeGuard<infer E>,
+			TypeGuard<infer F>,
+			TypeGuard<infer G>,
+			TypeGuard<infer H>,
+	  ]
+	? [A, B, C, D, E, F, G, H]
+	: Array<unknown>; // default, if user has more than 8 args then wtf they doing with their lives?!?
+
 
 export type StaticArguments<T> = T extends [TypeGuard<infer A>]
 	? [A]

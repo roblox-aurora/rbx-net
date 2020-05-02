@@ -50,7 +50,7 @@ export default class NetServerThrottledFunction<C extends Array<any> = Array<unk
 	public SetRateLimit(requestsPerMinute: number) {
 		this.maxRequestsPerMinute = requestsPerMinute;
 
-		let clientValue = this.instance.FindFirstChild<IntValue>("RateLimit");
+		let clientValue = this.instance.FindFirstChild("RateLimit") as IntValue;
 		if (clientValue) {
 			clientValue.Value = requestsPerMinute;
 		} else {

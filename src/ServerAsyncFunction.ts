@@ -42,6 +42,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 			const [eventId, data] = args;
 
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
+				// @ts-ignore ... again. unfortunately.
 				if (this.propTypes === undefined || t_assert(this.propTypes, data)) {
 					const result: unknown | Promise<unknown> = callback(player, ...(data as StaticArguments<C>));
 					if (Promise.is(result)) {
