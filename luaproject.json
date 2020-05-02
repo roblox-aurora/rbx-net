@@ -3,7 +3,10 @@
 	"tree": {
 		"$path": "out",
 		"vendor": {
-			"$path": "include"
+			"$path": "include",
+			"node_modules": {
+				"$path": "node_modules"
+			}
 		}
 	}
 }
