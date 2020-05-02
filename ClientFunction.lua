@@ -31,6 +31,9 @@ do
 		end;
 		return NetClientFunction.new(name);
 	end);
+	function NetClientFunction:Unmanaged(name)
+		return getRemoteOrThrow("RemoteFunction", name);
+	end;
 	
 	function NetClientFunction:GetInstance()
 		return self.instance;

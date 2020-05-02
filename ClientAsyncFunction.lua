@@ -42,7 +42,7 @@ do
 			local eventId = args[1];
 			local data = args[2];
 			if (type(eventId) == "string") and (type(data) == "table") then
-				local result = callback(unpack(data));
+				local result = callback(unpack(TS.iterableCache(data[TS.Symbol_iterator](data))));
 				if TS.Promise.is(result) then
 					result:andThen(function(promiseResult)
 						self.instance:FireServer(eventId, promiseResult);

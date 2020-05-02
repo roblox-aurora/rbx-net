@@ -24,6 +24,11 @@ do
 			self.propTypes = recievedPropTypes;
 		end;
 	end;
+	
+	function NetServerFunction:Unmanaged(name)
+		return findOrCreateRemote("RemoteFunction", name);
+	end;
+	
 	function NetServerFunction:GetCallback()
 		return self.instance.OnServerInvoke;
 	end;

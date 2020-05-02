@@ -25,6 +25,37 @@ do
 			self.propTypes = recievedPropTypes;
 		end;
 	end;
+	
+	function NetServerEvent:Unmanaged(name)
+		return findOrCreateRemote("RemoteEvent", name);
+	end;
+	function NetServerEvent:Group(list)
+		local map = {};
+		for key, value in pairs(list) do
+			if type(value) == "table" then
+				local item = NetServerEvent.new(key, unpack(TS.iterableCache(value[TS.Symbol_iterator](value))));
+				map[key] = item;
+			elseif type(value) == "boolean" then
+				map[key] = NetServerEvent.new(key);
+			elseif type(value) == "function" then
+				local event = NetServerEvent.new(key);
+				event:Connect(value);
+			end;
+		end;
+		return map;
+	end;
+	function NetServerEvent:PureReciever(name, cb, ...)
+		local recievedPropTypes = { ... };
+		local event = NetServerEvent.new(name, unpack(recievedPropTypes));
+		event:Connect(cb);
+		return event;
+	end;
+	function NetServerEvent:PureSender(name, ...)
+		local recievedPropTypes = { ... };
+		local event = NetServerEvent.new(name, unpack(recievedPropTypes));
+		return event;
+	end;
+	
 	function NetServerEvent:WithStrictCall(...)
 		local callPropTypes = { ... };
 		self.callTypes = callPropTypes;

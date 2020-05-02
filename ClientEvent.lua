@@ -28,6 +28,9 @@ do
 		end;
 		return NetClientEvent.new(name);
 	end);
+	function NetClientEvent:Unmanaged(name)
+		return getRemoteOrThrow("RemoteEvent", name);
+	end;
 	
 	function NetClientEvent:GetInstance()
 		return self.instance;

@@ -39,7 +39,7 @@ functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
 eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
 asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
 local function errorft(message, vars)
-	message = message:gsub("{([%w_][%w%d_]*)}", function(token)
+	message = string.gsub(message, "{([%w_][%w%d_]*)}", function(token)
 		local _2 = vars[token];
 		return (_2 ~= 0 and _2 == _2 and _2 ~= "" and _2) or token;
 	end);

@@ -20,7 +20,7 @@ NetConfig = NetConfig or {} do
 	end;
 	local function SetConfiguration(key, value)
 		assert(IS_SERVER, "Cannot set configuration on client!");
-		if key == "ServerThrottleMessage" then
+		if key == "ServerThrottleResetTimer" then
 			throttleResetTimer = value;
 		elseif key == "ServerThrottleMessage" then
 			rateLimitReachedMessage = value;

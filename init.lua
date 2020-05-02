@@ -26,6 +26,7 @@ local IS_CLIENT = _2 or runService:IsClient();
 local IS_SERVER = runService:IsServer();
 Net = Net or {} do
 	local _3 = Net;
+	local Types;
 	local SetConfiguration = config.SetConfiguration;
 	local SetClientConfiguration = config.SetClientConfiguration;
 	local GetConfiguration = config.GetConfiguration;
@@ -157,6 +158,10 @@ Net = Net or {} do
 			end;
 		end;
 	end;
+	function Types(...)
+		local value = { ... };
+		return value;
+	end;
 	_3.SetConfiguration = SetConfiguration;
 	_3.SetClientConfiguration = SetClientConfiguration;
 	_3.GetConfiguration = GetConfiguration;
@@ -184,6 +189,7 @@ Net = Net or {} do
 	_3.WaitForClientEventAsync = WaitForClientEventAsync;
 	_3.GetServerEventAsync = GetServerEventAsync;
 	_3.GetServerFunctionAsync = GetServerFunctionAsync;
+	_3.Types = Types;
 end;
 exports = Net;
 return exports;
