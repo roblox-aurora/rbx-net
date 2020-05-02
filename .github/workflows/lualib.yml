@@ -19,7 +19,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Install node_modules
         run: |
-          npm install -g roblox-ts@next
+          npm install -g roblox-ts@latest
           npm install
           
       - name: Configure Git
