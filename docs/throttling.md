@@ -12,6 +12,15 @@ When using remotes in Roblox, you might want to limit the amount of times a user
 
 Say for example we have a remote object that fetches a list of items. Ideally we wouldn't want the user to be able to continuously spam it.
 
+=== "Tab 1"
+    Markdown **content**.
+
+    Multiple paragraphs.
+
+=== "Tab 2"
+	What
+
+
 ```ts tab="TypeScript"
 const fetchItemList = new Net.ServerFunction("FetchItemList");
 fetchItemList.SetRateLimit(1);

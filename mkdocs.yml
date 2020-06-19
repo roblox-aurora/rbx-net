@@ -40,8 +40,10 @@ markdown_extensions:
     - pymdownx.inlinehilite:
     - pymdownx.tasklist:
     - pymdownx.critic:
+    - pymdownx.tabbed:
     - pymdownx.superfences:
         preserve_tabs: true
+        # legacy_tab_classes: true
     - codehilite:
           guess_lang: false
     - toc:
