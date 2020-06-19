@@ -1,1 +1,1 @@
-pymdown-extension==7.0
+pymdown-extension==7.1
