@@ -1,4 +1,4 @@
-site_name: Roblox Networking Library
+site_name: RbxNet
 repo_name: GitHub
 repo_url: https://github.com/roblox-aurora/rbx-net
 nav:
@@ -8,14 +8,14 @@ nav:
         - Install for Lua: lua-install.md
     - Guide:
         - Events: events.md
+        - Throttling: throttling.md
+        - Caching: caching.md
         - Type Safety: type-safety.md
     - API Reference:
       - Net namespace: api-reference.md
       - Server Classes:
         - ServerEvent: class/NetServerEvent.md
         - ServerFunction: class/NetServerFunction.md
-        - ServerThrottledFunction: class/NetServerThrottledFunction.md
-        - ServerThrottledEvent: class/NetServerThrottledEvent.md
         - GlobalEvent: class/NetGlobalClientEvent.md
         - GlobalServerEvent: class/NetGlobalClientEvent.md
         - ServerAsyncFunction: class/NetServerAsyncFunction.md

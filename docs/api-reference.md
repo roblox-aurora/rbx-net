@@ -107,10 +107,6 @@ Added in 1.2.0
 Added in 1.0.13
 {: .added}
 
-### [NetServerThrottledEvent](/rbx-net/class/NetServerThrottledEvent) {: .tag .server }
-
-### [NetServerThrottledFunction](/rbx-net/class/NetServerThrottledFunction) {: .tag .server }
-
 ### [NetGlobalEvent](/rbx-net/class/NetGlobalEvent) {: .tag .server }
 Added in 1.0.13
 {: .added}
