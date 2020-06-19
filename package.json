@@ -6,6 +6,7 @@
 	"main": "./out/init.lua",
 	"typings": "./out/index.d.ts",
 	"scripts": {
+		"prepare": "rbxtsc",
 		"test": "rbxtsc && lua ./out/Test/spec.lua",
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
 		"build": "npm run cleanup && rbxtsc",

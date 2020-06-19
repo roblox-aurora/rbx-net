@@ -1,4 +1,4 @@
-import { findOrCreateRemote, IS_CLIENT, TypeGuard, StaticArguments, t_assert, TypeGuards } from "./internal";
+import { findOrCreateRemote, IS_CLIENT, TypeGuard, StaticArguments, checkArguments, TypeGuards } from "./internal";
 
 export interface ServerRecieverEvent<C> {
 	Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void): RBXScriptConnection;
@@ -125,7 +125,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		if (this.propTypes !== undefined) {
 			return this.GetEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
 				// @ts-ignore ... again. unfortunately.
-				if (t_assert(this.propTypes!, args)) {
+				if (checkArguments(this.propTypes!, args)) {
 					// @ts-ignore
 					callback(sourcePlayer, ...args);
 				}
@@ -141,7 +141,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 */
 	public SendToAllPlayers(...args: StaticArguments<F>) {
 		if (this.callTypes !== undefined) {
-			if (!t_assert(this.callTypes, args)) {
+			if (!checkArguments(this.callTypes, args)) {
 				return;
 			}
 		}
@@ -156,7 +156,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 */
 	public SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: StaticArguments<F>) {
 		if (this.callTypes !== undefined) {
-			if (!t_assert(this.callTypes, args)) {
+			if (!checkArguments(this.callTypes, args)) {
 				return;
 			}
 		}
@@ -182,7 +182,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 */
 	public SendToPlayer(player: Player, ...args: StaticArguments<F>) {
 		if (this.callTypes !== undefined) {
-			if (!t_assert(this.callTypes, args)) {
+			if (!checkArguments(this.callTypes, args)) {
 				return;
 			}
 		}
@@ -197,7 +197,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	 */
 	public SendToPlayers(players: Array<Player>, ...args: StaticArguments<F>) {
 		if (this.callTypes !== undefined) {
-			if (!t_assert(this.callTypes, args)) {
+			if (!checkArguments(this.callTypes, args)) {
 				return;
 			}
 		}

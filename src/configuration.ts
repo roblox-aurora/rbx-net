@@ -1,8 +1,16 @@
 import { IS_CLIENT } from "./internal";
+import NetServerEvent from "./ServerEvent";
+import NetServerFunction from "./ServerFunction";
+import NetServerAsyncFunction from "./ServerAsyncFunction";
 
 const runService = game.GetService("RunService");
 
 const IS_SERVER = runService.IsServer();
+
+type InvalidPropTypesHandler = (
+	who: NetServerEvent | NetServerFunction | NetServerAsyncFunction,
+	srcPlayer: Player,
+) => void;
 
 interface RbxNetConfigItem {
 	/**
@@ -11,6 +19,8 @@ interface RbxNetConfigItem {
 	ServerThrottleResetTimer: number;
 
 	EnableDebugMessages: boolean;
+
+	InvalidPropTypesHandler?: InvalidPropTypesHandler;
 
 	/**
 	 * The message shown when the throttle has been exceeded.
@@ -27,6 +37,9 @@ let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via 
 namespace NetConfig {
 	/** @internal */
 	export let DebugEnabled = false;
+
+	/** @internal */
+	export let InvalidPropTypesHandlerFunc: InvalidPropTypesHandler | undefined;
 
 	/** @rbxts client */
 	export function SetClientConfiguration<K extends keyof Pick<RbxNetConfigItem, "EnableDebugMessages">>(
@@ -48,6 +61,8 @@ namespace NetConfig {
 			rateLimitReachedMessage = value as string;
 		} else if (key === "EnableDebugMessages") {
 			DebugEnabled = value as boolean;
+		} else if (key === "InvalidPropTypesHandler") {
+			InvalidPropTypesHandlerFunc = value as InvalidPropTypesHandler;
 		}
 	}
 

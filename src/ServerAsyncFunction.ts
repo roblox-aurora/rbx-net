@@ -1,4 +1,4 @@
-import { findOrCreateRemote, IS_CLIENT, IAsyncListener, t_assert, StaticArguments } from "./internal";
+import { findOrCreateRemote, IS_CLIENT, IAsyncListener, checkArguments, StaticArguments } from "./internal";
 import { DebugLog, DebugWarn } from "./configuration";
 
 const HttpService = game.GetService("HttpService");
@@ -43,7 +43,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
 				// @ts-ignore ... again. unfortunately.
-				if (this.propTypes === undefined || t_assert(this.propTypes, data)) {
+				if (this.propTypes === undefined || checkArguments(this.propTypes, data)) {
 					const result: unknown | Promise<unknown> = callback(player, ...(data as StaticArguments<C>));
 					if (Promise.is(result)) {
 						result

@@ -156,16 +156,11 @@ export interface IAsyncListener {
 	timeout: number;
 }
 
-export function t_assert(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
+export function checkArguments(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
 	if (args === undefined) {
 		warn("[net-types] Argument length is zero");
 		return false;
 	}
-
-	// if (args.size() < types.size()) {
-	// 	warn(`[net-types] Argument length less than required: ${args.size()} < ${types.size()}`);
-	// 	return false;
-	// }
 
 	for (let i = 0; i < types.size(); i++) {
 		const typeCheck = types[i];
