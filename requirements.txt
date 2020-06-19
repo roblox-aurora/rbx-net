@@ -1,2 +1,1 @@
-markdown
-pymdown-extension
+pymdown-extensions
