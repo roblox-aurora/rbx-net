@@ -2,8 +2,11 @@ When using remotes in Roblox, you might want to limit the amount of times a user
 
 
 !!! info "Supported By"
-	- [ServerEvent](class/NetServerEvent)
-	- [ServerFunction](class/NetServerFunction)
+	- [ServerEvent](class/NetServerEvent) `>= 1.3.0`
+	- [ServerFunction](class/NetServerFunction) `>= 1.3.0`
+
+	- {--*[ServerThrottledEvent](class/NetServerEvent)*--} <code>[deprecated](https://github.com/roblox-aurora/rbx-net/issues/20)</code>
+	- {--*[ServerThrottledFunction](class/NetServerFunction)*--} <code>[deprecated](https://github.com/roblox-aurora/rbx-net/issues/20)</code>
 
 ## Basic Usage
 

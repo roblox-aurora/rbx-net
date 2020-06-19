@@ -39,6 +39,7 @@ markdown_extensions:
     - pymdownx.details:
     - pymdownx.inlinehilite:
     - pymdownx.tasklist:
+    - pymdownx.critic:
     - pymdownx.superfences:
         preserve_tabs: true
     - codehilite:
