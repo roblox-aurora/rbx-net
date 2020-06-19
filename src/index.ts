@@ -86,11 +86,15 @@ namespace Net {
 	export const GlobalServerEvent = NetGlobalServerEvent;
 	export type GlobalServerEvent = NetGlobalServerEvent;
 
+	/** @deprecated */
 	export const ServerThrottledEvent = NetServerThrottledEvent;
-	export type ServerThrottledEvent = NetServerThrottledEvent;
+	/** @deprecated */
+	export type ServerThrottledEvent = NetServerEvent;
 
+	/** @deprecated */
 	export const ServerThrottledFunction = NetServerThrottledFunction;
-	export type ServerThrottledFunction = NetServerThrottledFunction;
+	/** @deprecated */
+	export type ServerThrottledFunction = NetServerFunction;
 
 	export function IsClient() {
 		return IS_CLIENT;
@@ -140,7 +144,7 @@ namespace Net {
 	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
 	 * @rbxts server
 	 */
-	export function CreateThrottledFunction(name: string, rateLimit: number): NetServerThrottledFunction {
+	export function CreateThrottledFunction(name: string, rateLimit: number): NetServerFunction {
 		if (IS_SERVER) {
 			return new NetServerThrottledFunction(name, rateLimit);
 		} else {
@@ -154,7 +158,7 @@ namespace Net {
 	 * @param rateLimit The amount of requests allowed by clients in the rate timeout (default 60 seconds)
 	 * @rbxts server
 	 */
-	export function CreateThrottledEvent(name: string, rateLimit: number): NetServerThrottledEvent {
+	export function CreateThrottledEvent(name: string, rateLimit: number): NetServerEvent {
 		if (IS_SERVER) {
 			return new NetServerThrottledEvent(name, rateLimit);
 		} else {
