@@ -4,7 +4,10 @@
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local _0 = TS.import(script, script.Parent, "internal");
-local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
+local findOrCreateRemote, IS_CLIENT, checkArguments, errorft = _0.findOrCreateRemote, _0.IS_CLIENT, _0.checkArguments, _0.errorft;
+local throttler = TS.import(script, script.Parent, "Throttle");
+local GetConfiguration = TS.import(script, script.Parent, "configuration").GetConfiguration;
+local UNLIMITED_REQUESTS = -1;
 local NetServerFunction;
 do
 	NetServerFunction = setmetatable({}, {
@@ -18,8 +21,11 @@ do
 	end;
 	function NetServerFunction:constructor(name, ...)
 		local recievedPropTypes = { ... };
+		self.invalidRequestHandler = GetConfiguration("InvalidPropTypesHandler");
+		self.maxRequestsPerMinute = UNLIMITED_REQUESTS;
 		self.instance = findOrCreateRemote("RemoteFunction", name);
 		assert(not (IS_CLIENT), "Cannot create a Net.ServerFunction on the Client!");
+		self.clientRequests = throttler:Get("Function~" .. name);
 		if #recievedPropTypes > 0 then
 			self.propTypes = recievedPropTypes;
 		end;
@@ -36,9 +42,24 @@ do
 		if self.propTypes ~= nil then
 			self.instance.OnServerInvoke = function(player, ...)
 				local args = { ... };
-				if t_assert(self.propTypes, args) then
-					return func(player, unpack(args));
+				local maxRequests = self.maxRequestsPerMinute;
+				if maxRequests > 0 then
+					local clientRequestCount = self.clientRequests:Get(player);
+					if clientRequestCount >= maxRequests then
+						errorft(GetConfiguration("ServerThrottleMessage"), {
+							player = player.UserId;
+							remote = self.instance.Name;
+							limit = maxRequests;
+						});
+					else
+						self.clientRequests:Increment(player);
+					end;
+				end;
+				if checkArguments(self.propTypes, args) then
+					return func(player, unpack((args)));
 				else
+					local _1 = self.invalidRequestHandler;
+					local _ = _1 and self.invalidRequestHandler(self, player);
 					error("Client failed type checks", 2);
 				end;
 			end;
@@ -68,6 +89,20 @@ do
 			cache.Value = time;
 		end;
 		return self;
+	end;
+	function NetServerFunction:SetRateLimit(requestsPerMinute)
+		self.maxRequestsPerMinute = requestsPerMinute;
+		local clientValue = self.instance:FindFirstChild("RateLimit");
+		if clientValue then
+			clientValue.Value = requestsPerMinute;
+		else
+			clientValue = Instance.new("IntValue", self.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = requestsPerMinute;
+		end;
+	end;
+	function NetServerFunction:GetRateLimit()
+		return self.maxRequestsPerMinute;
 	end;
 end;
 exports.default = NetServerFunction;

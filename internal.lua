@@ -19,10 +19,6 @@ local REMOTES_FOLDER_NAME = "Remotes";
 local FUNCTIONS_FOLDER_NAME = "Functions";
 local EVENTS_FOLDER_NAME = "Events";
 local ASYNC_FUNCTIONS_FOLDER_NAME = "AsyncFunctions";
-local remoteFolder;
-local eventFolder;
-local functionFolder;
-local asyncFunctionFolder;
 local ServerTickFunctions = {};
 local function findOrCreateFolder(parent, name)
 	local folder = parent:FindFirstChild(name);
@@ -34,10 +30,10 @@ local function findOrCreateFolder(parent, name)
 		return folder;
 	end;
 end;
-remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
-functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
-eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
-asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
+local remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
+local functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
+local eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
+local asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
 local function errorft(message, vars)
 	message = string.gsub(message, "{([%w_][%w%d_]*)}", function(token)
 		local _2 = vars[token];
@@ -106,7 +102,7 @@ local function findOrCreateRemote(remoteType, name)
 		return remote;
 	end;
 end;
-local function t_assert(types, args)
+local function checkArguments(types, args)
 	if args == nil then
 		warn("[net-types] Argument length is zero");
 		return false;
@@ -149,5 +145,5 @@ exports.getRemoteFolder = getRemoteFolder;
 exports.findRemote = findRemote;
 exports.getRemoteOrThrow = getRemoteOrThrow;
 exports.findOrCreateRemote = findOrCreateRemote;
-exports.t_assert = t_assert;
+exports.checkArguments = checkArguments;
 return exports;

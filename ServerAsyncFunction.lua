@@ -4,7 +4,7 @@
 local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local _0 = TS.import(script, script.Parent, "internal");
-local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
+local findOrCreateRemote, IS_CLIENT, checkArguments = _0.findOrCreateRemote, _0.IS_CLIENT, _0.checkArguments;
 local _1 = TS.import(script, script.Parent, "configuration");
 local DebugLog, DebugWarn = _1.DebugLog, _1.DebugWarn;
 local HttpService = game:GetService("HttpService");
@@ -46,7 +46,7 @@ do
 			local eventId = args[1];
 			local data = args[2];
 			if (type(eventId) == "string") and (type(data) == "table") then
-				if (self.propTypes == nil) or (t_assert(self.propTypes, data)) then
+				if (self.propTypes == nil) or (checkArguments(self.propTypes, data)) then
 					local result = callback(player, unpack((data)));
 					if TS.Promise.is(result) then
 						result:andThen(function(promiseResult)

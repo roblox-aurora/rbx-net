@@ -26,6 +26,8 @@ NetConfig = NetConfig or {} do
 			rateLimitReachedMessage = value;
 		elseif key == "EnableDebugMessages" then
 			_0.DebugEnabled = value;
+		elseif key == "InvalidPropTypesHandler" then
+			_0.InvalidPropTypesHandlerFunc = value;
 		end;
 	end;
 	local function GetConfiguration(key)

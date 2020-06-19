@@ -5,7 +5,9 @@ local TS = require(script.Parent.vendor.RuntimeLib);
 local exports = {};
 local NetServerEvent;
 local _0 = TS.import(script, script.Parent, "internal");
-local findOrCreateRemote, IS_CLIENT, t_assert = _0.findOrCreateRemote, _0.IS_CLIENT, _0.t_assert;
+local findOrCreateRemote, IS_CLIENT, checkArguments, errorft = _0.findOrCreateRemote, _0.IS_CLIENT, _0.checkArguments, _0.errorft;
+local throttler = TS.import(script, script.Parent, "Throttle");
+local GetConfiguration = TS.import(script, script.Parent, "configuration").GetConfiguration;
 local Players = game:GetService("Players");
 do
 	NetServerEvent = setmetatable({}, {
@@ -19,8 +21,10 @@ do
 	end;
 	function NetServerEvent:constructor(name, ...)
 		local recievedPropTypes = { ... };
+		self.maxRequestsPerMinute = 0;
 		self.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(not (IS_CLIENT), "Cannot create a Net.ServerEvent on the Client!");
+		self.clientRequests = throttler:Get("Event~" .. name);
 		if #recievedPropTypes > 0 then
 			self.propTypes = recievedPropTypes;
 		end;
@@ -33,7 +37,7 @@ do
 		local map = {};
 		for key, value in pairs(list) do
 			if type(value) == "table" then
-				local item = NetServerEvent.new(key, unpack(TS.iterableCache(value[TS.Symbol_iterator](value))));
+				local item = NetServerEvent.new(key, unpack((value)));
 				map[key] = item;
 			elseif type(value) == "boolean" then
 				map[key] = NetServerEvent.new(key);
@@ -71,8 +75,21 @@ do
 		if self.propTypes ~= nil then
 			return self:GetEvent():Connect(function(sourcePlayer, ...)
 				local args = { ... };
-				if t_assert(self.propTypes, args) then
-					callback(sourcePlayer, unpack(args));
+				local maxRequests = self.maxRequestsPerMinute;
+				if maxRequests > 0 then
+					local clientRequestCount = self.clientRequests:Get(sourcePlayer);
+					if clientRequestCount >= maxRequests then
+						errorft(GetConfiguration("ServerThrottleMessage"), {
+							player = sourcePlayer.UserId;
+							remote = self.instance.Name;
+							limit = maxRequests;
+						});
+					else
+						self.clientRequests:Increment(sourcePlayer);
+					end;
+				end;
+				if checkArguments(self.propTypes, args) then
+					callback(sourcePlayer, unpack((args)));
 				end;
 			end);
 		else
@@ -82,7 +99,7 @@ do
 	function NetServerEvent:SendToAllPlayers(...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not (t_assert(self.callTypes, args)) then
+			if not (checkArguments(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
@@ -91,7 +108,7 @@ do
 	function NetServerEvent:SendToAllPlayersExcept(blacklist, ...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not (t_assert(self.callTypes, args)) then
+			if not (checkArguments(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
@@ -116,7 +133,7 @@ do
 	function NetServerEvent:SendToPlayer(player, ...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not (t_assert(self.callTypes, args)) then
+			if not (checkArguments(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
@@ -125,7 +142,7 @@ do
 	function NetServerEvent:SendToPlayers(players, ...)
 		local args = { ... };
 		if self.callTypes ~= nil then
-			if not (t_assert(self.callTypes, args)) then
+			if not (checkArguments(self.callTypes, args)) then
 				return nil;
 			end;
 		end;
@@ -133,6 +150,20 @@ do
 			local player = players[_1];
 			self:SendToPlayer(player, unpack((args)));
 		end;
+	end;
+	function NetServerEvent:SetRateLimit(requestsPerMinute)
+		self.maxRequestsPerMinute = requestsPerMinute;
+		local clientValue = self.instance:FindFirstChild("RateLimit");
+		if clientValue then
+			clientValue.Value = requestsPerMinute;
+		else
+			clientValue = Instance.new("IntValue", self.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = requestsPerMinute;
+		end;
+	end;
+	function NetServerEvent:GetRateLimit()
+		return self.maxRequestsPerMinute;
 	end;
 end;
 exports.default = NetServerEvent;

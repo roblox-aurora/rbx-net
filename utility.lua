@@ -43,8 +43,20 @@ local function isNetworkValue(value)
 		isValidInstance(value)
 end
 
+local function createDeprecatedFactory(newFn, super)
+	if super then
+		return setmetatable({new = newFn}, super)
+	else
+		return {
+			new = newFn
+		}
+	end
+
+end
+
 return {
 	IsNetworkTable = isNetworkTable,
 	IsNetworkValue = isNetworkValue,
-	IsNetworkMap = isNetworkMap
+	IsNetworkMap = isNetworkMap,
+	createDeprecatedThrottledConstructor = createDeprecatedFactory,
 }
