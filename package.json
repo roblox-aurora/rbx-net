@@ -11,15 +11,22 @@
 		"cleanup": "rm -rf ./out && rm -rf ./dist",
 		"build": "npm run cleanup && rbxtsc",
 		"binary": "mkdir -p dist && rbxtsc -r luaproject.json && rojo build luaproject.json --output dist/net.rbxmx",
-		"prepublish": "rbxtsc",
 		"publish:alpha": "rbxtsc && npm publish --tag alpha",
-		"luadist": "./build.sh -l && gh-pages -d lualib -b lualib"
+		"luadist": "./build.sh -l && gh-pages -d lualib -b lualib",
+		"eslint": "npx eslint \"src/**/*.ts\" --max-warnings 0"
 	},
 	"author": "vorlias",
 	"license": "MIT",
 	"devDependencies": {
 		"@rbxts/types": "^1.0.353",
-		"gh-pages": "^2.2.0"
+		"gh-pages": "^2.2.0",
+		"eslint": "^7.2.0",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-plugin-prettier": "^3.1.4",
+		"eslint-plugin-roblox-ts": "0.0.15",
+		"prettier": "^2.0.5",
+		"@typescript-eslint/eslint-plugin": "^3.3.0",
+		"@typescript-eslint/parser": "^3.3.0"
 	},
 	"dependencies": {},
 	"repository": {

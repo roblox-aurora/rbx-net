@@ -1,4 +1,12 @@
-import { findOrCreateRemote, IS_CLIENT, StaticArguments, checkArguments, RequestCounter, errorft, TypeGuard } from "./internal";
+import {
+	findOrCreateRemote,
+	IS_CLIENT,
+	StaticArguments,
+	checkArguments,
+	RequestCounter,
+	errorft,
+	TypeGuard,
+} from "./internal";
 import throttler from "./Throttle";
 import { GetConfiguration } from "./configuration";
 const UNLIMITED_REQUESTS = -1;
@@ -25,7 +33,6 @@ export default class NetServerFunction<C extends Array<any> = Array<unknown>> {
 		if (recievedPropTypes.size() > 0) {
 			this.propTypes = recievedPropTypes;
 		}
-		
 	}
 
 	/**
@@ -69,8 +76,9 @@ export default class NetServerFunction<C extends Array<any> = Array<unknown>> {
 				}
 
 				if (checkArguments(this.propTypes! as Array<TypeGuard<unknown>>, args)) {
-					return func(player, ...args as StaticArguments<C>);
+					return func(player, ...(args as StaticArguments<C>));
 				} else {
+					// tslint:disable-next-line: no-unused-expression
 					this.invalidRequestHandler && this.invalidRequestHandler(this, player);
 					error("Client failed type checks", 2);
 				}

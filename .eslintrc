@@ -1,0 +1,55 @@
+{
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"jsx": true,
+		"useJSXTextNode": true,
+		"ecmaVersion": 2018,
+		"sourceType": "module",
+		"project": "./tsconfig.json"
+	},
+	"plugins": [
+		"roblox-ts",
+		"@typescript-eslint",
+		"@typescript-eslint/eslint-plugin",
+		"prettier"
+	],
+	"extends": [
+		"plugin:@typescript-eslint/recommended",
+		"prettier/@typescript-eslint",
+		"plugin:prettier/recommended",
+		"plugin:roblox-ts/recommended"
+	],
+	"rules": {
+		"prettier/prettier": [
+			"warn",
+			{
+				"semi": true,
+				"trailingComma": "all",
+				"singleQuote": false,
+				"printWidth": 120,
+				"tabWidth": 4,
+				"useTabs": true
+			}
+		],
+		"@typescript-eslint/array-type": [
+			"warn",
+			{
+				"default": "generic",
+				"readonly": "generic"
+			}
+		],
+		"@typescript-eslint/no-var-requires": "off", // roblox uses require
+		"roblox-ts/no-any": "off", // broken
+		"@typescript-eslint/explicit-module-boundary-types": "off", // this is too much imo
+		"roblox-ts/no-namespace-merging": "off", // This is handled by the compiler, also needs fixing
+		"roblox-ts/lua-truthiness": "off",
+		"@typescript-eslint/no-unused-vars": "off",
+		"@typescript-eslint/explicit-function-return-type": "off",
+		"@typescript-eslint/no-namespace": "off",
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/no-empty-function": "warn",
+		"@typescript-eslint/no-explicit-any": "off", // I know what I'm doing here
+		"prefer-const": "warn",
+		"no-undef-init": "error"
+	}
+}

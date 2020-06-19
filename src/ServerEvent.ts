@@ -26,7 +26,7 @@ type UsableEvents<T> = { [Q in FilteredKeys<T, true | TypeGuards<any>>]: InferEv
 
 interface EventList {
 	// tslint:disable-next-line: array-type
-	[name: string]: ((player: Player, ...args: unknown[]) => void) | true | Array<TypeGuard<any>>;
+	[name: string]: ((player: Player, ...args: Array<unknown>) => void) | true | Array<TypeGuard<any>>;
 }
 
 const Players = game.GetService("Players");
@@ -35,7 +35,7 @@ const Players = game.GetService("Players");
  * @rbxts server
  */
 export default class NetServerEvent<C extends Array<any> = Array<unknown>, F extends Array<any> = Array<unknown>>
-	implements IServerNetEvent, ServerRecieverEvent<C>, ServerSenderEvent<F> {
+	implements ServerRecieverEvent<C>, ServerSenderEvent<F> {
 	/** @internal */
 	protected instance: RemoteEvent;
 	protected propTypes: C | undefined;
@@ -70,7 +70,6 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		const map = new Map<string, NetServerEvent>();
 		for (const [key, value] of Object.entries<EventList>(list)) {
 			if (typeIs(value, "table")) {
-				// @ts-ignore
 				const item = new NetServerEvent(key as string, ...value);
 				map.set(key as string, item);
 			} else if (typeIs(value, "boolean")) {
@@ -80,7 +79,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 				event.Connect(value);
 			}
 		}
-		return map as {[name: string]: any} as UsableEvents<T>;
+		return (map as { [name: string]: any }) as UsableEvents<T>;
 	}
 
 	public static PureReciever<C extends Array<any> = Array<unknown>>(
@@ -124,10 +123,8 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	public Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void) {
 		if (this.propTypes !== undefined) {
 			return this.GetEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
-				// @ts-ignore ... again. unfortunately.
-				if (checkArguments(this.propTypes!, args)) {
-					// @ts-ignore
-					callback(sourcePlayer, ...args);
+				if (checkArguments(this.propTypes! as Array<TypeGuard<unknown>>, args)) {
+					callback(sourcePlayer, ...(args as StaticArguments<C>));
 				}
 			});
 		} else {
@@ -162,7 +159,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		}
 
 		if (typeIs(blacklist, "Instance")) {
-			const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
+			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
 			for (const player of otherPlayers) {
 				this.instance.FireClient(player, ...(args as Array<unknown>));
 			}
@@ -203,8 +200,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		}
 
 		for (const player of players) {
-			// @ts-ignore
-			this.SendToPlayer(player, ...(args as Array<unknown>));
+			this.SendToPlayer(player, ...(args as StaticArguments<F>));
 		}
 	}
 }

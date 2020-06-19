@@ -8,7 +8,7 @@ import { GetConfiguration } from "./configuration";
  * @rbxts server
  */
 export default class NetServerThrottledEvent<C extends Array<any> = Array<unknown>> extends NetServerEvent<C> {
-	private maxRequestsPerMinute: number = 0;
+	private maxRequestsPerMinute = 0;
 	private clientRequests: RequestCounter;
 
 	constructor(name: string, rateLimit: number, ...recievedPropTypes: C) {

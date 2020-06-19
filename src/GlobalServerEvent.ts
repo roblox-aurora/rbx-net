@@ -26,7 +26,7 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class NetGlobalServerEvent implements INetXServerEvent {
+export default class NetGlobalServerEvent {
 	private readonly instance: NetServerEvent;
 	private readonly event: NetGlobalEvent;
 	private readonly eventHandler: RBXScriptConnection;
@@ -36,7 +36,7 @@ export default class NetGlobalServerEvent implements INetXServerEvent {
 		this.event = new NetGlobalEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
-		this.eventHandler = this.event.Connect(message => {
+		this.eventHandler = this.event.Connect((message) => {
 			if (isTargetedSubscriptionMessage(message)) {
 				this.recievedMessage(message.Data);
 			} else {

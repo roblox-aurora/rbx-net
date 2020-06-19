@@ -36,11 +36,10 @@ export default class NetClientAsyncFunction {
 		this.connector = this.instance.OnClientEvent.Connect(async (...args: Array<unknown>) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				// @ts-ignore ... again. unfortunately.
-				const result: unknown | Promise<unknown> = callback(...data);
+				const result: unknown | Promise<unknown> = callback(...(data as Array<unknown>));
 				if (Promise.is(result)) {
 					result
-						.then(promiseResult => {
+						.then((promiseResult) => {
 							this.instance.FireServer(eventId, promiseResult);
 						})
 						.catch((err: string) => {

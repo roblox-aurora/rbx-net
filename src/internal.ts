@@ -30,11 +30,6 @@ const FUNCTIONS_FOLDER_NAME = "Functions";
 const EVENTS_FOLDER_NAME = "Events";
 const ASYNC_FUNCTIONS_FOLDER_NAME = "AsyncFunctions";
 
-let remoteFolder: Folder;
-let eventFolder: Folder;
-let functionFolder: Folder;
-let asyncFunctionFolder: Folder;
-
 /** @internal */
 export const ServerTickFunctions = new Array<() => void>();
 
@@ -50,10 +45,10 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
-functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
-eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
-asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
+const remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
+const functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
+const eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
+const asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
 
 /**
  * Errors with variables formatted in a message
@@ -61,6 +56,7 @@ asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NA
  * @param vars variables to pass to the error message
  */
 export function errorft(message: string, vars: { [name: string]: unknown }) {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
 		return vars[token] || token;
@@ -217,7 +213,6 @@ export type TypeGuards<T> = T extends [TypeGuard<infer A>]
 	  ]
 	? [A, B, C, D, E, F, G, H]
 	: Array<unknown>; // default, if user has more than 8 args then wtf they doing with their lives?!?
-
 
 export type StaticArguments<T> = T extends [TypeGuard<infer A>]
 	? [A]

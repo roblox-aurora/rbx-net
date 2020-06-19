@@ -4,7 +4,7 @@ import { getRemoteOrThrow, IS_CLIENT, waitForEvent, MAX_CLIENT_WAITFORCHILD_TIME
  * An event on the client
  * @rbxts client
  */
-export default class NetClientEvent implements IClientNetEvent {
+export default class NetClientEvent {
 	/** @internal */
 	private instance: RemoteEvent;
 

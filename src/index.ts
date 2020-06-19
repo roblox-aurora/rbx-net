@@ -55,7 +55,7 @@ namespace Net {
 	};
 
 	setmetatable(VERSION, {
-		__tostring: self => {
+		__tostring: (self) => {
 			const { major, minor, revision } = self.number;
 
 			return `${major}.${minor}.${revision}${IS_LUA_MODULE !== undefined ? "-lua" : ""}`;

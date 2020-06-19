@@ -83,7 +83,7 @@ function processMessageQueue() {
  * An event that works across all servers
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
-export default class NetGlobalEvent implements INetXMessageEvent {
+export default class NetGlobalEvent {
 	constructor(private name: string) {}
 
 	/**
