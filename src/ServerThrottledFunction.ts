@@ -1,13 +1,16 @@
 import NetServerFunction from "./ServerFunction";
+import { createDeprecatedThrottledConstructor } from "./utility";
 
-/**
- * A server function that can be rate limited
- * @rbxts server
- * @deprecated Use NetServerFunction
- */
-export default class NetServerThrottledFunction<C extends Array<any> = Array<unknown>> extends NetServerFunction<C> {
-	constructor(name: string, rateLimit: number, ...recievedPropTypes: C) {
-		super(name, ...recievedPropTypes);
-		this.SetRateLimit(rateLimit);
-	}
-}
+const NetServerThrottledFunction = createDeprecatedThrottledConstructor(
+	<C extends Array<any> = Array<unknown>>(name: string, rateLimit: number, ...recievedPropTypes: C) => {
+		warn(
+			"[rbx-net] NetServerThrottledFunction is deprecated - see https://github.com/roblox-aurora/rbx-net/issues/20",
+		);
+		const remote = new NetServerFunction(name, ...recievedPropTypes);
+		remote.SetRateLimit(rateLimit);
+		return remote;
+	},
+	NetServerFunction,
+);
+
+export default NetServerThrottledFunction;

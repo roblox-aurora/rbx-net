@@ -1,4 +1,15 @@
-import { findOrCreateRemote, IS_CLIENT, TypeGuard, StaticArguments, checkArguments, TypeGuards } from "./internal";
+import {
+	findOrCreateRemote,
+	IS_CLIENT,
+	TypeGuard,
+	StaticArguments,
+	checkArguments,
+	TypeGuards,
+	RequestCounter,
+	errorft,
+} from "./internal";
+import throttler from "./Throttle";
+import { GetConfiguration } from "./configuration";
 
 export interface ServerRecieverEvent<C> {
 	Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void): RBXScriptConnection;
@@ -41,6 +52,9 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	protected propTypes: C | undefined;
 	protected callTypes: F | undefined;
 
+	private maxRequestsPerMinute = 0;
+	private clientRequests: RequestCounter;
+
 	/**
 	 * Creates a new instance of a server event (Will also create the corresponding remote if it does not exist!)
 	 * @param name The name of this server event
@@ -49,6 +63,8 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	constructor(name: string, ...recievedPropTypes: C) {
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(!IS_CLIENT, "Cannot create a Net.ServerEvent on the Client!");
+
+		this.clientRequests = throttler.Get(`Event~${name}`);
 
 		if (recievedPropTypes.size() > 0) {
 			this.propTypes = recievedPropTypes;
@@ -123,6 +139,20 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 	public Connect(callback: (sourcePlayer: Player, ...args: StaticArguments<C>) => void) {
 		if (this.propTypes !== undefined) {
 			return this.GetEvent().Connect((sourcePlayer: Player, ...args: Array<unknown>) => {
+				const maxRequests = this.maxRequestsPerMinute;
+				if (maxRequests > 0) {
+					const clientRequestCount = this.clientRequests.Get(sourcePlayer);
+					if (clientRequestCount >= maxRequests) {
+						errorft(GetConfiguration("ServerThrottleMessage"), {
+							player: sourcePlayer.UserId,
+							remote: this.instance.Name,
+							limit: maxRequests,
+						});
+					} else {
+						this.clientRequests.Increment(sourcePlayer);
+					}
+				}
+
 				if (checkArguments(this.propTypes! as Array<TypeGuard<unknown>>, args)) {
 					callback(sourcePlayer, ...(args as StaticArguments<C>));
 				}
@@ -202,5 +232,25 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		for (const player of players) {
 			this.SendToPlayer(player, ...(args as StaticArguments<F>));
 		}
+	}
+
+	/**
+	 * The number of requests allowed per minute per user
+	 */
+	public SetRateLimit(requestsPerMinute: number) {
+		this.maxRequestsPerMinute = requestsPerMinute;
+
+		let clientValue = this.instance.FindFirstChild("RateLimit") as IntValue;
+		if (clientValue) {
+			clientValue.Value = requestsPerMinute;
+		} else {
+			clientValue = new Instance("IntValue", this.instance);
+			clientValue.Name = "RateLimit";
+			clientValue.Value = requestsPerMinute;
+		}
+	}
+
+	public GetRateLimit() {
+		return this.maxRequestsPerMinute;
 	}
 }
