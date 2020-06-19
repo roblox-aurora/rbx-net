@@ -1,2 +1,2 @@
-markdown==3.2.2
-pymdown-extension==7.1
+markdown
+pymdown-extension
