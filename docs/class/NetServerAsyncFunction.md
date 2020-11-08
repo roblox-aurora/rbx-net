@@ -91,7 +91,7 @@ end)
 SetCallTimeout(seconds: number): void;
 ```
 
-### SetCallTimeout
+### GetCallTimeout
 ```ts
 GetCallTimeout(): number;
 ```
