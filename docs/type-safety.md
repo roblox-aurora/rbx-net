@@ -82,7 +82,7 @@ You can [install it](https://www.npmjs.com/package/@rbxts/t) using:
 npm i @rbxts/t
 ```
 
-Then with our above example, simply replace `isString` and `isNUmber` with `t.string` and `t.number`. There are also other type guards in that library that you could use for different argument types.
+Then with our above example, simply replace `isString` and `isNumber` with `t.string` and `t.number`. There are also other type guards in that library that you could use for different argument types.
 
 ```TypeScript
 import t from "@rbxts/t";
