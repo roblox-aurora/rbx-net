@@ -71,8 +71,8 @@ function compile {
 }
 
 function generate_toml {
-    echo "name = \"rbx-net\"
-author = \"Vorlias\"
+    echo "name = \"vorlias/rbx-net\"
+author = \"roblox-aurora\"
 license = \"\"
 content_root = \"\"
 version = \"$(cat package.json | jq -r '.version')\"" >> lualib/rotriever.toml
