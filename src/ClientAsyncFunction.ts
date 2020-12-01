@@ -27,7 +27,7 @@ export default class NetClientAsyncFunction {
 		return this.timeout;
 	}
 
-	public SetCallback(callback: (...args: Array<unknown>) => any) {
+	public SetCallback<R>(callback: (...args: Array<unknown>) => R) {
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
@@ -74,20 +74,17 @@ export default class NetClientAsyncFunction {
 			});
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
-			Promise.spawn(() => {
-				// Wait until disconnected or timeout
-				do {
-					game.GetService("RunService").Stepped.Wait();
-				} while (connection.Connected && tick() < startTime + this.timeout);
+			do {
+				game.GetService("RunService").Stepped.Wait();
+			} while (connection.Connected && tick() < startTime + this.timeout);
 
-				this.listeners.delete(id);
+			this.listeners.delete(id);
 
-				if (tick() >= startTime && connection.Connected) {
-					DebugWarn("(timeout) Disconnected CallServerAsync EventId", id);
-					connection.Disconnect();
-					reject("Request to client timed out");
-				}
-			});
+			if (tick() >= startTime && connection.Connected) {
+				DebugWarn("(timeout) Disconnected CallServerAsync EventId", id);
+				connection.Disconnect();
+				reject("Request to client timed out");
+			}
 		});
 	}
 }

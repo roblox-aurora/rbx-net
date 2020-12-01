@@ -122,9 +122,7 @@ export default class NetGlobalEvent {
 			globalEventMessageCounter++;
 
 			// Since this yields
-			Promise.spawn(() => {
-				((IS_STUDIO && MockMessagingService) || MessagingService).PublishAsync(this.name, message);
-			});
+			((IS_STUDIO && MockMessagingService) || MessagingService).PublishAsync(this.name, message);
 		}
 	}
 

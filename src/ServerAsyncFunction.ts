@@ -47,7 +47,7 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 					const result: unknown | Promise<unknown> = callback(player, ...(data as StaticArguments<C>));
 					if (Promise.is(result)) {
 						result
-							.then(promiseResult => {
+							.then((promiseResult) => {
 								this.instance.FireClient(player, eventId, promiseResult);
 							})
 							.catch((err: string) => {
@@ -87,20 +87,17 @@ export default class NetServerAsyncFunction<C extends Array<any> = Array<unknown
 			);
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
-			Promise.spawn(() => {
-				// Wait until disconnected or timeout
-				do {
-					game.GetService("RunService").Stepped.Wait();
-				} while (connection.Connected && tick() < startTime + this.timeout);
+			do {
+				game.GetService("RunService").Stepped.Wait();
+			} while (connection.Connected && tick() < startTime + this.timeout);
 
-				this.listeners.delete(id);
+			this.listeners.delete(id);
 
-				if (tick() >= startTime && connection.Connected) {
-					DebugWarn("(timeout) Disconnected CallPlayerAsync EventId", id);
-					connection.Disconnect();
-					reject("Request to client timed out");
-				}
-			});
+			if (tick() >= startTime && connection.Connected) {
+				DebugWarn("(timeout) Disconnected CallPlayerAsync EventId", id);
+				connection.Disconnect();
+				reject("Request to client timed out");
+			}
 		});
 	}
 }
