@@ -84,7 +84,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 
 	public static Group<T extends EventList>(list: T): UsableEvents<T> {
 		const map = new Map<string, NetServerEvent>();
-		for (const [key, value] of Object.entries<EventList>(list)) {
+		for (const [key, value] of pairs(list)) {
 			if (typeIs(value, "table")) {
 				const item = new NetServerEvent(key as string, ...(value as Array<TypeGuard<any>>));
 				map.set(key as string, item);
@@ -98,7 +98,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		return (map as { [name: string]: any }) as UsableEvents<T>;
 	}
 
-	public static PureReciever<C extends Array<any> = Array<unknown>>(
+	public static PureReciever<C extends Array<unknown> = Array<unknown>>(
 		name: string,
 		cb: (plr: Player, ...args: StaticArguments<C>) => void,
 		...recievedPropTypes: C
@@ -108,7 +108,7 @@ export default class NetServerEvent<C extends Array<any> = Array<unknown>, F ext
 		return event as ServerRecieverEvent<C>;
 	}
 
-	public static PureSender<C extends Array<any> = Array<unknown>>(name: string, ...recievedPropTypes: C) {
+	public static PureSender<C extends Array<unknown> = Array<unknown>>(name: string, ...recievedPropTypes: C) {
 		const event = new NetServerEvent(name, ...recievedPropTypes);
 		return event as ServerSenderEvent<C>;
 	}

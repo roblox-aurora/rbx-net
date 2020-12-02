@@ -56,7 +56,7 @@ export default class NetClientEvent {
 	 * Connect a function to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
-	public Connect<T extends Array<any>>(callback: (...args: T) => void) {
+	public Connect<T extends Array<unknown>>(callback: (...args: T) => void) {
 		return this.GetEvent().Connect(callback as Callback);
 	}
 
@@ -64,7 +64,7 @@ export default class NetClientEvent {
 	 * Sends the specified arguments to the server
 	 * @param args The arguments to send to the server
 	 */
-	public SendToServer<T extends Array<any>>(...args: T) {
+	public SendToServer<T extends Array<unknown>>(...args: T) {
 		this.instance.FireServer(...args);
 	}
 }

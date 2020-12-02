@@ -68,7 +68,7 @@ export default class NetClientFunction<SR extends unknown> {
 	 * @param args The arguments to call the server with
 	 * @returns the result of the call to the server
 	 */
-	public CallServer<T extends Array<any>>(...args: T): SR {
+	public CallServer<T extends Array<unknown>>(...args: T): SR {
 		if (this.lastPing < os.time() + this.GetCache()) {
 			const result = this.instance.InvokeServer(...args);
 			this.cached = result;
@@ -86,7 +86,7 @@ export default class NetClientFunction<SR extends unknown> {
 	 * @param args The args to call the server with
 	 * @async Will return a promise
 	 */
-	public async CallServerAsync<T extends Array<any>>(...args: T): Promise<SR> {
+	public async CallServerAsync<T extends Array<unknown>>(...args: T): Promise<SR> {
 		return this.CallServer(...args);
 	}
 }
