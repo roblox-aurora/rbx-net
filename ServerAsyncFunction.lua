@@ -1,114 +1,145 @@
 
-
-
-local TS = require(script.Parent.vendor.RuntimeLib);
-local exports = {};
-local _0 = TS.import(script, script.Parent, "internal");
-local findOrCreateRemote, IS_CLIENT, checkArguments = _0.findOrCreateRemote, _0.IS_CLIENT, _0.checkArguments;
-local _1 = TS.import(script, script.Parent, "configuration");
-local DebugLog, DebugWarn = _1.DebugLog, _1.DebugWarn;
-local HttpService = game:GetService("HttpService");
-local NetServerAsyncFunction;
+local TS = _G[script]
+local _0 = TS.import(script, script.Parent, "internal")
+local findOrCreateRemote = _0.findOrCreateRemote
+local IS_CLIENT = _0.IS_CLIENT
+local checkArguments = _0.checkArguments
+local _1 = TS.import(script, script.Parent, "configuration")
+local DebugLog = _1.DebugLog
+local DebugWarn = _1.DebugWarn
+local HttpService = game:GetService("HttpService")
+--[[
+	*
+	* An event that behaves like a function
+	* @rbxts server
+]]
+local NetServerAsyncFunction
 do
 	NetServerAsyncFunction = setmetatable({}, {
-		__tostring = function() return "NetServerAsyncFunction" end;
-	});
-	NetServerAsyncFunction.__index = NetServerAsyncFunction;
+		__tostring = function()
+			return "NetServerAsyncFunction"
+		end,
+	})
+	NetServerAsyncFunction.__index = NetServerAsyncFunction
 	function NetServerAsyncFunction.new(...)
-		local self = setmetatable({}, NetServerAsyncFunction);
-		self:constructor(...);
-		return self;
-	end;
+		local self = setmetatable({}, NetServerAsyncFunction)
+		self:constructor(...)
+		return self
+	end
 	function NetServerAsyncFunction:constructor(name, ...)
-		local recievedPropTypes = { ... };
-		self.timeout = 10;
-		self.listeners = {};
-		self.instance = findOrCreateRemote("AsyncRemoteFunction", name);
-		assert(not (IS_CLIENT), "Cannot create a Net.ServerAsyncFunction on the Client!");
+		local recievedPropTypes = { ... }
+		self.timeout = 10
+		self.listeners = {}
+		self.instance = findOrCreateRemote("AsyncRemoteFunction", name)
+		assert(not IS_CLIENT, "Cannot create a Net.ServerAsyncFunction on the Client!")
 		if #recievedPropTypes > 0 then
-			self.propTypes = recievedPropTypes;
-		end;
-	end;
+			self.propTypes = recievedPropTypes
+		end
+	end
 	function NetServerAsyncFunction:GetCallTimeout()
-		return self.timeout;
-	end;
+		return self.timeout
+	end
 	function NetServerAsyncFunction:SetCallTimeout(timeout)
-		assert(timeout > 0, "timeout must be a positive number");
-		self.timeout = timeout;
-	end;
+		assert(timeout > 0, "timeout must be a positive number")
+		self.timeout = timeout
+	end
 	function NetServerAsyncFunction:SetCallback(callback)
 		if self.connector then
-			self.connector:Disconnect();
-			self.connector = nil;
-		end;
+			self.connector:Disconnect()
+			self.connector = nil
+		end
 		self.connector = self.instance.OnServerEvent:Connect(TS.async(function(player, ...)
-			local args = { ... };
-			local eventId = args[1];
-			local data = args[2];
-			if (type(eventId) == "string") and (type(data) == "table") then
-				if (self.propTypes == nil) or (checkArguments(self.propTypes, data)) then
-					local result = callback(player, unpack((data)));
+			local args = { ... }
+			local _2 = args
+			local eventId = _2[1]
+			local data = _2[2]
+			local _3 = eventId
+			local _4 = type(_3) == "string"
+			if _4 then
+				local _5 = data
+				_4 = type(_5) == "table"
+			end
+			if _4 then
+				
+				if self.propTypes == nil or checkArguments(self.propTypes, data) then
+					local result = callback(player, unpack(data))
 					if TS.Promise.is(result) then
-						result:andThen(function(promiseResult)
-							self.instance:FireClient(player, eventId, promiseResult);
-						end):catch(function(err)
-							warn("[rbx-net] Failed to send response to client: " .. err);
-						end);
+						local _5 = result
+						local _6 = function(promiseResult)
+							self.instance:FireClient(player, eventId, promiseResult)
+						end
+						_5:andThen(_6):catch(function(err)
+							warn("[rbx-net] Failed to send response to client: " .. err)
+						end)
 					else
-						self.instance:FireClient(player, eventId, result);
-					end;
+						self.instance:FireClient(player, eventId, result)
+					end
 				else
-					warn("[rbx-net] Client failed type checks");
-				end;
+					warn("[rbx-net] Client failed type checks")
+				end
 			else
-				warn("[rbx-net-async] Recieved message without eventId");
-			end;
-		end));
-	end;
+				warn("[rbx-net-async] Recieved message without eventId")
+			end
+		end))
+	end
 	NetServerAsyncFunction.CallPlayerAsync = TS.async(function(self, player, ...)
-		local args = { ... };
-		local id = HttpService:GenerateGUID(false);
-		local _3 = self.instance;
-		local _4 = player;
-		local _2 = {};
-		for _3, _4 in pairs(args) do _2[_3] = _4; end;
-		_3:FireClient(_4, id, _2);
+		local args = { ... }
+		local id = HttpService:GenerateGUID(false)
+		local _2 = self.instance
+		local _3 = {}
+		for _4, _5 in pairs(args) do
+			_3[_4] = _5
+		end
+		_2:FireClient(player, id, _3)
 		return TS.Promise.new(function(resolve, reject)
-			local connection;
-			local startTime = tick();
-			DebugLog("Connected CallPlayerAsync EventId", id);
+			local startTime = tick()
+			DebugLog("Connected CallPlayerAsync EventId", id)
+			local connection
 			connection = self.instance.OnServerEvent:Connect(function(fromPlayer, ...)
-				local recvArgs = { ... };
-				local eventId = recvArgs[1];
-				local data = recvArgs[2];
-				if (type(eventId) == "string") and (data ~= nil) then
-					if (player == player) and (eventId == id) then
-						DebugLog("Disconnected CallPlayerAsync EventId", eventId);
-						connection:Disconnect();
-						resolve(data);
-					end;
-				end;
-			end);
-			local _5 = self.listeners;
-			_5[id] = {
-				connection = connection;
-				timeout = self.timeout;
-			};
-			TS.Promise.spawn(function()
-				repeat
-					do
-						game:GetService("RunService").Stepped:Wait();
-					end;
-				until not ((connection.Connected) and (tick() < startTime + self.timeout));
-				self.listeners[id] = nil;
-				if (tick() >= startTime) and (connection.Connected) then
-					DebugWarn("(timeout) Disconnected CallPlayerAsync EventId", id);
-					connection:Disconnect();
-					reject("Request to client timed out");
-				end;
-			end);
-		end);
-	end);
-end;
-exports.default = NetServerAsyncFunction;
-return exports;
+				local recvArgs = { ... }
+				local _4 = recvArgs
+				local eventId = _4[1]
+				local data = _4[2]
+				local _5 = eventId
+				local _6 = type(_5) == "string"
+				if _6 then
+					_6 = data ~= nil
+				end
+				if _6 then
+					if player == player and eventId == id then
+						DebugLog("Disconnected CallPlayerAsync EventId", eventId)
+						connection:Disconnect()
+						resolve(data)
+					end
+				end
+			end)
+			local _4 = self.listeners
+			local _5 = id
+			local _6 = {
+				connection = connection,
+				timeout = self.timeout,
+			}
+			
+			_4[_5] = _6
+			
+			repeat
+				do
+					game:GetService("RunService").Stepped:Wait()
+				end
+			until not (connection.Connected and tick() < startTime + self.timeout)
+			local _7 = self.listeners
+			local _8 = id
+			
+			_7[_8] = nil
+			
+			if tick() >= startTime and connection.Connected then
+				DebugWarn("(timeout) Disconnected CallPlayerAsync EventId", id)
+				connection:Disconnect()
+				reject("Request to client timed out")
+			end
+		end)
+	end)
+end
+return {
+	default = NetServerAsyncFunction,
+}

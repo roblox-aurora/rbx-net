@@ -1,12 +1,7 @@
 local Promise = require(script.Parent.Promise)
 
-local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-
-local ReplicatedFirst
-if not __LEMUR__ then
-	ReplicatedFirst = game:GetService("ReplicatedFirst")
-end
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 
 local TS = {}
 
@@ -60,12 +55,12 @@ end
 
 -- module resolution
 function TS.getModule(object, moduleName)
-	if not __LEMUR__ and object:IsDescendantOf(ReplicatedFirst) then
+	if RunService:IsRunning() and object:IsDescendantOf(ReplicatedFirst) then
 		warn("roblox-ts packages should not be used from ReplicatedFirst!")
 	end
 
 	-- ensure modules have fully replicated
-	if not __LEMUR__ and RunService:IsRunning() and RunService:IsClient() and not isPlugin(object) and not game:IsLoaded() then
+	if RunService:IsRunning() and RunService:IsClient() and not isPlugin(object) and not game:IsLoaded() then
 		game.Loaded:Wait()
 	end
 
@@ -196,43 +191,25 @@ function TS.async(callback)
 	end
 end
 
-function TS.generator(c)
-	c = coroutine.create(c)
-
-	local o = {
-		next = function(...)
-			if coroutine.status(c) == "dead" then
-				return { done = true }
-			else
-				local success, value = coroutine.resume(c, ...)
-				if success == false then error(value, 2) end
-				return { value = value, done = coroutine.status(c) == "dead" }
-			end
-		end
-	}
-
-	o[TS.Symbol_iterator] = function() return o end
-
-	return o
-end
-
 local function package(...)
 	return select("#", ...), {...}
 end
 
-local function assertAwait(ok, ...)
-	if ok then
-		return ...
-	else
-		error(ok == nil and "The awaited Promise was cancelled" or (...), 2)
-	end
-end
-
 function TS.await(promise)
-	if Promise.is(promise) then
-		return assertAwait(promise:await())
-	else
+	if not Promise.is(promise) then
 		return promise
+	end
+
+	local size, result = package(promise:await())
+	local ok = table.remove(result, 1)
+	if ok then
+		if size > 2 then
+			return result
+		else
+			return result[1]
+		end
+	else
+		error(ok == nil and "The awaited Promise was cancelled" or (size > 2 and result[1] or result), 2)
 	end
 end
 
@@ -253,6 +230,58 @@ function TS.bit_lrsh(a, b)
 		return -result - 1
 	end
 end
+
+TS.TRY_RETURN = 1
+TS.TRY_BREAK = 2
+TS.TRY_CONTINUE = 3
+
+function TS.try(func, catch, finally)
+	local err, traceback
+	local success, exitType, returns = xpcall(
+		func,
+		function(errInner)
+			err = errInner
+			traceback = debug.traceback()
+		end
+	)
+	if not success and catch then
+		local newExitType, newReturns = catch(err, traceback)
+		if newExitType then
+			exitType, returns = newExitType, newReturns
+		end
+	end
+	if finally then
+		local newExitType, newReturns = finally()
+		if newExitType then
+			exitType, returns = newExitType, newReturns
+		end
+	end
+	return exitType, returns
+end
+
+function TS.generator(callback)
+	local co = coroutine.create(callback)
+	return {
+		next = function(...)
+			if coroutine.status(co) == "dead" then
+				return { done = true }
+			else
+				local success, value = coroutine.resume(co, ...)
+				if success == false then
+					error(value, 2)
+				end
+				return {
+					value = value,
+					done = coroutine.status(co) == "dead"
+				}
+			end
+		end
+	}
+end
+
+-- LEGACY RUNTIME FUNCTIONS
+
+local HttpService = game:GetService("HttpService")
 
 -- utility functions
 local function copy(object)
