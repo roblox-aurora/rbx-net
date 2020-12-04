@@ -1,0 +1,9 @@
+{
+    "name": "net",
+    "tree": {
+        "$path": "out",
+        "node_modules": {
+            "$path": "node_modules"
+        }
+    }
+}

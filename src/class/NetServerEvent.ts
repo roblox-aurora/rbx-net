@@ -1,4 +1,4 @@
-import { Middleware, NextCaller } from "middleware";
+import { Middleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
 
 interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extends defined = Player> {

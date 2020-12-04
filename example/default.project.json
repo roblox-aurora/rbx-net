@@ -1,0 +1,33 @@
+{
+    "name": "zirconium-test",
+    "tree": {
+        "$className": "DataModel",
+        "ServerScriptService": {
+            "$className": "ServerScriptService",
+            "Server": {
+                "$path": "build/example/server"
+            }
+        },
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+            "TS": {
+                "$path": "../include",
+                "node_modules": {
+                    "$path": "../node_modules/@rbxts",
+                    "net": {
+                        "$path": "build/src"
+                    }
+                }
+            }
+        },
+        "StarterPlayer": {
+            "$className": "StarterPlayer",
+            "StarterPlayerScripts": {
+                "$className": "StarterPlayerScripts",
+                "Client": {
+                    "$path": "build/example/client"
+                }
+            }
+        }
+    }
+}

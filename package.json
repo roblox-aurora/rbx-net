@@ -4,7 +4,11 @@
   "description": "",
   "main": "out/init.lua",
   "scripts": {
-    "prepublishOnly": "rbxtsc"
+    "prepublishOnly": "rbxtsc",
+    "build": "rbxtsc --verbose",
+    "build:example": "rbxtsc-dev --type=game -p ./example -i ./include",
+    "watch:example": "rbxtsc-dev -w --type=game -p ./example -i ./include",
+    "serve:example": "rojo serve ./example/default.project.json --port 34567"
   },
   "repository": {
     "type": "git",
@@ -22,6 +26,8 @@
   },
   "types": "out/index.d.ts",
   "devDependencies": {
+    "@rbxts/compiler-types": "^1.0.0-beta.6.2",
+    "@rbxts/t": "^1.3.5",
     "@rbxts/types": "^1.0.428",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
@@ -31,5 +37,6 @@
     "eslint-plugin-roblox-ts": "0.0.24",
     "prettier": "^2.2.1",
     "typescript": "^4.1.2"
-  }
+  },
+  "dependencies": {}
 }
