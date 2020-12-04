@@ -1,14 +1,17 @@
 import { Middleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
+import NetMiddlewareEvent, { MiddlewareList } from "./NetMiddlewareEventHandler";
 
 interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extends defined = Player> {
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;
 }
 
-class ServerEventV2<CallArguments extends Array<unknown> = Array<unknown>>
+class NetServerEvent<CallArguments extends Array<unknown> = Array<unknown>, PlayerArg = Player>
+	extends NetMiddlewareEvent
 	implements NetManagedEvent, Signalable<CallArguments, Player> {
 	private instance: RemoteEvent;
-	public constructor(name: string, private readonly middlewares: Array<Middleware<Array<unknown>>> = []) {
+	public constructor(name: string, middlewares: MiddlewareList = []) {
+		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
 	}
@@ -22,25 +25,8 @@ class ServerEventV2<CallArguments extends Array<unknown> = Array<unknown>>
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect(callback: (player: Player, ...args: CallArguments) => void): RBXScriptConnection {
-		const { middlewares } = this;
-
 		const connection = this.instance.OnServerEvent.Connect((player, ...args) => {
-			try {
-				if (middlewares.size() > 0) {
-					let callbackFn = callback as NextCaller;
-
-					// Run through each middleware
-					for (const middleware of middlewares) {
-						callbackFn = middleware(callbackFn, this) as NextCaller;
-					}
-
-					callbackFn(player, ...(args as CallArguments));
-				} else {
-					callback(player, ...(args as CallArguments));
-				}
-			} catch (e) {
-				warn("[rbx-net] " + tostring(e));
-			}
+			this._processMiddleware(callback)?.(player, ...(args as CallArguments));
 		});
 
 		return connection;
@@ -108,14 +94,14 @@ type EnhancedServerEventV2<M0 = defined, M1 = defined, M2 = defined, M3 = define
 	infer A,
 	infer _
 >
-	? ServerEventV2<A>
+	? NetServerEvent<A>
 	: M2 extends Middleware<infer A, infer _>
-	? ServerEventV2<A>
+	? NetServerEvent<A>
 	: M1 extends Middleware<infer A, infer _>
-	? ServerEventV2<A>
+	? NetServerEvent<A>
 	: M0 extends Middleware<infer A, infer _>
-	? ServerEventV2<A>
-	: ServerEventV2;
+	? NetServerEvent<A>
+	: NetServerEvent;
 
 type PlayerEnhancer<M0> = M0 extends Middleware<infer _, infer _, infer A> ? Signalable<any, A> : never;
 
@@ -128,7 +114,7 @@ export interface ServerEventV2Constructor {
 	 *
 	 * @param name The name of the event
 	 */
-	new <T extends Array<unknown>>(name: string): ServerEventV2<T>;
+	new <T extends Array<unknown>>(name: string): NetServerEvent<T>;
 
 	/**
 	 * Creates a new middleware augmented Server Event
@@ -171,6 +157,6 @@ export interface ServerEventV2Constructor {
 	): EnhancedServerEventV2<M0, M1, M2, M3>;
 }
 
-type NetServerEventV2<CallArguments extends Array<unknown> = []> = ServerEventV2<CallArguments>;
-const NetServerEventV2 = ServerEventV2 as ServerEventV2Constructor;
+type NetServerEventV2<CallArguments extends Array<unknown> = []> = NetServerEvent<CallArguments>;
+const NetServerEventV2 = NetServerEvent as ServerEventV2Constructor;
 export default NetServerEventV2;

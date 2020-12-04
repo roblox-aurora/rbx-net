@@ -23,7 +23,7 @@ local function typeCheckMiddleware(...)
             end
             
             -- Invoke the next middleware OR the callback (if none left)
-            next(player, ...)
+            return next(player, ...)
         end
     end
     -- ^ The middleware

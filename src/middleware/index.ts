@@ -2,7 +2,7 @@ import { NetManagedEvent } from "../internal";
 import createRateLimiter from "./RateLimitMiddleware";
 import createTypeChecker from "./TypeCheckMiddleware";
 
-export type NextCaller = (player: defined, ...args: Array<unknown>) => void;
+export type NextCaller<R = void> = (player: defined, ...args: Array<unknown>) => R;
 
 export type Middleware<
 	CallArguments extends Array<unknown> = Array<unknown>,

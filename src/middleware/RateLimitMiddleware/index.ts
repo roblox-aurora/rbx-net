@@ -33,7 +33,7 @@ function createRateLimiter(maxRequestsPerMinute: number): RateLimitMiddleware {
 				});
 			} else {
 				throttle.Increment(player);
-				next(player, ...args);
+				return next(player, ...args);
 			}
 		};
 	};
