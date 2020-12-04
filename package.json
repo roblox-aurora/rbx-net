@@ -1,0 +1,35 @@
+{
+  "name": "@rbxts/rbx-net",
+  "version": "2.0.0-indev.0",
+  "description": "",
+  "main": "out/init.lua",
+  "scripts": {
+    "prepublishOnly": "rbxtsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roblox-aurora/rbx-net.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/roblox-aurora/rbx-net/issues"
+  },
+  "homepage": "https://github.com/roblox-aurora/rbx-net#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "types": "out/index.d.ts",
+  "devDependencies": {
+    "@rbxts/types": "^1.0.428",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.2.0",
+    "eslint-plugin-roblox-ts": "0.0.24",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.2"
+  }
+}
