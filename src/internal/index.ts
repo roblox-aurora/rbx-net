@@ -88,6 +88,11 @@ export function functionExists(name: string) {
 }
 
 /** @internal */
+export function waitForAsyncEvent(name: string, timeOut: number): RemoteEvent | undefined {
+	return asyncFunctionFolder.WaitForChild(name, timeOut) as RemoteEvent | undefined;
+}
+
+/** @internal */
 export function waitForEvent(name: string, timeOut: number): RemoteEvent | undefined {
 	return eventFolder.WaitForChild(name, timeOut) as RemoteEvent | undefined;
 }

@@ -157,6 +157,9 @@ export interface ServerEventV2Constructor {
 	): EnhancedServerEventV2<M0, M1, M2, M3>;
 }
 
+/**
+ * A server event
+ */
 type NetServerEventV2<CallArguments extends Array<unknown> = []> = NetServerEvent<CallArguments>;
 const NetServerEventV2 = NetServerEvent as ServerEventV2Constructor;
 export default NetServerEventV2;

@@ -1,5 +1,5 @@
 import { DebugLog, DebugWarn } from "../configuration";
-import { IAsyncListener, getRemoteOrThrow, IS_SERVER } from "../internal";
+import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForAsyncEvent } from "../internal";
 
 const HttpService = game.GetService("HttpService");
 
@@ -16,6 +16,17 @@ export default class NetClientAsyncFunction {
 	constructor(name: string) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
+	}
+
+	public static Wait(name: string) {
+		return Promise.defer<NetClientAsyncFunction>((resolve, reject) => {
+			const remote = waitForAsyncEvent(name, 10);
+			if (remote) {
+				resolve(new NetClientAsyncFunction(name));
+			} else {
+				reject();
+			}
+		});
 	}
 
 	public SetCallTimeout(timeout: number) {

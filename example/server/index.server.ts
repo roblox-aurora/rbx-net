@@ -19,5 +19,9 @@ Net.Server.CreateListener("Say", [createTypeChecker(t.string)], async (player, m
 	print(`${player}: ${message}`);
 });
 
+new Net.Server.Event("test");
+
 const tester = new Net.Server.AsyncFunction("TestAysnc", [createTypeChecker(t.string)]);
 tester.SetCallback((player, message) => `Message was: "${message}" from ${player}`);
+
+const test = Net.Server.CreateAsyncFunction("test", [createTypeChecker(t.string)]);
