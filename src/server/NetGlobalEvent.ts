@@ -121,7 +121,7 @@ export default class NetGlobalEvent {
 			globalEventMessageCounter++;
 
 			// Since this yields
-			((IS_STUDIO && MockMessagingService) || MessagingService).PublishAsync(this.name, message);
+			MessagingService.PublishAsync(this.name, message);
 		}
 	}
 
@@ -136,22 +136,19 @@ export default class NetGlobalEvent {
 		}
 
 		globalSubscriptionCounter++;
-		return ((IS_STUDIO && MockMessagingService) || MessagingService).SubscribeAsync(
-			this.name,
-			(recieved: ISubscriptionMessage) => {
-				const { Sent } = recieved;
+		return MessagingService.SubscribeAsync(this.name, (recieved: ISubscriptionMessage) => {
+			const { Sent } = recieved;
 
-				if (isJobTargetMessage(recieved)) {
-					const { Data } = recieved;
+			if (isJobTargetMessage(recieved)) {
+				const { Data } = recieved;
 
-					if (game.JobId === Data.JobId) {
-						handler(Data.InnerData, Sent);
-					}
-				} else {
-					handler(recieved.Data, Sent);
+				if (game.JobId === Data.JobId) {
+					handler(Data.InnerData, Sent);
 				}
-			},
-		);
+			} else {
+				handler(recieved.Data, Sent);
+			}
+		});
 	}
 }
 
