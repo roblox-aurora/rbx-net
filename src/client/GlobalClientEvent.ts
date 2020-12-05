@@ -1,13 +1,13 @@
 import { getGlobalRemote as getGlobalRemoteId } from "../internal";
-import NetClientEvent from "./NetClientEvent";
+import ClientEvent from "./ClientEvent";
 
 /**
  * Client counter-part to GlobalServerEvent
  */
 export default class CrossServerEvent {
-	private readonly instance: NetClientEvent;
+	private readonly instance: ClientEvent;
 	constructor(name: string) {
-		this.instance = new NetClientEvent(getGlobalRemoteId(name));
+		this.instance = new ClientEvent(getGlobalRemoteId(name));
 	}
 
 	/**

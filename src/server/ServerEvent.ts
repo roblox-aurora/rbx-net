@@ -1,13 +1,13 @@
 import { Middleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
-import NetMiddlewareEvent, { MiddlewareList } from "./NetMiddlewareEventHandler";
+import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 
 interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extends defined = Player> {
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;
 }
 
-export class NetServerEvent<CallArguments extends Array<unknown> = Array<unknown>, PlayerArg = Player>
-	extends NetMiddlewareEvent
+export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, PlayerArg = Player>
+	extends MiddlewareEvent
 	implements NetManagedEvent, Signalable<CallArguments, Player> {
 	private instance: RemoteEvent;
 	public constructor(name: string, middlewares: MiddlewareList = []) {
@@ -94,14 +94,14 @@ type EnhancedServerEventV2<M0 = defined, M1 = defined, M2 = defined, M3 = define
 	infer A,
 	infer _
 >
-	? NetServerEvent<A>
+	? ServerEvent<A>
 	: M2 extends Middleware<infer A, infer _>
-	? NetServerEvent<A>
+	? ServerEvent<A>
 	: M1 extends Middleware<infer A, infer _>
-	? NetServerEvent<A>
+	? ServerEvent<A>
 	: M0 extends Middleware<infer A, infer _>
-	? NetServerEvent<A>
-	: NetServerEvent;
+	? ServerEvent<A>
+	: ServerEvent;
 
 type PlayerEnhancer<M0> = M0 extends Middleware<infer _, infer _, infer A> ? Signalable<any, A> : never;
 
@@ -114,7 +114,7 @@ export interface ServerEventV2Constructor {
 	 *
 	 * @param name The name of the event
 	 */
-	new <T extends Array<unknown>>(name: string): NetServerEvent<T>;
+	new <T extends Array<unknown>>(name: string): ServerEvent<T>;
 
 	/**
 	 * Creates a new middleware augmented Server Event
@@ -160,6 +160,6 @@ export interface ServerEventV2Constructor {
 /**
  * A server event
  */
-type NetServerEventV2<CallArguments extends Array<unknown> = []> = NetServerEvent<CallArguments>;
-const NetServerEventV2 = NetServerEvent as ServerEventV2Constructor;
-export default NetServerEventV2;
+type ServerEventV2<CallArguments extends Array<unknown> = []> = ServerEvent<CallArguments>;
+const ServerEventV2 = ServerEvent as ServerEventV2Constructor;
+export default ServerEventV2;

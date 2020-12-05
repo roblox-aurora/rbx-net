@@ -1,4 +1,4 @@
-import NetServerEventV2 from "./NetServerEvent";
+import ServerEventV2 from "./ServerEvent";
 import { Middleware } from "../middleware";
 
 type MiddlewareOverload = [
@@ -38,14 +38,14 @@ export default function createServerListener<
 	callback: (player: Player, ...args: M2) => void,
 ): RBXScriptConnection;
 export default function createServerListener(id: string, ...args: CreateServerListenerOverloads) {
-	let event: NetServerEventV2;
+	let event: ServerEventV2;
 	if (isMiddlewareArgument(args)) {
 		const [middleware, connect] = args;
-		event = new NetServerEventV2(id, middleware as [Middleware<any>]);
+		event = new ServerEventV2(id, middleware as [Middleware<any>]);
 		return event.Connect(connect);
 	} else {
 		const [connect] = args;
-		event = new NetServerEventV2(id);
+		event = new ServerEventV2(id);
 		return event.Connect(connect);
 	}
 }

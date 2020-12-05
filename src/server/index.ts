@@ -1,8 +1,8 @@
 import { MiddlewareOverload } from "../helpers/EventConstructor";
-import { MiddlewareList } from "./NetMiddlewareEventHandler";
-import { default as AsyncFunction } from "./NetServerAsyncFunction";
-import { default as Event, NetServerEvent } from "./NetServerEvent";
-import { default as CrossServerEvent } from "./NetGlobalServerEvent";
+import { MiddlewareList } from "./MiddlewareEvent";
+import { default as AsyncFunction } from "./ServerAsyncFunction";
+import { default as Event, ServerEvent } from "./ServerEvent";
+import { default as CrossServerEvent } from "./GlobalServerEvent";
 import { default as CreateListener } from "./CreateServerListener";
 import config from "../configuration";
 
@@ -17,7 +17,7 @@ export { Event, AsyncFunction, CrossServerEvent, CreateListener };
  * @param middleware The middleware attached to this event
  */
 export function CreateEvent(name: string, middleware?: MiddlewareList) {
-	return new NetServerEvent(name, middleware);
+	return new ServerEvent(name, middleware);
 }
 
 /**

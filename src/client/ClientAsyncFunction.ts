@@ -7,7 +7,7 @@ const HttpService = game.GetService("HttpService");
  * An event that behaves like a function
  * @rbxts client
  */
-export default class NetClientAsyncFunction {
+export default class ClientAsyncFunction {
 	private instance: RemoteEvent;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
@@ -19,10 +19,10 @@ export default class NetClientAsyncFunction {
 	}
 
 	public static Wait(name: string) {
-		return Promise.defer<NetClientAsyncFunction>((resolve, reject) => {
+		return Promise.defer<ClientAsyncFunction>((resolve, reject) => {
 			const remote = waitForAsyncEvent(name, 10);
 			if (remote) {
-				resolve(new NetClientAsyncFunction(name));
+				resolve(new ClientAsyncFunction(name));
 			} else {
 				reject();
 			}

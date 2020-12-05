@@ -1,5 +1,5 @@
-import NetServerEvent from "./NetServerEvent";
-import NetGlobalEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./NetGlobalEvent";
+import NetServerEvent from "./ServerEvent";
+import NetGlobalEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./GlobalEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 const Players = game.GetService("Players");
 

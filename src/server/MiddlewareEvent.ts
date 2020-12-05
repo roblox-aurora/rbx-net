@@ -1,7 +1,7 @@
 import { Middleware, NextCaller } from "../middleware";
 
 export type MiddlewareList = Array<Middleware<Array<unknown>>>;
-abstract class NetMiddlewareEvent {
+abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 	abstract GetInstance(): RemoteEvent;
 	protected _processMiddleware<A extends Array<unknown>, R = void>(callback: (player: Player, ...args: A) => R) {
@@ -25,4 +25,4 @@ abstract class NetMiddlewareEvent {
 	}
 }
 
-export default NetMiddlewareEvent;
+export default MiddlewareEvent;

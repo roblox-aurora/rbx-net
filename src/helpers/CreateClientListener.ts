@@ -1,4 +1,4 @@
-import NetClientEvent from "../client/NetClientEvent";
+import ClientEvent from "../client/ClientEvent";
 import { Middleware } from "../middleware";
 
 type MiddlewareOverload = [middleware: Array<Middleware<any>>, callback: (...args: Array<unknown>) => void];
@@ -35,7 +35,7 @@ export default function createClientListener<T extends Array<unknown>>(
 // 	callback: (...args: M2) => void,
 // ): RBXScriptConnection;
 export default function createClientListener(id: string, ...args: CreateServerListenerOverloads) {
-	let event: NetClientEvent;
+	let event: ClientEvent;
 	if (isMiddlewareArgument(args)) {
 		// const [middleware, connect] = args;
 		// event = new NetClientEvent(id, middleware as [Middleware<any>]);
@@ -43,7 +43,7 @@ export default function createClientListener(id: string, ...args: CreateServerLi
 		throw `No Middleware`;
 	} else {
 		const [connect] = args;
-		event = new NetClientEvent(id);
+		event = new ClientEvent(id);
 		return event.Connect(connect);
 	}
 }

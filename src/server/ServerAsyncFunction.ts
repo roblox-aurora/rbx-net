@@ -1,7 +1,7 @@
 import { Middleware } from "../middleware";
 import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
-import NetMiddlewareEvent, { MiddlewareList } from "./NetMiddlewareEventHandler";
+import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../helpers/EventConstructor";
 const HttpService = game.GetService("HttpService");
 
@@ -13,7 +13,7 @@ function isEventArgs(value: unknown[]): value is AsyncEventArgs {
 	return typeIs(eventId, "string") && typeIs(data, "table");
 }
 
-class NetServerAsyncFunction<CallArguments extends Array<unknown>> extends NetMiddlewareEvent {
+class ServerAsyncFunction<CallArguments extends Array<unknown>> extends MiddlewareEvent {
 	private instance: RemoteEvent<Callback>;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
@@ -102,4 +102,4 @@ class NetServerAsyncFunction<CallArguments extends Array<unknown>> extends NetMi
 	}
 }
 
-export default NetServerAsyncFunction;
+export default ServerAsyncFunction;

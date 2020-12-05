@@ -1,6 +1,6 @@
 import { getRemoteOrThrow, IS_SERVER, waitForEvent } from "../internal";
 
-class NetClientEvent {
+class ClientEvent {
 	private instance: RemoteEvent;
 	public constructor(name: string) {
 		this.instance = getRemoteOrThrow("RemoteEvent", name);
@@ -8,10 +8,10 @@ class NetClientEvent {
 	}
 
 	public static Wait(name: string) {
-		return Promise.defer<NetClientEvent>((resolve, reject) => {
+		return Promise.defer<ClientEvent>((resolve, reject) => {
 			const remote = waitForEvent(name, 10);
 			if (remote) {
-				resolve(new NetClientEvent(name));
+				resolve(new ClientEvent(name));
 			} else {
 				reject();
 			}
@@ -29,4 +29,4 @@ class NetClientEvent {
 	}
 }
 
-export default NetClientEvent;
+export default ClientEvent;

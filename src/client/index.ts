@@ -1,27 +1,27 @@
-import { default as AsyncFunction } from "./NetClientAsyncFunction";
-import { default as Event } from "./NetClientEvent";
-import { default as CrossServerEvent } from "./NetGlobalClientEvent";
+import { default as AsyncFunction } from "./ClientAsyncFunction";
+import { default as Event } from "./ClientEvent";
+import { default as CrossServerEvent } from "./GlobalClientEvent";
 import config from "../configuration";
-import NetClientEvent from "./NetClientEvent";
-import NetClientAsyncFunction from "./NetClientAsyncFunction";
+import ClientEvent from "./ClientEvent";
+import ClientAsyncFunction from "./ClientAsyncFunction";
 
 export const SetConfiguration = config.SetClientConfiguration;
 export const GetConfiguration = config.GetConfiguration;
 
 export function GetEvent(id: string) {
-	return new NetClientEvent(id);
+	return new ClientEvent(id);
 }
 
 export async function GetEventAsync(id: string) {
-	return NetClientEvent.Wait(id);
+	return ClientEvent.Wait(id);
 }
 
 export async function GetAsyncFunctionAsync(id: string) {
-	return NetClientAsyncFunction.Wait(id);
+	return ClientAsyncFunction.Wait(id);
 }
 
 export function GetAsyncFunction(id: string) {
-	return new NetClientAsyncFunction(id);
+	return new ClientAsyncFunction(id);
 }
 
 export { Event, AsyncFunction, CrossServerEvent };
