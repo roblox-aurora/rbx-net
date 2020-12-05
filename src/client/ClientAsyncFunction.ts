@@ -24,7 +24,7 @@ export default class ClientAsyncFunction {
 			if (remote) {
 				resolve(new ClientAsyncFunction(name));
 			} else {
-				reject();
+				reject("Failed to retrieve event " + name);
 			}
 		});
 	}
@@ -38,16 +38,16 @@ export default class ClientAsyncFunction {
 		return this.timeout;
 	}
 
-	public SetCallback<R>(callback: (...args: Array<unknown>) => R) {
+	public SetCallback<A extends Array<unknown>, R>(callback: (...args: A) => R) {
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnClientEvent.Connect(async (...args: Array<unknown>) => {
+		this.connector = this.instance.OnClientEvent.Connect(async (...args: A) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				const result: unknown | Promise<unknown> = callback(...(data as Array<unknown>));
+				const result: unknown | Promise<unknown> = callback(...(data as A));
 				if (Promise.is(result)) {
 					result
 						.then((promiseResult) => {
@@ -86,7 +86,7 @@ export default class ClientAsyncFunction {
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
 			do {
-				game.GetService("RunService").Stepped.Wait();
+				game.GetService("RunService").Heartbeat.Wait();
 			} while (connection.Connected && tick() < startTime + this.timeout);
 
 			this.listeners.delete(id);

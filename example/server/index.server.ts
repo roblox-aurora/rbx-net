@@ -2,6 +2,8 @@ import Net from "@rbxts/net";
 import t from "@rbxts/t";
 import { createRateLimiter, createTypeChecker } from "./middleware";
 
+Net.Server.SetConfiguration("EnableDebugMessages", true);
+
 async function wait(time: number) {
 	return Promise.defer<void>((resolve) => {
 		let i = 0;
@@ -21,7 +23,5 @@ Net.Server.CreateListener("Say", [createRateLimiter(1), createTypeChecker(t.stri
 
 new Net.Server.Event("test");
 
-const tester = new Net.Server.AsyncFunction("TestAysnc", [createTypeChecker(t.string)]);
+const tester = new Net.Server.AsyncFunction("TestAsync", [createTypeChecker(t.string)]);
 tester.SetCallback((player, message) => `Message was: "${message}" from ${player}`);
-
-const test = Net.Server.CreateAsyncFunction("test", [createTypeChecker(t.string)]);
