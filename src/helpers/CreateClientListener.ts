@@ -1,4 +1,4 @@
-import NetClientEvent from "../class/NetClientEvent";
+import NetClientEvent from "../client/NetClientEvent";
 import { Middleware } from "../middleware";
 
 type MiddlewareOverload = [middleware: Array<Middleware<any>>, callback: (...args: Array<unknown>) => void];

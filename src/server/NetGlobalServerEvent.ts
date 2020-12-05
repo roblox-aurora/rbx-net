@@ -26,7 +26,7 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class NetGlobalServerEvent {
+export default class CrossServerEvent {
 	private readonly instance: NetServerEvent;
 	private readonly event: NetGlobalEvent;
 	private readonly eventHandler: RBXScriptConnection;

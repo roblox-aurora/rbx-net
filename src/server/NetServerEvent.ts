@@ -6,7 +6,7 @@ interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extend
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;
 }
 
-class NetServerEvent<CallArguments extends Array<unknown> = Array<unknown>, PlayerArg = Player>
+export class NetServerEvent<CallArguments extends Array<unknown> = Array<unknown>, PlayerArg = Player>
 	extends NetMiddlewareEvent
 	implements NetManagedEvent, Signalable<CallArguments, Player> {
 	private instance: RemoteEvent;

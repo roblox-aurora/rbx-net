@@ -4,7 +4,7 @@ import NetClientEvent from "./NetClientEvent";
 /**
  * Client counter-part to GlobalServerEvent
  */
-export default class NetGlobalClientEvent {
+export default class CrossServerEvent {
 	private readonly instance: NetClientEvent;
 	constructor(name: string) {
 		this.instance = new NetClientEvent(getGlobalRemoteId(name));

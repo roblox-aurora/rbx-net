@@ -1,4 +1,4 @@
-import NetServerEventV2 from "../class/NetServerEvent";
+import NetServerEventV2 from "./NetServerEvent";
 import { Middleware } from "../middleware";
 
 type MiddlewareOverload = [

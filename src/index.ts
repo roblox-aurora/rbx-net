@@ -1,15 +1,18 @@
-/* eslint-disable roblox-ts/no-any */
-import NetServerEventV2 from "./class/NetServerEvent";
-import createClientListener from "./helpers/CreateClientListener";
-import createServerListener from "./helpers/CreateServerListener";
-import { Middleware } from "./middleware";
+import * as NetServerContext from "./server";
+import * as NetClientContext from "./client";
 
+/**
+ * Networking Library for Roblox
+ */
 namespace Net {
-	export const ServerEvent = NetServerEventV2;
-	export type ServerEvent<T extends Array<unknown> = []> = NetServerEventV2<T>;
-
-	export const CreateServerListener = createServerListener;
-	export const CreateClientListener = createClientListener;
+	/**
+	 * All Net functions and classes relating to the client
+	 */
+	export const Client = NetClientContext;
+	/**
+	 * All Net functions and classes relating to the server
+	 */
+	export const Server = NetServerContext;
 }
 
 export = Net;

@@ -1,6 +1,4 @@
-import NetClientAsyncFunction from "./class/NetClientAsyncFunction";
-import NetClientEvent from "./class/NetClientEvent";
+import Net from "@rbxts/net";
 
-new NetClientEvent("Say").SendToServer("Hello, World!");
-
-new NetClientAsyncFunction("TestAysnc").CallServerAsync("Hello there").then((result) => print(result));
+new Net.Client.Event("Say").SendToServer("Hello, World!");
+new Net.Client.AsyncFunction("TestAysnc").CallServerAsync("Hello there").then((result) => print(result));
