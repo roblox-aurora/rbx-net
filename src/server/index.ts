@@ -1,13 +1,12 @@
 import { MiddlewareOverload } from "../helpers/EventConstructor";
 import { MiddlewareList } from "./NetMiddlewareEventHandler";
-import NetServerAsyncFunction from "./NetServerAsyncFunction";
-import NetServerEventV2, { NetServerEvent } from "./NetServerEvent";
+import { default as AsyncFunction } from "./NetServerAsyncFunction";
+import { default as Event, NetServerEvent } from "./NetServerEvent";
+import { default as CrossServerEvent } from "./NetGlobalServerEvent";
+import { default as CreateListener } from "./CreateServerListener";
 import config from "../configuration";
 
-export { default as Event } from "./NetServerEvent";
-export { default as AsyncFunction } from "./NetServerAsyncFunction";
-export { default as CrossServerEvent } from "./NetGlobalServerEvent";
-export { default as CreateListener } from "./CreateServerListener";
+export { Event, AsyncFunction, CrossServerEvent, CreateListener };
 
 /**
  * Creates an event on the server
@@ -33,7 +32,7 @@ export function CreateAsyncFunction<CallArguments extends Array<unknown>>(
 	name: string,
 	middleware: MiddlewareOverload<CallArguments> = [],
 ) {
-	return new NetServerAsyncFunction(name, middleware);
+	return new AsyncFunction(name, middleware);
 }
 
 export const SetConfiguration = config.SetConfiguration;
