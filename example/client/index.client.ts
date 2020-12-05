@@ -1,6 +1,8 @@
 import Net from "@rbxts/net";
 
-new Net.Client.Event("Say").SendToServer("Hello, World!");
+const say = new Net.Client.Event("Say");
+say.SendToServer("Hello, World!");
+say.SendToServer("Should throw");
 
 Net.Client.GetAsyncFunctionAsync("TestAsync").then((event) => {
 	event.CallServerAsync("Hello there").then((result) => print(result));

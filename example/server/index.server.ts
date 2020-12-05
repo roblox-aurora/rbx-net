@@ -1,6 +1,6 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
-import { createTypeChecker } from "./middleware";
+import { createRateLimiter, createTypeChecker } from "./middleware";
 
 async function wait(time: number) {
 	return Promise.defer<void>((resolve) => {
@@ -14,8 +14,8 @@ async function wait(time: number) {
 	});
 }
 
-Net.Server.CreateListener("Say", [createTypeChecker(t.string)], async (player, message) => {
-	await wait(5);
+Net.Server.CreateListener("Say", [createRateLimiter(1), createTypeChecker(t.string)], async (player, message) => {
+	await wait(1);
 	print(`${player}: ${message}`);
 });
 

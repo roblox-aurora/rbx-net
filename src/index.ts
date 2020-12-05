@@ -4,6 +4,7 @@ import config from "./configuration";
 
 /**
  * Networking Library for Roblox
+ * @version 2.0
  */
 namespace Net {
 	/**

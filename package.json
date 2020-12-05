@@ -1,5 +1,5 @@
 {
-  "name": "@rbxts/rbx-net",
+  "name": "@rbxts/net",
   "version": "2.0.0-indev.0",
   "description": "",
   "main": "out/init.lua",
@@ -22,7 +22,8 @@
   },
   "homepage": "https://github.com/roblox-aurora/rbx-net#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "alpha"
   },
   "types": "out/index.d.ts",
   "devDependencies": {
