@@ -25,3 +25,9 @@ new Net.Server.Event("test");
 
 const tester = new Net.Server.AsyncFunction("TestAsync", [createTypeChecker(t.string)]);
 tester.SetCallback((player, message) => `Message was: "${message}" from ${player}`);
+
+const [WithStringAndNumber, GenericEvent, WithBoolean] = Net.Server.CreateEvents(
+	["WithStringAndNumber", createTypeChecker(t.string, t.number)],
+	"GenericEvent",
+	["WithBoolean", createTypeChecker(t.boolean)],
+);
