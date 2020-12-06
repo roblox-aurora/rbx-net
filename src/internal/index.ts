@@ -1,5 +1,6 @@
 const replicatedStorage = game.GetService("ReplicatedStorage");
 const runService = game.GetService("RunService");
+const collectionService = game.GetService("CollectionService");
 
 interface RemoteTypes {
 	RemoteEvent: RemoteEvent;
@@ -37,10 +38,15 @@ export interface NetManagedEvent {
 	GetInstance(): RemoteEvent;
 }
 
-const REMOTES_FOLDER_NAME = "Net";
-const FUNCTIONS_FOLDER_NAME = "NetManagedFunctions";
-const EVENTS_FOLDER_NAME = "NetManagedEvents";
-const ASYNC_FUNCTIONS_FOLDER_NAME = "NetManagedAsyncFunctions";
+const REMOTES_FOLDER_NAME = "NetV2Managed";
+
+export const enum TagId {
+	RecieveOnly = "NetRecieveOnly",
+	Managed = "NetManagedInstance",
+	Async = "NetManagedAsyncFunction",
+	LegacyFunction = "NetManagedLegacyFunction",
+	Event = "NetManagedEvent",
+}
 
 /** @internal */
 export const ServerTickFunctions = new Array<() => void>();
@@ -58,10 +64,6 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 }
 
 const remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
-const functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME);
-const eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME);
-const asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME);
-
 /**
  * Errors with variables formatted in a message
  * @param message The message
@@ -78,52 +80,32 @@ export function errorft(message: string, vars: { [name: string]: unknown }): nev
 }
 
 /** @internal */
-export function eventExists(name: string) {
-	return eventFolder.FindFirstChild(name) !== undefined;
-}
-
-/** @internal */
-export function functionExists(name: string) {
-	return functionFolder.FindFirstChild(name) !== undefined;
-}
-
-/** @internal */
-export function waitForAsyncEvent(name: string, timeOut: number): RemoteEvent | undefined {
-	return asyncFunctionFolder.WaitForChild(name, timeOut) as RemoteEvent | undefined;
-}
-
-/** @internal */
-export function waitForEvent(name: string, timeOut: number): RemoteEvent | undefined {
-	return eventFolder.WaitForChild(name, timeOut) as RemoteEvent | undefined;
-}
-
-/** @internal */
-export function waitForFunction(name: string, timeOut: number): RemoteFunction | undefined {
-	return functionFolder.WaitForChild(name, timeOut) as RemoteFunction | undefined;
-}
-
-/** @internal */
-export function getRemoteFolder<K extends keyof RemoteTypes>(remoteType: K): Folder {
-	let targetFolder: Folder;
-	if (remoteType === "RemoteEvent") {
-		targetFolder = eventFolder;
-	} else if (remoteType === "RemoteFunction") {
-		targetFolder = functionFolder;
-	} else if (remoteType === "AsyncRemoteFunction") {
-		targetFolder = asyncFunctionFolder;
-	} else {
-		return error("Invalid type: " + remoteType);
-	}
-
-	return targetFolder;
+export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: string, timeout: number) {
+	return Promise.defer<RemoteTypes[K]>((resolve, reject) => {
+		let i = 0;
+		let result: RemoteTypes[K] | undefined;
+		do {
+			const [step] = runService.Heartbeat.Wait();
+			i += step;
+			result = findRemote(remoteType, name);
+		} while (i < timeout && !result);
+		if (result) {
+			resolve(result);
+		} else {
+			reject("Unable to find remote object");
+		}
+	});
 }
 
 /** @internal */
 export function findRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] | undefined {
-	const targetFolder = getRemoteFolder(remoteType);
-	const existing = targetFolder.FindFirstChild(name) as RemoteFunction | RemoteEvent;
+	if (remoteType === "AsyncRemoteFunction") {
+		return collectionService.GetTagged(TagId.Async).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
+	} else if (remoteType === "RemoteEvent") {
+		return collectionService.GetTagged(TagId.Event).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
+	}
 
-	return existing as RemoteTypes[K] | undefined;
+	throw `Invalid Remote Access`;
 }
 
 /** @internal */
@@ -150,16 +132,19 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 
 		if (remoteType === "RemoteEvent") {
 			remote = new Instance("RemoteEvent");
+			collectionService.AddTag(remote, TagId.Event);
 		} else if (remoteType === "AsyncRemoteFunction") {
 			remote = new Instance("RemoteEvent");
+			collectionService.AddTag(remote, TagId.Async);
 		} else if (remoteType === "RemoteFunction") {
 			remote = new Instance("RemoteFunction");
+			collectionService.AddTag(remote, TagId.LegacyFunction);
 		} else {
 			throw `Invalid Remote Type: ${remoteType}`;
 		} // stfu
 
 		remote.Name = name;
-		remote.Parent = getRemoteFolder(remoteType);
+		remote.Parent = remoteFolder;
 		return remote as RemoteTypes[K];
 	}
 }

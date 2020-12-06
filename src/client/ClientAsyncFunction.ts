@@ -1,5 +1,5 @@
 import { DebugLog, DebugWarn } from "../configuration";
-import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForAsyncEvent } from "../internal";
+import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForAsyncEvent, waitForRemote } from "../internal";
 
 const HttpService = game.GetService("HttpService");
 
@@ -19,13 +19,9 @@ export default class ClientAsyncFunction {
 	}
 
 	public static Wait(name: string) {
-		return Promise.defer<ClientAsyncFunction>((resolve, reject) => {
-			const remote = waitForAsyncEvent(name, 10);
-			if (remote) {
-				resolve(new ClientAsyncFunction(name));
-			} else {
-				reject("Failed to retrieve event " + name);
-			}
+		return Promise.defer<ClientAsyncFunction>(async (resolve) => {
+			await waitForRemote("AsyncRemoteFunction", name, 10);
+			resolve(new ClientAsyncFunction(name));
 		});
 	}
 

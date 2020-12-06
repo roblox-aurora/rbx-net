@@ -1,4 +1,4 @@
-import { getRemoteOrThrow, IS_SERVER, waitForEvent } from "../internal";
+import { getRemoteOrThrow, IS_SERVER, waitForEvent, waitForRemote } from "../internal";
 
 class ClientEvent {
 	private instance: RemoteEvent;
@@ -8,13 +8,9 @@ class ClientEvent {
 	}
 
 	public static Wait(name: string) {
-		return Promise.defer<ClientEvent>((resolve, reject) => {
-			const remote = waitForEvent(name, 10);
-			if (remote) {
-				resolve(new ClientEvent(name));
-			} else {
-				reject();
-			}
+		return Promise.defer<ClientEvent>(async (resolve) => {
+			await waitForRemote("RemoteEvent", name, 10);
+			resolve(new ClientEvent(name));
 		});
 	}
 

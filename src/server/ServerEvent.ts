@@ -1,6 +1,7 @@
 import { Middleware, NextCaller } from "../middleware";
-import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
+import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
+const CollectionService = game.GetService("CollectionService");
 
 interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extends defined = Player> {
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;
@@ -18,6 +19,15 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 
 	public GetInstance() {
 		return this.instance;
+	}
+
+	/** @internal */
+	public _SetRecieverOnly(value: boolean) {
+		if (value) {
+			CollectionService.AddTag(this.instance, TagId.RecieveOnly);
+		} else {
+			CollectionService.RemoveTag(this.instance, TagId.RecieveOnly);
+		}
 	}
 
 	/**
@@ -38,6 +48,7 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 */
 	public SendToAllPlayers(...args: Array<unknown>) {
 		if (!IS_RUNNING) return;
+		if (CollectionService.HasTag(this.instance, TagId.RecieveOnly)) throw `Cannot invoke recieve-only event`;
 
 		this.instance.FireAllClients(...args);
 	}
@@ -48,6 +59,7 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 * @param args The arguments
 	 */
 	public SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: Array<unknown>) {
+		if (CollectionService.HasTag(this.instance, TagId.RecieveOnly)) throw `Cannot invoke recieve-only event`;
 		if (!IS_RUNNING) return;
 		const Players = game.GetService("Players");
 
@@ -72,6 +84,7 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 */
 	public SendToPlayer(player: Player, ...args: Array<unknown>) {
 		if (!IS_RUNNING) return;
+		if (CollectionService.HasTag(this.instance, TagId.RecieveOnly)) throw `Cannot invoke recieve-only event`;
 
 		this.instance.FireClient(player, ...(args as Array<unknown>));
 	}

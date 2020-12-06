@@ -13,3 +13,6 @@ Net.Client.GetAsyncFunctionAsync("TestAsync").then((event) => {
 		.then((result) => print(result))
 		.catch((err) => warn("failed: " + tostring(err)));
 });
+
+// ensure no conflict
+Net.Client.GetEvent("TestAsync");
