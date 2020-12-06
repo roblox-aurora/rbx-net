@@ -1,6 +1,5 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
-import config from "./configuration";
 
 /**
  * Networking Library for Roblox
