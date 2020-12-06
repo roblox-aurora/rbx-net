@@ -1,5 +1,5 @@
 import { DebugLog, DebugWarn } from "../configuration";
-import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForAsyncEvent, waitForRemote } from "../internal";
+import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 
 const HttpService = game.GetService("HttpService");
 

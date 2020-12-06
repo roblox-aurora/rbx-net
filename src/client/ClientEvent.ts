@@ -1,4 +1,4 @@
-import { getRemoteOrThrow, IS_SERVER, waitForEvent, waitForRemote } from "../internal";
+import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 
 class ClientEvent {
 	private instance: RemoteEvent;
