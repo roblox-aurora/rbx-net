@@ -1,27 +1,8 @@
-Roblox Networking Library (Version 2)
+![](logo.png) Roblox Networking
 ===========
 
-Work in progress, and very unstable changing API at this point in time. Not backwards compatible with some of the v1.x API.
+An advanced utility library for Roblox, to handle networking between client and server.
 
-- [x] NetServerEvent
-  - [x] Connect
-    - [x] Middleware
-  - [x] SendToAllPlayers
-  - [x] SendToPlayer
-  - [x] SendToPlayers
-  - [x] SendToAllPlayersExcept
-- [x] NetClientEvent
-  - [x] SendToServer
-- [ ] NetServerFunction
-  - [ ] Callback
-    - [ ] Support Async
-    - [ ] Middleware
-- [ ] NetClientFunction
-  - [ ] CallServerAsync
-- [x] NetClientAsyncFunction
-  - [x] CallServerAsync
-  - [ ] Callback
-- [x] NetServerAsyncFunction
-  - [x] CallPlayerAsync
-  - [x] Middleware
-  - [x] Callback
+# Version 2.0
+## Changes from 1.x
+See [MIGRATION](MIGRATION.md)

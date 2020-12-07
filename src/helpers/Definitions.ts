@@ -22,11 +22,11 @@ type RemoteDeclarations = Record<string, FunctionDeclaration | EventDeclaration>
 
 type CheckLike = (value: unknown) => boolean;
 type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
-type EventArray<Tuple extends readonly [...defined[]]> = {
+type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
 	[Index in keyof Tuple]: InferCheck<Tuple[Index]>;
 };
 type InferArgs<T extends readonly CheckLike[] | undefined> = T extends readonly [...CheckLike[]]
-	? EventArray<T>
+	? CheckTupleToInferedValues<T>
 	: unknown[];
 
 type InferServerEvent<T extends EventDeclaration> = T["ServerMiddleware"] extends [...mw: MiddlewareOverload<infer A>]
