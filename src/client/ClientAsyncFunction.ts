@@ -8,8 +8,8 @@ const HttpService = game.GetService("HttpService");
  * @rbxts client
  */
 export default class ClientAsyncFunction<
-	CallbackArgs extends Array<unknown> = Array<unknown>,
-	CallArgs extends Array<unknown> = Array<unknown>
+	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>
 > {
 	private instance: RemoteEvent;
 	private timeout = 10;

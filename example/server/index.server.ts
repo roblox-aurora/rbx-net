@@ -1,5 +1,6 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
+import Remotes from "./definitions";
 import { createRateLimiter, createTypeChecker } from "./middleware";
 
 Net.Server.SetConfiguration("EnableDebugMessages", true);
@@ -36,3 +37,6 @@ ServerPrint.Connect((player, ...args) => print("client", ...args));
 const Test = Net.Server.CreateEvents("Hello");
 
 new Net.Server.CrossServerEvent("Testing");
+
+const TestDefinition = Remotes.CreateServer("TestDefinition");
+TestDefinition.Connect((player, message) => print("Recieved: " + message));

@@ -1,5 +1,6 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
+import Remotes from "./definitions";
 import { createTypeChecker } from "./middleware";
 
 Net.Client.SetConfiguration("EnableDebugMessages", true);
@@ -16,4 +17,5 @@ Net.Client.GetAsyncFunctionAsync("TestAsync").then((event) => {
 		.catch((err) => warn("failed: " + tostring(err)));
 });
 
-Net.Server.CreateSender<[number]>("test");
+const remote = Remotes.GetClient("TestDefinition");
+remote.SendToServer("Hello there!! :D");

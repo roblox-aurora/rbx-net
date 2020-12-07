@@ -1,10 +1,12 @@
 import { Middleware, NextCaller } from "../middleware";
 
-export type MiddlewareList = Array<Middleware<Array<unknown>>>;
+export type MiddlewareList = ReadonlyArray<Middleware<ReadonlyArray<unknown>>>;
 abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 	abstract GetInstance(): RemoteEvent;
-	protected _processMiddleware<A extends Array<unknown>, R = void>(callback: (player: Player, ...args: A) => R) {
+	protected _processMiddleware<A extends ReadonlyArray<unknown>, R = void>(
+		callback: (player: Player, ...args: A) => R,
+	) {
 		const { middlewares } = this;
 		try {
 			if (middlewares.size() > 0) {

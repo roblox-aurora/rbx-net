@@ -1,8 +1,8 @@
 import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 
 class ClientEvent<
-	ConnectArgs extends Array<unknown> = Array<unknown>,
-	CallArguments extends Array<unknown> = Array<unknown>
+	ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
 > {
 	private instance: RemoteEvent;
 	public constructor(name: string) {

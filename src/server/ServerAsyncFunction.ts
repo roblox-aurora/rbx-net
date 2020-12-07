@@ -17,8 +17,8 @@ function isEventArgs(value: unknown[]): value is AsyncEventArgs {
  * An asynchronous function for two way communication between the client and server
  */
 class ServerAsyncFunction<
-	CallbackArgs extends Array<unknown> = Array<unknown>,
-	CallArgs extends Array<unknown> = Array<unknown>
+	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>
 > extends MiddlewareEvent {
 	private instance: RemoteEvent<Callback>;
 	private timeout = 10;

@@ -3,13 +3,13 @@ import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../i
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../helpers/EventConstructor";
 
-interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extends defined = Player> {
+interface Signalable<CallArguments extends ReadonlyArray<unknown>, PlayerArgument extends defined = Player> {
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;
 }
 
 export default class ServerEvent<
-		ConnectArgs extends Array<unknown> = Array<unknown>,
-		CallArgs extends Array<unknown> = Array<unknown>
+		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArgs extends ReadonlyArray<unknown> = Array<unknown>
 	>
 	extends MiddlewareEvent
 	implements NetManagedEvent, Signalable<ConnectArgs, Player> {
@@ -30,7 +30,7 @@ export default class ServerEvent<
 	 */
 	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): RBXScriptConnection {
 		const connection = this.instance.OnServerEvent.Connect((player, ...args) => {
-			this._processMiddleware(callback)?.(player, ...(args as ConnectArgs));
+			this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
 		});
 
 		return connection;

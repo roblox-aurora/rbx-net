@@ -18,7 +18,8 @@
                         "$path": "build/src"
                     }
                 }
-            }
+            },
+            "Shared": {"$path": "build/example/shared"}
         },
         "StarterPlayer": {
             "$className": "StarterPlayer",
