@@ -26,8 +26,13 @@ new Net.Server.Event("test");
 const tester = new Net.Server.AsyncFunction("TestAsync", [createTypeChecker(t.string)]);
 tester.SetCallback((player, message) => `Message was: "${message}" from ${player}`);
 
-const [WithStringAndNumber, GenericEvent, WithBoolean] = Net.Server.CreateEvents(
-	["WithStringAndNumber", createTypeChecker(t.string, t.number)],
-	"GenericEvent",
-	["WithBoolean", createTypeChecker(t.boolean)],
-);
+const [AddNumbers, ServerPrint] = Net.Server.CreateEvents(
+	["AddNumbers", createTypeChecker(t.number, t.number)],
+	"print",
+); // ?
+AddNumbers.Connect((_, a, b) => print(`${a} + ${b} = ${a + b}`));
+ServerPrint.Connect((player, ...args) => print("client", ...args));
+
+const Test = Net.Server.CreateEvents("Hello");
+
+new Net.Server.CrossServerEvent("Testing");

@@ -1,6 +1,6 @@
-import NetServerEvent from "./ServerEvent";
 import NetGlobalEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./GlobalEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
+import ServerEvent from "./ServerEvent";
 const Players = game.GetService("Players");
 
 export interface IMessage {
@@ -27,12 +27,12 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
  * Similar to a ServerEvent, but works across all servers.
  */
 export default class CrossServerEvent {
-	private readonly instance: NetServerEvent;
+	private readonly instance: ServerEvent;
 	private readonly event: NetGlobalEvent;
 	private readonly eventHandler: RBXScriptConnection;
 
 	constructor(name: string) {
-		this.instance = new NetServerEvent(getGlobalRemote(name));
+		this.instance = new ServerEvent(getGlobalRemote(name));
 		this.event = new NetGlobalEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 

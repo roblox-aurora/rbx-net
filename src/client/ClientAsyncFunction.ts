@@ -7,7 +7,10 @@ const HttpService = game.GetService("HttpService");
  * An event that behaves like a function
  * @rbxts client
  */
-export default class ClientAsyncFunction {
+export default class ClientAsyncFunction<
+	CallbackArgs extends Array<unknown> = Array<unknown>,
+	CallArgs extends Array<unknown> = Array<unknown>
+> {
 	private instance: RemoteEvent;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
@@ -34,16 +37,16 @@ export default class ClientAsyncFunction {
 		return this.timeout;
 	}
 
-	public SetCallback<A extends Array<unknown>, R>(callback: (...args: A) => R) {
+	public SetCallback<R>(callback: (...args: CallbackArgs) => R) {
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnClientEvent.Connect(async (...args: A) => {
+		this.connector = this.instance.OnClientEvent.Connect(async (...args: CallbackArgs) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				const result: unknown | Promise<unknown> = callback(...(data as A));
+				const result: unknown | Promise<unknown> = callback(...(data as CallbackArgs));
 				if (Promise.is(result)) {
 					result
 						.then((promiseResult) => {
@@ -61,7 +64,7 @@ export default class ClientAsyncFunction {
 		});
 	}
 
-	public async CallServerAsync(...args: Array<unknown>): Promise<unknown> {
+	public async CallServerAsync(...args: CallArgs): Promise<unknown> {
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 

@@ -1,6 +1,9 @@
 import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 
-class ClientEvent {
+class ClientEvent<
+	ConnectArgs extends Array<unknown> = Array<unknown>,
+	CallArguments extends Array<unknown> = Array<unknown>
+> {
 	private instance: RemoteEvent;
 	public constructor(name: string) {
 		this.instance = getRemoteOrThrow("RemoteEvent", name);
@@ -14,13 +17,11 @@ class ClientEvent {
 		});
 	}
 
-	public SendToServer(...args: unknown[]) {
+	public SendToServer(...args: CallArguments) {
 		this.instance.FireServer(...args);
 	}
 
-	public Connect<CallArguments extends Array<unknown>>(
-		callback: (...args: CallArguments) => void,
-	): RBXScriptConnection {
+	public Connect(callback: (...args: ConnectArgs) => void): RBXScriptConnection {
 		return this.instance.OnClientEvent.Connect(callback);
 	}
 }

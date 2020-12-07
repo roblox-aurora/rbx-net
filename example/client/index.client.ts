@@ -1,4 +1,6 @@
 import Net from "@rbxts/net";
+import t from "@rbxts/t";
+import { createTypeChecker } from "./middleware";
 
 Net.Client.SetConfiguration("EnableDebugMessages", true);
 
@@ -14,5 +16,4 @@ Net.Client.GetAsyncFunctionAsync("TestAsync").then((event) => {
 		.catch((err) => warn("failed: " + tostring(err)));
 });
 
-// ensure no conflict
-Net.Client.GetEvent("TestAsync");
+Net.Server.CreateSender<[number]>("test");

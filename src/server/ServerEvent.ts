@@ -1,17 +1,20 @@
 import { Middleware, NextCaller } from "../middleware";
-import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent, TagId } from "../internal";
+import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
-const CollectionService = game.GetService("CollectionService");
+import { MiddlewareOverload } from "../helpers/EventConstructor";
 
 interface Signalable<CallArguments extends Array<unknown>, PlayerArgument extends defined = Player> {
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;
 }
 
-export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, PlayerArg = Player>
+export default class ServerEvent<
+		ConnectArgs extends Array<unknown> = Array<unknown>,
+		CallArgs extends Array<unknown> = Array<unknown>
+	>
 	extends MiddlewareEvent
-	implements NetManagedEvent, Signalable<CallArguments, Player> {
+	implements NetManagedEvent, Signalable<ConnectArgs, Player> {
 	private instance: RemoteEvent;
-	public constructor(name: string, middlewares: MiddlewareList = []) {
+	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
@@ -21,22 +24,13 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 		return this.instance;
 	}
 
-	/** @internal */
-	public _SetRecieverOnly(value: boolean) {
-		if (value) {
-			CollectionService.AddTag(this.instance, TagId.RecieveOnly);
-		} else {
-			CollectionService.RemoveTag(this.instance, TagId.RecieveOnly);
-		}
-	}
-
 	/**
 	 * Connect a fucntion to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
-	public Connect(callback: (player: Player, ...args: CallArguments) => void): RBXScriptConnection {
+	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): RBXScriptConnection {
 		const connection = this.instance.OnServerEvent.Connect((player, ...args) => {
-			this._processMiddleware(callback)?.(player, ...(args as CallArguments));
+			this._processMiddleware(callback)?.(player, ...(args as ConnectArgs));
 		});
 
 		return connection;
@@ -46,9 +40,8 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 * Sends the specified arguments to all players
 	 * @param args The arguments to send to the players
 	 */
-	public SendToAllPlayers(...args: Array<unknown>) {
+	public SendToAllPlayers(...args: CallArgs) {
 		if (!IS_RUNNING) return;
-		if (CollectionService.HasTag(this.instance, TagId.RecieveOnly)) throw `Cannot invoke recieve-only event`;
 
 		this.instance.FireAllClients(...args);
 	}
@@ -58,20 +51,19 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 * @param blacklist The blacklist
 	 * @param args The arguments
 	 */
-	public SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: Array<unknown>) {
-		if (CollectionService.HasTag(this.instance, TagId.RecieveOnly)) throw `Cannot invoke recieve-only event`;
+	public SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: CallArgs) {
 		if (!IS_RUNNING) return;
 		const Players = game.GetService("Players");
 
 		if (typeIs(blacklist, "Instance")) {
 			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
 			for (const player of otherPlayers) {
-				this.instance.FireClient(player, ...(args as Array<unknown>));
+				this.instance.FireClient(player, ...(args as CallArgs));
 			}
 		} else if (typeIs(blacklist, "table")) {
 			for (const player of Players.GetPlayers()) {
 				if (blacklist.indexOf(player) === -1) {
-					this.instance.FireClient(player, ...(args as Array<unknown>));
+					this.instance.FireClient(player, ...(args as CallArgs));
 				}
 			}
 		}
@@ -82,11 +74,10 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 * @param player The player
 	 * @param args The arguments to send to the player
 	 */
-	public SendToPlayer(player: Player, ...args: Array<unknown>) {
+	public SendToPlayer(player: Player, ...args: CallArgs) {
 		if (!IS_RUNNING) return;
-		if (CollectionService.HasTag(this.instance, TagId.RecieveOnly)) throw `Cannot invoke recieve-only event`;
 
-		this.instance.FireClient(player, ...(args as Array<unknown>));
+		this.instance.FireClient(player, ...(args as CallArgs));
 	}
 
 	/**
@@ -94,7 +85,7 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 	 * @param players The players
 	 * @param args The arugments to send to these players
 	 */
-	public SendToPlayers(players: Array<Player>, ...args: Array<unknown>) {
+	public SendToPlayers(players: Array<Player>, ...args: CallArgs) {
 		if (!IS_RUNNING) return;
 
 		for (const player of players) {
@@ -102,77 +93,3 @@ export class ServerEvent<CallArguments extends Array<unknown> = Array<unknown>, 
 		}
 	}
 }
-
-type EnhancedServerEventV2<M0 = defined, M1 = defined, M2 = defined, M3 = defined> = M3 extends Middleware<
-	infer A,
-	infer _
->
-	? ServerEvent<A>
-	: M2 extends Middleware<infer A, infer _>
-	? ServerEvent<A>
-	: M1 extends Middleware<infer A, infer _>
-	? ServerEvent<A>
-	: M0 extends Middleware<infer A, infer _>
-	? ServerEvent<A>
-	: ServerEvent;
-
-type PlayerEnhancer<M0> = M0 extends Middleware<infer _, infer _, infer A> ? Signalable<any, A> : never;
-
-type InferPrevType<T> = T extends Middleware<infer A> ? A : never;
-type InferPrevSender<T> = T extends Middleware<infer _, infer _, infer A> ? A : never;
-
-export interface ServerEventV2Constructor {
-	/**
-	 * Creates a new server event
-	 *
-	 * @param name The name of the event
-	 */
-	new <T extends Array<unknown>>(name: string): ServerEvent<T>;
-
-	/**
-	 * Creates a new middleware augmented Server Event
-	 *
-	 * e.g. (using `t`)
-	 * ```ts
-	 * const myEvent = new Net.ServerEvent("Test", [
-	 *		Net.Types(t.string, t.number)
-	 * ])
-	 * ```
-	 * will ensure that events recieved have a `string` and `number` argument.
-	 *
-	 * @param name The name of the event
-	 * @param middlewares The middleware array
-	 */
-	new <M0 extends Middleware<any>>(name: string, middlewares: [middleware: M0]): EnhancedServerEventV2<M0>;
-	new <
-		M0 extends Middleware<any, any, any, any>,
-		M1 extends Middleware<any, InferPrevType<M0>, any, InferPrevSender<M0>>
-	>(
-		name: string,
-		middlewares: [middleware: M0, middleware: M1],
-	): EnhancedServerEventV2<M0, M1> & PlayerEnhancer<M0>;
-	new <
-		M0 extends Middleware<any>,
-		M1 extends Middleware<any, InferPrevType<M0>, any, InferPrevSender<M0>>,
-		M2 extends Middleware<any, InferPrevType<M1>, any, InferPrevSender<M1>>
-	>(
-		name: string,
-		middlewares: [middleware: M0, middleware: M1, middleware: M2],
-	): EnhancedServerEventV2<M0, M1, M2>;
-	new <
-		M0 extends Middleware<any>,
-		M1 extends Middleware<any, InferPrevType<M0>, any, InferPrevSender<M0>>,
-		M2 extends Middleware<any, InferPrevType<M1>, any, InferPrevSender<M1>>,
-		M3 extends Middleware<any, InferPrevType<M2>, any, InferPrevSender<M2>>
-	>(
-		name: string,
-		middlewares: [middleware: M0, middleware: M1, middleware: M2, middleware: M3],
-	): EnhancedServerEventV2<M0, M1, M2, M3>;
-}
-
-/**
- * A server event
- */
-type ServerEventV2<CallArguments extends Array<unknown> = []> = ServerEvent<CallArguments>;
-const ServerEventV2 = ServerEvent as ServerEventV2Constructor;
-export default ServerEventV2;
