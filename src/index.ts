@@ -1,6 +1,6 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
-import NetDeclare from "./helpers/Declare";
+import CreateNetDefinitionBuilder from "./helpers/Definitions";
 
 /**
  * Networking Library for Roblox
@@ -20,7 +20,7 @@ namespace Net {
 	 * @experimental
 	 * Experimental definition builder for Net
 	 */
-	export const Definitions = NetDeclare;
+	export const Definitions = CreateNetDefinitionBuilder;
 
 	export const VERSION = PKG_VERSION;
 }

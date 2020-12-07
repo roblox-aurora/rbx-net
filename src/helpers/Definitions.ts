@@ -67,7 +67,7 @@ type InferServerRemote<T> = T extends FunctionDeclaration
 type ClientBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferClientRemote<T[P]> };
 type ServerBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferServerRemote<T[P]> };
 
-class DeclarationBuilder<T extends RemoteDeclarations> {
+class DefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(private decl: T) {}
 	GetAllClient() {
 		const remotes = {} as Record<string, ClientAsyncFunction<any, any> | ClientEvent<any, any>>;
@@ -123,6 +123,6 @@ class DeclarationBuilder<T extends RemoteDeclarations> {
 	}
 }
 
-export default function NetDeclare<T extends RemoteDeclarations>(remotes: T) {
-	return new DeclarationBuilder<T>(remotes);
+export default function CreateNetDefinitionBuilder<T extends RemoteDeclarations>(remotes: T) {
+	return new DefinitionBuilder<T>(remotes);
 }
