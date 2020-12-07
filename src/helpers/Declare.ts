@@ -53,12 +53,12 @@ type InferClientRemote<T> = T extends FunctionDeclaration
 	? InferClientFunction<T>
 	: T extends EventDeclaration
 	? InferClientEvent<T>
-	: [];
+	: never;
 type InferServerRemote<T> = T extends FunctionDeclaration
 	? InferServerFunction<T>
 	: T extends EventDeclaration
 	? InferServerEvent<T>
-	: [];
+	: never;
 
 /////////////////////////////////////////
 // Building
