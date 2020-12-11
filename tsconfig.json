@@ -16,6 +16,7 @@
 		// configurable
 		"rootDir": "src",
 		"outDir": "out",
+		"removeComments": true,
 		"baseUrl": "src",
 		//"incremental": true,
 		//"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",

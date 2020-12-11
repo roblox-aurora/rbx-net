@@ -1,6 +1,7 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import CreateNetDefinitionBuilder from "./helpers/Definitions";
+import type { NetMiddleware } from "./middleware";
 
 /**
  * Networking Library for Roblox
@@ -20,9 +21,14 @@ namespace Net {
 	 * @experimental
 	 * Experimental definition builder for Net
 	 */
-	export const Definitions = CreateNetDefinitionBuilder;
+	export const CreateDefinitions = CreateNetDefinitionBuilder;
 
 	export const VERSION = PKG_VERSION;
+
+	/**
+	 * Middleware function type for Net
+	 */
+	export type Middleware = NetMiddleware;
 }
 
 export = Net;

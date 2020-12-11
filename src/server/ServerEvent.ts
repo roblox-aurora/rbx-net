@@ -1,4 +1,4 @@
-import { Middleware, NextCaller } from "../middleware";
+import { NetMiddleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../helpers/EventConstructor";

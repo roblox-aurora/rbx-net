@@ -1,11 +1,11 @@
 import { errorft, NetManagedEvent, RequestCounter } from "../../internal";
-import { Middleware } from "..";
+import { NetMiddleware } from "..";
 import throttler from "./throttle";
 import { GetConfiguration } from "../../configuration";
 
 const throttles = new Map<NetManagedEvent, RequestCounter>();
 
-type RateLimitMiddleware = Middleware<any, Array<unknown>>;
+type RateLimitMiddleware = NetMiddleware<any, Array<unknown>>;
 
 /**
  * Creates a throttle middleware for this event

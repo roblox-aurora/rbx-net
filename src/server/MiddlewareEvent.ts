@@ -1,6 +1,6 @@
-import { Middleware, NextCaller } from "../middleware";
+import { NetMiddleware, NextCaller } from "../middleware";
 
-export type MiddlewareList = ReadonlyArray<Middleware<ReadonlyArray<unknown>>>;
+export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
 abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 	abstract GetInstance(): RemoteEvent;

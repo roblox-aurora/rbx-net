@@ -4,7 +4,7 @@ import createTypeChecker from "./TypeCheckMiddleware";
 
 export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unknown>) => R;
 
-export type Middleware<
+export type NetMiddleware<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
 	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
 	Sender = Player,

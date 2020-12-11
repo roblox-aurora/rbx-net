@@ -10,8 +10,11 @@ class ClientEvent<
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
 	}
 
-	public static Wait(name: string) {
-		return Promise.defer<ClientEvent>(async (resolve) => {
+	public static Wait<
+		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArguments extends ReadonlyArray<unknown> = Array<unknown>
+	>(name: string) {
+		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async (resolve) => {
 			await waitForRemote("RemoteEvent", name, 10);
 			resolve(new ClientEvent(name));
 		});

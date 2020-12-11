@@ -1,9 +1,9 @@
-import { Middleware } from "../middleware";
+import { NetMiddleware } from "../middleware";
 
 export type MiddlewareOverload<T extends readonly unknown[]> =
 	| []
-	| [Middleware<T>]
-	| [Middleware, Middleware<T>]
-	| [Middleware, Middleware, Middleware, Middleware<T>]
-	| [Middleware, Middleware, Middleware, Middleware, Middleware<T>]
-	| [Middleware, Middleware, Middleware, Middleware, Middleware, Middleware<T>];
+	| [NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>];

@@ -8,20 +8,34 @@ import ClientAsyncFunction from "./ClientAsyncFunction";
 export const SetConfiguration = config.SetClientConfiguration;
 export const GetConfiguration = config.GetConfiguration;
 
-export function GetEvent(id: string) {
-	return new ClientEvent(id);
+export function GetEvent<
+	ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
+>(id: string) {
+	return new ClientEvent<ConnectArgs, CallArguments>(id);
 }
 
-export async function GetEventAsync(id: string) {
-	return ClientEvent.Wait(id);
+export async function GetEventAsync<
+	ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
+>(id: string) {
+	return ClientEvent.Wait<ConnectArgs, CallArguments>(id);
 }
 
-export async function GetAsyncFunctionAsync(id: string) {
-	return ClientAsyncFunction.Wait(id);
+export async function GetAsyncFunctionAsync<
+	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	ServerReturnType = unknown
+>(id: string) {
+	return ClientAsyncFunction.Wait<CallbackArgs, CallArgs, ServerReturnType>(id);
 }
 
-export function GetAsyncFunction(id: string) {
-	return new ClientAsyncFunction(id);
+export function GetAsyncFunction<
+	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	ServerReturnType = unknown
+>(id: string) {
+	return new ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>(id);
 }
 
 export { Event, AsyncFunction, CrossServerEvent };

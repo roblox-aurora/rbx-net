@@ -9,7 +9,8 @@ const HttpService = game.GetService("HttpService");
  */
 export default class ClientAsyncFunction<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	CallArgs extends ReadonlyArray<unknown> = Array<unknown>
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	ServerReturnType = unknown
 > {
 	private instance: RemoteEvent;
 	private timeout = 10;
@@ -21,8 +22,12 @@ export default class ClientAsyncFunction<
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
 
-	public static Wait(name: string) {
-		return Promise.defer<ClientAsyncFunction>(async (resolve) => {
+	public static Wait<
+		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		ServerReturnType = unknown
+	>(name: string) {
+		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async (resolve) => {
 			await waitForRemote("AsyncRemoteFunction", name, 10);
 			resolve(new ClientAsyncFunction(name));
 		});
@@ -64,7 +69,7 @@ export default class ClientAsyncFunction<
 		});
 	}
 
-	public async CallServerAsync(...args: CallArgs): Promise<unknown> {
+	public async CallServerAsync(...args: CallArgs): Promise<ServerReturnType> {
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 
@@ -78,7 +83,7 @@ export default class ClientAsyncFunction<
 					if (eventId === id) {
 						DebugLog("Disconnected CallServerAsync EventId", eventId);
 						connection.Disconnect();
-						resolve(data);
+						resolve(data as ServerReturnType);
 					}
 				}
 			});

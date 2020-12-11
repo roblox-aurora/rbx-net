@@ -1,7 +1,7 @@
 import ClientEvent from "../client/ClientEvent";
-import { Middleware } from "../middleware";
+import { NetMiddleware } from "../middleware";
 
-type MiddlewareOverload = [middleware: Array<Middleware<any>>, callback: (...args: Array<unknown>) => void];
+type MiddlewareOverload = [middleware: Array<NetMiddleware<any>>, callback: (...args: Array<unknown>) => void];
 type CreateServerListenerOverloads = [callback: (...args: Array<unknown>) => void] | MiddlewareOverload;
 
 function isMiddlewareArgument<T>(args: Array<unknown>): args is MiddlewareOverload {

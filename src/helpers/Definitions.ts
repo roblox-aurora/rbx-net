@@ -2,7 +2,7 @@ import t from "@rbxts/t";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
-import { createTypeChecker, Middleware } from "../middleware";
+import { createTypeChecker, NetMiddleware } from "../middleware";
 import { MiddlewareOverload } from "./EventConstructor";
 import ServerEvent from "../server/ServerEvent";
 
