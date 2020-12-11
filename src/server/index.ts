@@ -4,10 +4,11 @@ import { default as AsyncFunction } from "./ServerAsyncFunction";
 import ServerEvent, { default as Event } from "./ServerEvent";
 import { default as CrossServerEvent } from "./GlobalServerEvent";
 import { default as CreateListener } from "./CreateServerListener";
+import { default as Function } from "./ServerFunction";
 import config from "../configuration";
 import t from "@rbxts/t";
 
-export { Event, AsyncFunction, CrossServerEvent, CreateListener };
+export { Event, AsyncFunction, Function, CrossServerEvent, CreateListener };
 
 /**
  * Creates an event on the server

@@ -1,3 +1,5 @@
+import { env, ifEnv } from "rbxts-transform-env";
+
 const replicatedStorage = game.GetService("ReplicatedStorage");
 const runService = game.GetService("RunService");
 const collectionService = game.GetService("CollectionService");
@@ -34,11 +36,11 @@ export function isLuaTable(value: unknown): value is Map<unknown, unknown> {
 	return typeIs(value, "table");
 }
 
-export interface NetManagedEvent {
-	GetInstance(): RemoteEvent;
+export interface NetManagedInstance {
+	GetInstance(): RemoteEvent | RemoteFunction;
 }
 
-const REMOTES_FOLDER_NAME = "NetV2Managed";
+const REMOTES_FOLDER_NAME = "NetManagedInstances";
 
 export const enum TagId {
 	RecieveOnly = "NetRecieveOnly",
@@ -63,7 +65,15 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-const remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
+const dist = env<"ts" | "lua">("TYPE", "ts");
+let location: Instance;
+if (dist === "ts") {
+	location = script.Parent!.Parent!;
+} else {
+	location = replicatedStorage;
+}
+
+const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 /**
  * Errors with variables formatted in a message
  * @param message The message
@@ -103,6 +113,10 @@ export function findRemote<K extends keyof RemoteTypes>(remoteType: K, name: str
 		return collectionService.GetTagged(TagId.Async).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
 	} else if (remoteType === "RemoteEvent") {
 		return collectionService.GetTagged(TagId.Event).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
+	} else if (remoteType === "RemoteFunction") {
+		return collectionService.GetTagged(TagId.LegacyFunction).find((f) => f.Name === name) as
+			| RemoteTypes[K]
+			| undefined;
 	}
 
 	throw `Invalid Remote Access`;

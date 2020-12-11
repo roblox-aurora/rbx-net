@@ -1,9 +1,9 @@
-import { errorft, NetManagedEvent, RequestCounter } from "../../internal";
-import { NetMiddleware } from "..";
+import { errorft, NetManagedInstance, RequestCounter } from "../../internal";
 import throttler from "./throttle";
 import { GetConfiguration } from "../../configuration";
+import { NetMiddleware } from "../../middleware";
 
-const throttles = new Map<NetManagedEvent, RequestCounter>();
+const throttles = new Map<NetManagedInstance, RequestCounter>();
 
 type RateLimitMiddleware = NetMiddleware<any, Array<unknown>>;
 

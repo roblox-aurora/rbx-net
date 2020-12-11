@@ -10,6 +10,10 @@ class ClientEvent<
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
 	}
 
+	public GetInstance() {
+		return this.instance;
+	}
+
 	public static Wait<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArguments extends ReadonlyArray<unknown> = Array<unknown>

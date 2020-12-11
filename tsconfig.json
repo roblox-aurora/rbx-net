@@ -20,7 +20,12 @@
 		"baseUrl": "src",
 		//"incremental": true,
 		//"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",
-		"declaration": true
+		"declaration": true,
+		"plugins": [
+			{
+				"transform": "rbxts-transform-env"
+			}
+		]
 	},
 	"exclude": [
 		"example/**/*",

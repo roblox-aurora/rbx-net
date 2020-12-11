@@ -1,21 +1,15 @@
 import { NetMiddleware, NextCaller } from "../middleware";
-import { ifEnv } from "rbxts-transform-env";
-import { DebugLog } from "../configuration";
+import { MiddlewareList } from "./MiddlewareEvent";
 
-export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
-abstract class MiddlewareEvent {
+abstract class MiddlewareFunction {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
-	abstract GetInstance(): RemoteEvent;
+	abstract GetInstance(): RemoteFunction;
 	protected _processMiddleware<A extends ReadonlyArray<unknown>, R = void>(
 		callback: (player: Player, ...args: A) => R,
 	) {
 		const { middlewares } = this;
 		try {
 			if (middlewares.size() > 0) {
-				ifEnv("NODE_ENV", "development", () => {
-					DebugLog(`${this.GetInstance().GetFullName()} created with ${middlewares.size()} middleware(s).`);
-				});
-
 				let callbackFn = callback as NextCaller<R>;
 
 				// Run through each middleware
@@ -33,4 +27,4 @@ abstract class MiddlewareEvent {
 	}
 }
 
-export default MiddlewareEvent;
+export default MiddlewareFunction;

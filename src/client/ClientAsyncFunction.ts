@@ -98,7 +98,7 @@ export default class ClientAsyncFunction<
 			if (tick() >= startTime && connection.Connected) {
 				DebugWarn("(timeout) Disconnected CallServerAsync EventId", id);
 				connection.Disconnect();
-				reject("Request to client timed out");
+				reject("Request to server timed out after " + this.timeout + " seconds");
 			}
 		});
 	}

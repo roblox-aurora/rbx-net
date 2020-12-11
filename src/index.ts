@@ -2,6 +2,8 @@ import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import CreateNetDefinitionBuilder from "./helpers/Definitions";
 import type { NetMiddleware } from "./middleware";
+import { ifEnv } from "rbxts-transform-env";
+import { IS_SERVER } from "./internal";
 
 /**
  * Networking Library for Roblox
@@ -30,5 +32,13 @@ namespace Net {
 	 */
 	export type Middleware = NetMiddleware;
 }
+
+ifEnv("NODE_ENV", "development", () => {
+	if (IS_SERVER) {
+		Net.Server.SetConfiguration("EnableDebugMessages", true);
+	} else {
+		Net.Client.SetConfiguration("EnableDebugMessages", true);
+	}
+});
 
 export = Net;

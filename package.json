@@ -1,13 +1,14 @@
 {
   "name": "@rbxts/net",
-  "version": "2.0.0-indev.3",
+  "version": "2.0.0-alpha.0",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
-    "prepublishOnly": "rbxtsc",
-    "build": "rbxtsc --verbose",
-    "build:example": "rbxtsc-dev --type=game -p ./example -i ./include",
-    "watch:example": "rbxtsc-dev -w --type=game -p ./example -i ./include",
+    "prepare": "npm run build",
+    "build": "cross-env NODE_ENV=production TYPE=ts rbxtsc --verbose",
+    "build:dev": "cross-env NODE_ENV=development TYPE=ts rbxtsc --verbose",
+    "build:example": "cross-env NODE_ENV=development TYPE=ts rbxtsc-dev --type=game -p ./example -i ./include",
+    "watch:example": "cross-env NODE_ENV=development TYPE=ts rbxtsc-dev -w --type=game -p ./example -i ./include",
     "serve:example": "rojo serve ./example/default.project.json --port 34567"
   },
   "repository": {
@@ -32,6 +33,7 @@
     "@rbxts/types": "^1.0.428",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
+    "cross-env": "^7.0.3",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.2.0",
@@ -39,5 +41,7 @@
     "prettier": "^2.2.1",
     "typescript": "^4.1.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "rbxts-transform-env": "^0.2.3"
+  }
 }

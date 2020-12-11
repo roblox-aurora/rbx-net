@@ -4,6 +4,7 @@ import { default as CrossServerEvent } from "./GlobalClientEvent";
 import config from "../configuration";
 import ClientEvent from "./ClientEvent";
 import ClientAsyncFunction from "./ClientAsyncFunction";
+import ClientFunction, { default as Function } from "./ClientFunction";
 
 export const SetConfiguration = config.SetClientConfiguration;
 export const GetConfiguration = config.GetConfiguration;
@@ -22,6 +23,13 @@ export async function GetEventAsync<
 	return ClientEvent.Wait<ConnectArgs, CallArguments>(id);
 }
 
+export async function GetFunctionAsync<
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	ServerReturnType = unknown
+>(id: string) {
+	return ClientFunction.Wait<CallArgs, ServerReturnType>(id);
+}
+
 export async function GetAsyncFunctionAsync<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
@@ -38,4 +46,4 @@ export function GetAsyncFunction<
 	return new ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>(id);
 }
 
-export { Event, AsyncFunction, CrossServerEvent };
+export { Event, AsyncFunction, CrossServerEvent, Function };

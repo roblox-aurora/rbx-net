@@ -1,5 +1,5 @@
 import { NetMiddleware, NextCaller } from "../middleware";
-import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedEvent } from "../internal";
+import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../helpers/EventConstructor";
 
@@ -12,7 +12,7 @@ export default class ServerEvent<
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>
 	>
 	extends MiddlewareEvent
-	implements NetManagedEvent, Signalable<ConnectArgs, Player> {
+	implements NetManagedInstance, Signalable<ConnectArgs, Player> {
 	private instance: RemoteEvent;
 	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
