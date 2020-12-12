@@ -24,6 +24,8 @@
 		"plugins": [
 			{
 				"transform": "rbxts-transform-env"
+			}, {
+				"transform": "rbxts-transform-debug"
 			}
 		]
 	},

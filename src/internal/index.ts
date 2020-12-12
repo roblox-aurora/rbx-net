@@ -1,4 +1,4 @@
-import { env, ifEnv } from "rbxts-transform-env";
+import { $env, $ifEnv } from "rbxts-transform-env";
 
 const replicatedStorage = game.GetService("ReplicatedStorage");
 const runService = game.GetService("RunService");
@@ -65,7 +65,7 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-const dist = env<"ts" | "lua">("TYPE", "ts");
+const dist = $env<"ts" | "lua">("TYPE", "ts");
 let location: Instance;
 if (dist === "ts") {
 	location = script.Parent!.Parent!;

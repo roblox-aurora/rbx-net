@@ -1,8 +1,9 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
-import CreateNetDefinitionBuilder from "./helpers/Definitions";
-import type { NetMiddleware } from "./middleware";
-import { ifEnv } from "rbxts-transform-env";
+import CreateNetDefinitionBuilder from "./definitions";
+import { NetMiddleware, NetMiddlewares } from "./middleware";
+import { $env, $ifEnv } from "rbxts-transform-env";
+import { $dbg } from "rbxts-transform-debug";
 import { IS_SERVER } from "./internal";
 
 /**
@@ -23,17 +24,27 @@ namespace Net {
 	 * @experimental
 	 * Experimental definition builder for Net
 	 */
-	export const CreateDefinitions = CreateNetDefinitionBuilder;
+	export const Definitions = CreateNetDefinitionBuilder;
 
-	export const VERSION = PKG_VERSION;
+	export const VERSION = `${PKG_VERSION}${
+		$env<"production" | "development">("NODE_ENV", "production") === "development"
+			? "-dev-" + $env("TYPE", "ts")
+			: "-" + $env("TYPE", "ts")
+	}`;
 
 	/**
 	 * Middleware function type for Net
 	 */
 	export type Middleware = NetMiddleware;
+
+	/**
+	 * Built-in middlewares
+	 */
+	export const Middleware = NetMiddlewares;
 }
 
-ifEnv("NODE_ENV", "development", () => {
+$ifEnv("NODE_ENV", "development", () => {
+	$dbg(Net.VERSION);
 	if (IS_SERVER) {
 		Net.Server.SetConfiguration("EnableDebugMessages", true);
 	} else {

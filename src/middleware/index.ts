@@ -6,12 +6,15 @@ export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unkn
 
 export type NetMiddleware<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
-	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
-	Sender = Player,
-	PreviousSender = Player
+	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>
 > = (
-	next: (player: Sender, ...args: CallArguments) => void,
+	next: (player: Player, ...args: CallArguments) => void,
 	event: NetManagedInstance,
-) => (sender: PreviousSender, ...args: PreviousCallArguments) => void;
+) => (sender: Player, ...args: PreviousCallArguments) => void;
+
+export namespace NetMiddlewares {
+	export const RateLimit = createRateLimiter;
+	export const RuntimeTypeCheck = createTypeChecker;
+}
 
 export { createRateLimiter, createTypeChecker };

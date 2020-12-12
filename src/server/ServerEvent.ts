@@ -9,7 +9,8 @@ interface Signalable<CallArguments extends ReadonlyArray<unknown>, PlayerArgumen
 
 export default class ServerEvent<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallArgs extends ReadonlyArray<unknown> = Array<unknown>
+		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		SenderArgs extends defined = Player
 	>
 	extends MiddlewareEvent
 	implements NetManagedInstance, Signalable<ConnectArgs, Player> {

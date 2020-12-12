@@ -1,6 +1,4 @@
 import { NetMiddleware, NextCaller } from "../middleware";
-import { ifEnv } from "rbxts-transform-env";
-import { DebugLog } from "../configuration";
 
 export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
 abstract class MiddlewareEvent {
@@ -12,10 +10,6 @@ abstract class MiddlewareEvent {
 		const { middlewares } = this;
 		try {
 			if (middlewares.size() > 0) {
-				ifEnv("NODE_ENV", "development", () => {
-					DebugLog(`${this.GetInstance().GetFullName()} created with ${middlewares.size()} middleware(s).`);
-				});
-
 				let callbackFn = callback as NextCaller<R>;
 
 				// Run through each middleware
