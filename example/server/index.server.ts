@@ -1,7 +1,7 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
 import Remotes from "./definitions";
-import { createRateLimiter, createTypeChecker } from "./middleware";
+import { createRateLimiter, createTypeChecker, NetMiddleware } from "./middleware";
 
 Net.Server.SetConfiguration("EnableDebugMessages", true);
 
@@ -34,9 +34,15 @@ const [AddNumbers, ServerPrint] = Net.Server.CreateEvents(
 AddNumbers.Connect((_, a, b) => print(`${a} + ${b} = ${a + b}`));
 ServerPrint.Connect((player, ...args) => print("client", ...args));
 
-const Test = Net.Server.CreateEvents("Hello");
+function wrap<T extends unknown[]>(fn: (obj: string, ...args: T) => void) {
+	return (player: Player, ...args: T) => {
+		const name = player.GetFullName();
+		fn(name, ...args);
+	};
+}
 
-new Net.Server.CrossServerEvent("Testing");
-
-const TestDefinition = Remotes.CreateServer("TestDefinition");
-TestDefinition.Connect((player, message) => print("Recieved: " + message));
+new Net.Server.Event<[string]>("Test").Connect(
+	wrap((obj, arg1) => {
+		print(obj, arg1);
+	}),
+);
