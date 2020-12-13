@@ -8,19 +8,19 @@ import ServerEvent from "../server/ServerEvent";
 import ClientFunction from "../client/ClientFunction";
 import ServerFunction from "../server/ServerFunction";
 
-interface FunctionDeclaration {
+export interface FunctionDeclaration {
 	Type: "Function";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	// ClientArguments?: ReadonlyArray<CheckLike>;
 }
 
-interface AsyncFunctionDeclaration {
+export interface AsyncFunctionDeclaration {
 	Type: "AsyncFunction";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	ClientArguments?: ReadonlyArray<CheckLike>;
 }
 
-interface EventDeclaration {
+export interface EventDeclaration {
 	Type: "Event";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	ClientArguments?: ReadonlyArray<CheckLike>;
@@ -29,6 +29,7 @@ interface EventDeclaration {
 type RemoteDeclarations = Record<string, FunctionDeclaration | EventDeclaration | AsyncFunctionDeclaration>;
 
 type CheckLike = (value: unknown) => boolean;
+export type Check<T> = (value: unknown) => value is T;
 type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
 type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
 	[Index in keyof Tuple]: InferCheck<Tuple[Index]>;
