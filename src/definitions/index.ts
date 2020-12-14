@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import t from "@rbxts/t";
 import { MiddlewareOverload } from "helpers/EventConstructor";
-import { createTypeChecker, NetMiddleware } from "../middleware";
-import CreateNetDefinitionBuilder, { AsyncFunctionDeclaration, Check } from "./CreateDefinitions";
+import CreateNetDefinitionBuilder from "./CreateDefinitions";
+import {
+	AsyncFunctionDeclaration,
+	AsyncFunctionDeclarationLike,
+	FunctionDeclaration,
+	FunctionDeclarationLike,
+	EventDeclaration,
+} from "./Types";
 
-type CheckMap<T> = { [P in keyof T]: Check<T[P]> };
 namespace NetDefinitions {
 	export const Create = CreateNetDefinitionBuilder;
 
@@ -12,38 +16,53 @@ namespace NetDefinitions {
 	 * Creates a definition for an async function
 	 */
 	export function AsyncFunction<
-		ServerArgs extends readonly unknown[] = unknown[],
-		ClientArgs extends readonly unknown[] = unknown[]
-	>(mw?: MiddlewareOverload<ServerArgs>) {
+		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined,
+		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
+	>(): AsyncFunctionDeclaration<
+		FunctionArguments<ServerFunction>,
+		ReturnType<ServerFunction>,
+		FunctionArguments<ClientFunction>,
+		ReturnType<ClientFunction>
+	>;
+	export function AsyncFunction(mw?: MiddlewareOverload<any>): AsyncFunctionDeclarationLike {
 		return {
 			Type: "AsyncFunction",
-			ServerMiddleware: mw as [NetMiddleware<ServerArgs>],
-			ClientArguments: (undefined as unknown) as CheckMap<ClientArgs>,
+			ServerMiddleware: mw,
 		} as const;
 	}
 
 	/**
 	 * Creates a definition for a function
 	 */
-	export function Function<ServerArgs extends ReadonlyArray<unknown>>(mw?: MiddlewareOverload<ServerArgs>) {
+	export function Function<ServerFunction extends (...args: any[]) => any>(
+		mw?: MiddlewareOverload<FunctionArguments<ServerFunction>>,
+	): FunctionDeclaration<FunctionArguments<ServerFunction>, ReturnType<ServerFunction>>;
+	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
+		mw?: MiddlewareOverload<ServerArgs>,
+	): FunctionDeclaration<ServerArgs, ServerReturns>;
+	export function Function(mw?: MiddlewareOverload<any>): FunctionDeclarationLike {
 		return {
 			Type: "Function",
-			ServerMiddleware: mw as [NetMiddleware<ServerArgs>],
+			ServerMiddleware: mw,
 		} as const;
 	}
 
 	/**
 	 * Creates a definition for an event
 	 */
-	export function Event<ServerArgs extends unknown[], ClientArgs extends unknown[]>(
+	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
 		mw?: MiddlewareOverload<ServerArgs>,
-	) {
+	): EventDeclaration<ServerArgs, ClientArgs>;
+	export function Event(mw?: MiddlewareOverload<any>) {
 		return {
 			Type: "Event",
-			ServerMiddleware: mw as [NetMiddleware<ServerArgs>],
-			ClientArguments: (undefined as unknown) as CheckMap<ClientArgs>,
+			ServerMiddleware: mw,
 		} as const;
 	}
 }
+
+NetDefinitions.Create({
+	Test: NetDefinitions.Event<[string]>(),
+}).CreateAllServer().Test;
 
 export default NetDefinitions;

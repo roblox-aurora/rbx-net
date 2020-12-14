@@ -4,7 +4,8 @@ import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
 
 export default class ServerFunction<
-	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>
+	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	Returns extends unknown = unknown
 > extends MiddlewareFunction {
 	private instance: RemoteFunction;
 
@@ -18,7 +19,7 @@ export default class ServerFunction<
 		return this.instance;
 	}
 
-	public SetCallback<R extends unknown>(callback: (player: Player, ...args: CallbackArgs) => R) {
+	public SetCallback<R extends Returns>(callback: (player: Player, ...args: CallbackArgs) => R) {
 		this.instance.OnServerInvoke = (player: Player, ...args: ReadonlyArray<unknown>) => {
 			const result: Promise<unknown> | unknown = this._processMiddleware<CallbackArgs, R>(callback)?.(
 				player,

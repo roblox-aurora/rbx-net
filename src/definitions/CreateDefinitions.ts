@@ -1,96 +1,19 @@
-import t from "@rbxts/t";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
-import { createTypeChecker, NetMiddleware } from "../middleware";
-import { MiddlewareOverload } from "../helpers/EventConstructor";
 import ServerEvent from "../server/ServerEvent";
 import ClientFunction from "../client/ClientFunction";
 import ServerFunction from "../server/ServerFunction";
-
-export interface FunctionDeclaration {
-	Type: "Function";
-	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
-	// ClientArguments?: ReadonlyArray<CheckLike>;
-}
-
-export interface AsyncFunctionDeclaration {
-	Type: "AsyncFunction";
-	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
-	ClientArguments?: ReadonlyArray<CheckLike>;
-}
-
-export interface EventDeclaration {
-	Type: "Event";
-	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
-	ClientArguments?: ReadonlyArray<CheckLike>;
-}
-
-type RemoteDeclarations = Record<string, FunctionDeclaration | EventDeclaration | AsyncFunctionDeclaration>;
-
-type CheckLike = (value: unknown) => boolean;
-export type Check<T> = (value: unknown) => value is T;
-type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
-type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
-	[Index in keyof Tuple]: InferCheck<Tuple[Index]>;
-};
-type InferArgs<T extends readonly CheckLike[] | undefined> = T extends readonly [...CheckLike[]]
-	? CheckTupleToInferedValues<T>
-	: unknown[];
-
-type InferServerEvent<T extends EventDeclaration> = T["ServerMiddleware"] extends [...mw: MiddlewareOverload<infer A>]
-	? ServerEvent<A, InferArgs<T["ClientArguments"]>>
-	: ServerEvent<unknown[], InferArgs<T["ClientArguments"]>>;
-
-type InferClientEvent<T extends EventDeclaration> = T["ServerMiddleware"] extends [...mw: MiddlewareOverload<infer A>]
-	? ClientEvent<InferArgs<T["ClientArguments"]>, A>
-	: ClientEvent<InferArgs<T["ClientArguments"]>, unknown[]>;
-
-type InferClientFunction<T extends FunctionDeclaration> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ClientFunction<A>
-	: ClientFunction<unknown[]>;
-
-type InferClientAsyncFunction<T extends AsyncFunctionDeclaration> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ClientAsyncFunction<InferArgs<T["ClientArguments"]>, A>
-	: ClientAsyncFunction<InferArgs<T["ClientArguments"]>, unknown[]>;
-
-type InferServerFunction<T extends FunctionDeclaration> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ServerFunction<A>
-	: ServerFunction<unknown[]>;
-
-type InferServerAsyncFunction<T extends AsyncFunctionDeclaration> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ServerAsyncFunction<A, InferArgs<T["ClientArguments"]>>
-	: ServerAsyncFunction<unknown[], InferArgs<T["ClientArguments"]>>;
-
-type InferClientRemote<T> = T extends FunctionDeclaration
-	? InferClientFunction<T>
-	: T extends AsyncFunctionDeclaration
-	? InferClientAsyncFunction<T>
-	: T extends EventDeclaration
-	? InferClientEvent<T>
-	: never;
-type InferServerRemote<T> = T extends FunctionDeclaration
-	? InferServerFunction<T>
-	: T extends AsyncFunctionDeclaration
-	? InferServerAsyncFunction<T>
-	: T extends EventDeclaration
-	? InferServerEvent<T>
-	: never;
-
-/////////////////////////////////////////
-// Building
-/////////////////////////////////////////
-
-type ClientBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferClientRemote<T[P]> };
-type ServerBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferServerRemote<T[P]> };
+import {
+	AsyncFunctionDeclarationLike,
+	ClientBuildResult,
+	EventDeclarationLike,
+	FunctionDeclarationLike,
+	InferClientRemote,
+	InferServerRemote,
+	RemoteDeclarations,
+	ServerBuildResult,
+} from "./Types";
 
 class DefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(private decl: T) {}
@@ -99,7 +22,7 @@ class DefinitionBuilder<T extends RemoteDeclarations> {
 			string,
 			ClientAsyncFunction<any, any> | ClientFunction<any> | ClientEvent<any, any>
 		>;
-		for (const [remoteId, declaration] of pairs(this.decl as Record<string, FunctionDeclaration>)) {
+		for (const [remoteId] of pairs(this.decl as Record<string, FunctionDeclarationLike>)) {
 			remotes[remoteId] = this.GetClient(remoteId);
 		}
 
@@ -110,7 +33,7 @@ class DefinitionBuilder<T extends RemoteDeclarations> {
 	 * Gets a client remote from a declaration
 	 */
 	GetClient<K extends keyof T & string>(k: K): InferClientRemote<T[K]> {
-		const item = this.decl[k] as FunctionDeclaration | AsyncFunctionDeclaration | EventDeclaration;
+		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
 		if (item.Type === "Function") {
 			return new ClientFunction(k) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
@@ -126,7 +49,7 @@ class DefinitionBuilder<T extends RemoteDeclarations> {
 	 * Creates a server remote from a declaration
 	 */
 	CreateServer<K extends keyof T & string>(k: K): InferServerRemote<T[K]> {
-		const item = this.decl[k] as FunctionDeclaration | AsyncFunctionDeclaration | EventDeclaration;
+		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
 		if (item.Type === "Function") {
 			if (item.ServerMiddleware) {
 				return new ServerFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
@@ -154,7 +77,7 @@ class DefinitionBuilder<T extends RemoteDeclarations> {
 			string,
 			ServerAsyncFunction<any, any> | ServerFunction<any> | ServerEvent<any, any>
 		>;
-		for (const [remoteId, declaration] of pairs(this.decl as Record<string, FunctionDeclaration>)) {
+		for (const [remoteId] of pairs(this.decl as Record<string, FunctionDeclarationLike>)) {
 			remotes[remoteId] = this.CreateServer(remoteId);
 		}
 
