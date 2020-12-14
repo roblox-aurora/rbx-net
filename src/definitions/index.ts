@@ -18,7 +18,9 @@ namespace NetDefinitions {
 	export function AsyncFunction<
 		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined,
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
-	>(): AsyncFunctionDeclaration<
+	>(
+		mw?: MiddlewareOverload<FunctionArguments<ServerFunction>>,
+	): AsyncFunctionDeclaration<
 		FunctionArguments<ServerFunction>,
 		ReturnType<ServerFunction>,
 		FunctionArguments<ClientFunction>,
@@ -60,9 +62,5 @@ namespace NetDefinitions {
 		} as const;
 	}
 }
-
-NetDefinitions.Create({
-	Test: NetDefinitions.Event<[string]>(),
-}).CreateAllServer().Test;
 
 export default NetDefinitions;

@@ -3,13 +3,13 @@
  *
  * I will admit, this is a lot of type spaghetti. It makes the definitions work good though. :D
  */
-import ClientAsyncFunction from "client/ClientAsyncFunction";
-import ClientEvent from "client/ClientEvent";
-import ClientFunction from "client/ClientFunction";
-import { MiddlewareOverload } from "helpers/EventConstructor";
-import ServerAsyncFunction from "server/ServerAsyncFunction";
-import ServerEvent from "server/ServerEvent";
-import ServerFunction from "server/ServerFunction";
+import ClientAsyncFunction from "../client/ClientAsyncFunction";
+import ClientEvent from "../client/ClientEvent";
+import ClientFunction from "../client/ClientFunction";
+import { MiddlewareOverload } from "../helpers/EventConstructor";
+import ServerAsyncFunction from "../server/ServerAsyncFunction";
+import ServerEvent from "../server/ServerEvent";
+import ServerFunction from "../server/ServerFunction";
 
 export interface FunctionDeclarationLike {
 	Type: "Function";
