@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/net",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-alpha.5",
   "description": "",
   "main": "out/init.lua",
   "scripts": {

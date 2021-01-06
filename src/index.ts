@@ -33,14 +33,13 @@ namespace Net {
 	}`;
 
 	/**
-	 * Middleware function type for Net
-	 */
-	export type Middleware = NetMiddleware;
-
-	/**
 	 * Built-in middlewares
 	 */
 	export const Middleware = NetMiddlewares;
+	/**
+	 * Middleware function type for Net
+	 */
+	export type Middleware = NetMiddleware;
 }
 
 $ifEnv("NODE_ENV", "development", () => {
