@@ -19,11 +19,11 @@ namespace NetDefinitions {
 		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined,
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
 	>(
-		mw?: MiddlewareOverload<FunctionArguments<ServerFunction>>,
+		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
 	): AsyncFunctionDeclaration<
-		FunctionArguments<ServerFunction>,
+		Parameters<ServerFunction>,
 		ReturnType<ServerFunction>,
-		FunctionArguments<ClientFunction>,
+		Parameters<ClientFunction>,
 		ReturnType<ClientFunction>
 	>;
 	export function AsyncFunction(mw?: MiddlewareOverload<any>): AsyncFunctionDeclarationLike {
@@ -37,8 +37,8 @@ namespace NetDefinitions {
 	 * Creates a definition for a function
 	 */
 	export function Function<ServerFunction extends (...args: any[]) => any>(
-		mw?: MiddlewareOverload<FunctionArguments<ServerFunction>>,
-	): FunctionDeclaration<FunctionArguments<ServerFunction>, ReturnType<ServerFunction>>;
+		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
+	): FunctionDeclaration<Parameters<ServerFunction>, ReturnType<ServerFunction>>;
 	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
 		mw?: MiddlewareOverload<ServerArgs>,
 	): FunctionDeclaration<ServerArgs, ServerReturns>;
