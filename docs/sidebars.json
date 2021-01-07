@@ -12,6 +12,18 @@
 			"type": "category",
 			"label": "Guides",
 			"items": [
+				"guides/basics",
+				"guides/definitions",
+				"guides/uuid"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Middleware (Advanced)",
+			"items": [
+				"middleware/ratelimit",
+				"middleware/typecheck",
+				"middleware/custom"
 			]
 		},
 		{

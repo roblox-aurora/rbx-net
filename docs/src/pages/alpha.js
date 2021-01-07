@@ -12,34 +12,44 @@ import Code from "@site/src/components/Code";
 
 const features = [
   {
-    title: "Simplified Networking & Contextual API",
+    title: "Contextual Networking API",
     // imageUrl: 'img/undraw_docusaurus_mountain.svg',
     description: (
       <>
-        Remotes are managed entirely by Net. All you need are identifiers. The
-        API is built to make things more simple and easy to follow as well. <br/><br/>
-        <code>Server</code> objects are explicitly for the server, while{" "}
-        <code>Client</code> objects are explicitly for the client
+        Remotes are managed entirely by RbxNet. All you need are identifiers for
+        the remotes.
+        <br />
+        <br />
+        The code is segregated, to make the APIs more clean and clear.
+        <br />
+        <br />
+        <code>Net.Server</code> is for server code, <code>Net.Client</code> is
+        for client code. Simple as that.
       </>
     ),
   },
   {
-    title: "Powered by roblox-ts",
+    title: "Networking Middleware",
     // imageUrl: 'img/undraw_docusaurus_tree.svg',
     description: (
       <>
-        Takes leverage of the feature set of roblox-ts, including <code>asynchronous</code> methods.
+        RbxNet comes with built-in useful middleware such as{" "}
+        <Link to="/docs/2.x/middleware/types">RuntimeTypeCheck</Link> and{" "}
+        <Link to="/docs/2.x/middleware/rate-limit">RateLimit</Link>, but you can
+        also roll your{" "}
+        <Link to="/docs/2.x/custom-middleware">own custom middleware</Link>.
       </>
     ),
   },
   {
-    title: "Powerful Extensions",
+    title: "Definitions API",
     // imageUrl: 'img/undraw_docusaurus_react.svg',
     description: (
       <>
-        <Link to="/docs/1.3.x/type-safety">Type Safety</Link>,{" "}
-        <Link to="/docs/1.3.x/caching">Caching</Link> and{" "}
-        <Link to="/docs/1.3.x/throttling">Throttling</Link> are examples of features available in RbxNet.
+        Take advantage of the declarative{" "}
+        <Link to="/docs/2.x/definitions">Definitions API</Link>, which allows
+        you to define your remote instances in one place, and use anywhere else.
+        Types generated for you.
       </>
     ),
   },
@@ -97,6 +107,21 @@ function Home() {
         </div>
       </header>
       <main>
+        <section className={styles.codeExample}>
+          <div className="container">
+            <div className="row row--no-gutters">
+              <div className="col col--2" />
+              <div className="col col--8">
+                <Code>
+                  <CodeBlock className="ts">{EXAMPLE_CODE_TS}</CodeBlock>
+                  <CodeBlock className="lua">{EXAMPLE_CODE_LUA}</CodeBlock>
+                </Code>
+              </div>
+              <div className="col col--2" />
+            </div>
+          </div>
+        </section>
+
         {features && features.length > 0 && (
           <section className={styles.features}>
             <div className="container">

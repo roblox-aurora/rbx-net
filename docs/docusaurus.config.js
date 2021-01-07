@@ -101,11 +101,11 @@ module.exports = {
           lastVersion: "1.3.0",
           versions: {
             current: {
-              label: "2.0.0-alpha",
-              path: "2.0.x"
+              label: "2.0.0-alpha.6",
+              path: "2.x"
             },
             "1.3.0": {
-              label: "1.3.x",
+              label: "1.3.0-beta.6.2",
               path: "1.3.x",
             },
           },
