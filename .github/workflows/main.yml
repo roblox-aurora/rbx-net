@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Docs
 
 on:
   workflow_dispatch:
@@ -15,8 +15,11 @@ jobs:
 
       - name: Install NPM dependencies
         uses: bahmutov/npm-install@v1.4.5
-
+        with:
+          working-directory: docs
+        
       - name: Build
+        working-directory: docs
         run: npm run build:docs
 
       - name: Deploy to GitHub Pages
