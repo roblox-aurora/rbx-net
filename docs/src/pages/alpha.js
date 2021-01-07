@@ -37,7 +37,7 @@ const features = [
         <Link to="/docs/2.x/middleware/types">RuntimeTypeCheck</Link> and{" "}
         <Link to="/docs/2.x/middleware/rate-limit">RateLimit</Link>, but you can
         also roll your{" "}
-        <Link to="/docs/2.x/custom-middleware">own custom middleware</Link>.
+        <Link to="/docs/2.x/middleware/custom">own custom middleware</Link>.
       </>
     ),
   },
