@@ -27,8 +27,12 @@ module.exports = {
       },
       items: [
         {
+          label: "Documentation",
+          type: "docsVersion",
+        },
+        {
           type: "docsVersionDropdown",
-          position: "left",
+          position: "right",
 
           // Add additional dropdown items at the beginning/end of the dropdown.
           dropdownItemsBefore: [],
@@ -36,10 +40,6 @@ module.exports = {
 
           // Do not add the link active class when browsing docs.
           dropdownActiveClassDisabled: true,
-        },
-        {
-          label: "Documentation",
-          type: "docsVersion",
         },
         // { to: "docs/api", label: "API", position: "right" },
         { to: "blog", label: "Updates", position: "right" },

@@ -5,6 +5,10 @@ sidebar_label: Introduction
 slug: /
 ---
 
+:::info
+The documentation for 1.3.x is still being ported over to docosaurus.
+:::
+
 <div align="center">
 	<img src="https://assets.vorlias.com/i1/net-tsx.png"/>
 </div>
