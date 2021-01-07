@@ -1,42 +1,57 @@
 module.exports = {
-  title: 'Roblox Networking',
-  tagline: 'Networking Library for Roblox',
-  url: 'https://docs.vorlias.com/rbx-net',
-  baseUrl: '/rbx-net/',
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
-  organizationName: 'roblox-aurora', // Usually your GitHub org/user name.
-  projectName: 'rbx-net', // Usually your repo name.
+  title: "Roblox Networking",
+  tagline: "Networking Library for Roblox",
+  url: "https://docs.vorlias.com/rbx-net",
+  baseUrl: "/rbx-net/",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "img/favicon.ico",
+  organizationName: "roblox-aurora", // Usually your GitHub org/user name.
+  projectName: "rbx-net", // Usually your repo name.
   themeConfig: {
+    colorMode: {
+      // defaultMode: "dark",
+      // disableSwitch: true,
+      respectPrefersColorScheme: true,
+    },
     prism: {
-      theme: require('prism-react-renderer/themes/vsDark'),
-      additionalLanguages: ["typescript", "lua"]
+      theme: require("prism-react-renderer/themes/vsDark"),
+      additionalLanguages: ["typescript", "lua"],
     },
     navbar: {
-      title: 'Roblox Networking',
+      title: "Roblox Networking",
       logo: {
-        alt: 'RbxNet Logo',
-        src: 'img/net-tsx-2.png',
+        alt: "RbxNet Logo",
+        src: "img/net2.svg",
+        srcDark: "img/net2-light.svg",
       },
       items: [
         {
-          to: 'docs',
-          activeBasePath: 'docs',
-          label: 'Docs',
-          position: 'left',
+          type: "docsVersionDropdown",
+          position: "left",
+
+          // Add additional dropdown items at the beginning/end of the dropdown.
+          dropdownItemsBefore: [],
+          dropdownItemsAfter: [],
+
+          // Do not add the link active class when browsing docs.
+          dropdownActiveClassDisabled: true,
         },
-        {to: 'docs/api', label: 'API', position: 'right'},
-        {to: 'blog', label: 'Updates', position: 'right'},
         {
-          href: 'https://github.com/roblox-aurora/rbx-net',
-          label: 'GitHub',
-          position: 'right',
+          label: "Documentation",
+          type: "docsVersion",
+        },
+        // { to: "docs/api", label: "API", position: "right" },
+        { to: "blog", label: "Updates", position: "right" },
+        {
+          href: "https://github.com/roblox-aurora/rbx-net",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         // {
         //   title: 'Docs',
@@ -79,33 +94,32 @@ module.exports = {
   },
   presets: [
     [
-      '@docusaurus/preset-classic',
+      "@docusaurus/preset-classic",
       {
         docs: {
-          sidebarPath: require.resolve('./sidebars.json'),
-          lastVersion: "current",
+          sidebarPath: require.resolve("./sidebars.json"),
+          lastVersion: "1.3.0",
           versions: {
             current: {
               label: "2.0.0-alpha",
-              // path: "2.0.x"
+              path: "alpha"
             },
-            '1.3.0': {
-              label: "1.3",
-              path: "1.3.x"
-            }
-        },
+            "1.3.0": {
+              label: "1.3.x",
+              path: "latest",
+            },
+          },
           // Please change this to your repo.
-          editUrl:
-            'https://github.com/roblox-aurora/rbx-net/edit/main/docs/',
+          editUrl: "https://github.com/roblox-aurora/rbx-net/edit/main/docs/",
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/roblox-aurora/rbx-net/edit/main/docs/blog/',
+            "https://github.com/roblox-aurora/rbx-net/edit/main/docs/blog/",
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: require.resolve("./src/css/custom.css"),
         },
       },
     ],
