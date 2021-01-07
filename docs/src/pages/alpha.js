@@ -71,10 +71,31 @@ function Feature({ imageUrl, title, description }) {
 }
 
 const EXAMPLE_CODE_TS = `import Net from "@rbxts/net";
-const TestIdRemote = new Net.Server.Event("TestId");
-TestIdRemote.Connect((message: string) => {
+const Remotes = Net.Definitions.Create({
+    PrintMessage: Net.Definitions.Event<[message: string]>(),
+    MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>()
+});
+export default Remotes;`;
+const EXAMPLE_CODE_CLIENT_TS = `import Remotes from "shared/remotes.ts";
+const PrintMessage = Remotes.GetClient("PrintMessage")
+const MakeHello = Remotes.GetClient("MakeHello")
 
-})`;
+// should print "Hello there!" on the server
+PrintMessage.SendToServer("Hello there!");
+MakeHello.CallServerAsync("Roblox").then(result => {
+    print(result); // Should print Hello, Roblox! on the client
+});`;
+const EXAMPLE_CODE_SERVER_TS = `import Remotes from "shared/remotes.ts";
+const PrintMessage = Remotes.CreateServer("PrintMessage")
+const MakeHello = Remotes.CreateServer("MakeHello")
+
+PrintMessage.Connect((message) => {
+    // Will print the message given to it
+    print(message);
+});
+// This will take the input string
+// e.g. 'Roblox' and turn it into 'Hello, Roblox!', and send it back to the client
+MakeHello.SetCallback((message) => \`Hello, \${message}!\`);`;
 const EXAMPLE_CODE_LUA = `local Net = require(game:GetService("ReplicatedStorage").Net)
 local TestIdRemote = Net.Server.Event.new("TestId")
 TestIdRemote:Connect(function()
@@ -111,11 +132,41 @@ function Home() {
           <div className="container">
             <div className="row row--no-gutters">
               <div className="col col--2" />
-              <div className="col col--8">
-                <Code>
-                  <CodeBlock className="ts">{EXAMPLE_CODE_TS}</CodeBlock>
-                  <CodeBlock className="lua">{EXAMPLE_CODE_LUA}</CodeBlock>
-                </Code>
+              <div className="col col--16">
+                <Tabs
+                  defaultValue="defs"
+                  groupId="code"
+                  values={[
+                    { label: "Definitions", value: "defs" },
+                    { label: "Client", value: "client" },
+                    { label: "Server", value: "server" },
+                  ]}
+                >
+                  <TabItem value="defs">
+                    <CodeBlock
+                      metastring={`title="shared/remotes.ts"`}
+                      className="ts"
+                    >
+                      {EXAMPLE_CODE_TS}
+                    </CodeBlock>
+                  </TabItem>
+                  <TabItem value="client">
+                    <CodeBlock
+                      metastring={`title="client/main.client.ts"`}
+                      className="ts"
+                    >
+                      {EXAMPLE_CODE_CLIENT_TS}
+                    </CodeBlock>
+                  </TabItem>
+                  <TabItem value="server">
+                    <CodeBlock
+                      metastring={`title="server/main.server.ts"`}
+                      className="ts"
+                    >
+                      {EXAMPLE_CODE_SERVER_TS}
+                    </CodeBlock>
+                  </TabItem>
+                </Tabs>
               </div>
               <div className="col col--2" />
             </div>
