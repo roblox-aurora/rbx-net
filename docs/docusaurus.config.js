@@ -102,11 +102,11 @@ module.exports = {
           versions: {
             current: {
               label: "2.0.0-alpha",
-              path: "alpha"
+              path: "2.0.x"
             },
             "1.3.0": {
               label: "1.3.x",
-              path: "latest",
+              path: "1.3.x",
             },
           },
           // Please change this to your repo.
