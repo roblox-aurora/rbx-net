@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[12],{82:function(a){a.exports=JSON.parse('{"update":{"allTagsPath":"/rbx-net/blog/tags","slug":"update","name":"update","count":1,"permalink":"/rbx-net/blog/tags/update"}}')}}]);
