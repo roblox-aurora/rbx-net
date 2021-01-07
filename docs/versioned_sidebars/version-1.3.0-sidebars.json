@@ -11,6 +11,9 @@
 			"type": "category",
 			"label": "Guides",
 			"items": [
+				"version-1.3.0/type-safety",
+				"version-1.3.0/caching",
+				"version-1.3.0/throttling"
 			]
 		}
 	]

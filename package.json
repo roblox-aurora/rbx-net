@@ -6,6 +6,7 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "cross-env NODE_ENV=production TYPE=ts rbxtsc --verbose",
+    "build:docs": "cd docs && npm run build",
     "build:dev": "cross-env NODE_ENV=development TYPE=ts rbxtsc --verbose",
     "build:example": "cross-env NODE_ENV=development TYPE=ts rbxtsc-dev --type=game -p ./example -i ./include",
     "watch:example": "cross-env NODE_ENV=development TYPE=ts rbxtsc-dev -w --type=game -p ./example -i ./include",

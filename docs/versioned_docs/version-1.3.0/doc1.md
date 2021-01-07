@@ -17,7 +17,7 @@ slug: /
 RbxNet is a _networking library_ for Roblox, built in TypeScript. It simplifies the creation and management of networking in Roblox.
 
 :::info "Info"
-    While RbxNet is primarily a Roblox TypeScript library, it also is available for Lua. 
+While RbxNet is primarily a Roblox TypeScript library, it also is available for Lua. 
 :::
 
 ## Features
