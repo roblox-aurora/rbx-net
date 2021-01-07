@@ -3,14 +3,22 @@
 		"introduction",
 		{
 			"type": "category",
-			"label": "API",
+			"label": "Installation",
 			"items": [
+				"install"
 			]
 		},
 		{
 			"type": "category",
 			"label": "Guides",
 			"items": [
+			]
+		},
+		{
+			"type": "category",
+			"label": "API",
+			"items": [
+				"api/api"
 			]
 		}
 	]
