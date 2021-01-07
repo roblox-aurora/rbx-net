@@ -1,0 +1,17 @@
+{
+	"docs": [
+		"introduction",
+		{
+			"type": "category",
+			"label": "API",
+			"items": [
+			]
+		},
+		{
+			"type": "category",
+			"label": "Guides",
+			"items": [
+			]
+		}
+	]
+}
