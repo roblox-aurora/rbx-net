@@ -30,7 +30,10 @@
 			"type": "category",
 			"label": "API",
 			"items": [
-				"api/api"
+				"api/api",
+				"api/net.server",
+				"api/net.client",
+				"api/net.definitions"
 			]
 		}
 	]

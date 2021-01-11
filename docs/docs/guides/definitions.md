@@ -48,15 +48,15 @@ const Remotes = Net.Definitions.Create({
     PrintMessage: Net.Definitions.Event<[message: string]>(),
     MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>()
 });
-export default Remotes;
+export = Remotes;
 ```
 
 And how do we use these in the client and server?
 
 ```ts title="server/test.server.ts"
-import Remotes from "shared/remotes.ts";
-const PrintMessage = Remotes.CreateServer("PrintMessage")
-const MakeHello = Remotes.CreateServer("MakeHello")
+import { Server } from "shared/remotes.ts";
+const PrintMessage = Server.Create("PrintMessage")
+const MakeHello = Server.Create("MakeHello")
 
 PrintMessage.Connect((message) => {
     print(message);
@@ -64,9 +64,9 @@ PrintMessage.Connect((message) => {
 MakeHello.SetCallback((message) => `Hello, ${message}!`);
 ```
 ```ts title="client/test.client.ts"
-import Remotes from "shared/remotes.ts";
-const PrintMessage = Remotes.GetClient("PrintMessage")
-const MakeHello = Remotes.GetClient("MakeHello")
+import { Client } from "shared/remotes.ts";
+const PrintMessage = Client.Get("PrintMessage")
+const MakeHello = Client.Get("MakeHello")
 
 PrintMessage.SendToServer("Hello there!");
 MakeHello.CallServerAsync("Roblox").then(result => {

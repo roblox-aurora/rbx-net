@@ -7,6 +7,7 @@ import ServerFunction from "../server/ServerFunction";
 import {
 	AsyncFunctionDeclarationLike,
 	ClientBuildResult,
+	EventDeclaration,
 	EventDeclarationLike,
 	FunctionDeclarationLike,
 	InferClientRemote,
@@ -14,9 +15,31 @@ import {
 	RemoteDeclarations,
 	ServerBuildResult,
 } from "./Types";
+import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
+import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 
-class DefinitionBuilder<T extends RemoteDeclarations> {
+export type DeclarationsOf<
+	T extends RemoteDeclarations,
+	U extends EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike
+> = {
+	[K in ExtractKeys<T, U>]: T[K];
+};
+export type DeclarationType<T extends DefinitionBuilders<any>> = T extends DefinitionBuilders<infer D> ? D : never;
+
+class DefinitionBuilders<T extends RemoteDeclarations> implements DefinitionBuilders<T> {
+	/**
+	 * Server builder namespace
+	 */
+	public readonly Server = new ServerDefinitionBuilder<T>(this.decl);
+
+	/**
+	 * Client builder namespace
+	 */
+	public readonly Client = new ClientDefinitionBuilder<T>(this.decl);
+
 	public constructor(private decl: T) {}
+
+	/** @deprecated */
 	GetAllClient() {
 		const remotes = {} as Record<
 			string,
@@ -31,47 +54,23 @@ class DefinitionBuilder<T extends RemoteDeclarations> {
 
 	/**
 	 * Gets a client remote from a declaration
+	 * @deprecated Use `.Client.Get(name)` - This will be removed in the future
 	 */
 	GetClient<K extends keyof T & string>(k: K): InferClientRemote<T[K]> {
-		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
-		if (item.Type === "Function") {
-			return new ClientFunction(k) as InferClientRemote<T[K]>;
-		} else if (item.Type === "AsyncFunction") {
-			return new ClientAsyncFunction(k) as InferClientRemote<T[K]>;
-		} else if (item.Type === "Event") {
-			return new ClientEvent(k) as InferClientRemote<T[K]>;
-		}
-
-		throw `Invalid Type`;
+		warn("[rbx-net] Use 'Client.Get' instead of 'GetClient' in the DefinitionBuilder for " + k + "");
+		return this.Client.Get(k);
 	}
 
 	/**
 	 * Creates a server remote from a declaration
+	 * @deprecated Use `.Server.Create(name)` - This will be removed in the future
 	 */
 	CreateServer<K extends keyof T & string>(k: K): InferServerRemote<T[K]> {
-		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
-		if (item.Type === "Function") {
-			if (item.ServerMiddleware) {
-				return new ServerFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
-			} else {
-				return new ServerFunction(k) as InferServerRemote<T[K]>;
-			}
-		} else if (item.Type === "AsyncFunction") {
-			if (item.ServerMiddleware) {
-				return new ServerAsyncFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
-			} else {
-				return new ServerAsyncFunction(k) as InferServerRemote<T[K]>;
-			}
-		} else if (item.Type === "Event") {
-			if (item.ServerMiddleware) {
-				return new ServerEvent(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
-			} else {
-				return new ServerEvent(k) as InferServerRemote<T[K]>;
-			}
-		}
-
-		throw `Invalid Type`;
+		warn("[rbx-net] Use 'Server.Create' instead of 'CreateServer' in the DefinitionBuilder for " + k + ".");
+		return this.Server.Create(k);
 	}
+
+	/** @deprecated */
 	CreateAllServer() {
 		const remotes = {} as Record<
 			string,
@@ -85,6 +84,11 @@ class DefinitionBuilder<T extends RemoteDeclarations> {
 	}
 }
 
+interface DefinitionBuilders<T extends RemoteDeclarations> {
+	readonly Server: ServerDefinitionBuilder<T>;
+	readonly Client: ClientDefinitionBuilder<T>;
+}
+
 export default function CreateNetDefinitionBuilder<T extends RemoteDeclarations>(remotes: T) {
-	return new DefinitionBuilder<T>(remotes);
+	return new DefinitionBuilders<T>(remotes);
 }

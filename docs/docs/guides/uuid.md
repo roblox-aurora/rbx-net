@@ -94,7 +94,7 @@ const Remotes = Net.Definitions.Create({
     [RemoteId.PrintMessage]: Net.Definitions.Event<[message: string]>(),
     [RemoteId.MakeHello]: Net.Definitions.AsyncFunction<(message: string) => string>()
 });
-export default Remotes;
+export = Remotes;
 ```
 
 Which should compile to the following:

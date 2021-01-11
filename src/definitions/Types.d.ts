@@ -55,6 +55,9 @@ export interface EventDeclaration<ServerArgs extends readonly unknown[], ClientA
 
 type RemoteDeclarations = Record<string, FunctionDeclarationLike | EventDeclarationLike | AsyncFunctionDeclarationLike>;
 
+export type InferServerConnect<T> = T extends EventDeclaration<infer A, any> ? (...args: A) => void : never;
+export type InferClientConnect<T> = T extends EventDeclaration<any, infer A> ? (...args: A) => void : never;
+
 export type CheckLike = (value: unknown) => boolean;
 export type Check<T> = (value: unknown) => value is T;
 export type Checks<Tuple extends readonly [...unknown[]]> = { [Index in keyof Tuple]: Check<Tuple[Index]> };
