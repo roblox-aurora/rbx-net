@@ -15,7 +15,7 @@ function Create<T extends RemoteDeclarations>(remotes: T): DefinitionBuilders<T>
 
 Function
 - Parameters
-    - `remotes` An object of remote definitions. See [definitions](./definitions#definitions-oh-my) for usage.
+    - `remotes` An object of remote definitions. See [definitions](../definitions#definitions-oh-my) for usage.
 - Returns a [DefinitionBuilders](#definitionbuilderst)
 
 Example
@@ -42,7 +42,7 @@ This namespace contains built-in middleware for RbxNet.
 ### RuntimeTypeCheck(...typeCheckers)
 
 ## DefinitionBuilders&lt;T&gt;
-Contains the definition builders for a given definition (returned using [`Create`](api#createdefinitions) in Net.Definitions)
+Contains the definition builders for a given definition (returned using [`Create`](definitions#createdefinitions) in Net.Definitions)
 
 ```ts
 class DefinitionBuilders<T extends RemoteDeclarations> {
@@ -52,9 +52,9 @@ class DefinitionBuilders<T extends RemoteDeclarations> {
 ```
 
 ### Server
-A [ServerDefinitionBuilder](api#serverdefinitionbuildert) object.
+A [ServerDefinitionBuilder](definitions#serverdefinitionbuildert) object.
 ### Client
-A [ClientDefinitionBuilder](api#clientdefinitionbuildert) object.
+A [ClientDefinitionBuilder](definitions#clientdefinitionbuildert) object.
 
 <!-- 
 #### Example Usage

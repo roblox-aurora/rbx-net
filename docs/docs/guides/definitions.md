@@ -40,7 +40,7 @@ While this works very well, you may want a single place to reference _all_ your 
 
 
 ## Definitions, oh my!
-One of the new cool features of v2.0 is the `Net.Definitions` namespace. Now we can define our remotes in a single place, rather than having to maintain separate references:
+One of the new cool features of v2.0 is the [Net.Definitions](api/definitions) namespace. Now we can define our remotes in a single place, rather than having to maintain separate references:
 
 ```ts title="shared/remotes.ts"
 import Net from "@rbxts/net";
