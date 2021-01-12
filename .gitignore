@@ -2,3 +2,4 @@ node_modules
 out
 include
 build
+roblox.toml

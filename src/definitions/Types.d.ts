@@ -12,6 +12,12 @@ import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 
 export interface FunctionDeclarationLike {
+	/**
+	 * @deprecated
+	 * @internal Do not use, used to force using the creators
+	 */
+	readonly _nominal_FunctionDeclaration: unique symbol;
+
 	Type: "Function";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	ServerReturns?: CheckLike;
@@ -23,6 +29,12 @@ export interface FunctionDeclaration<T extends readonly unknown[], R extends unk
 }
 
 export interface AsyncFunctionDeclarationLike {
+	/**
+	 * @deprecated
+	 * @internal Do not use, used to force using the creators
+	 */
+	readonly _nominal_AsyncFunctionDeclaration: unique symbol;
+
 	Type: "AsyncFunction";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	ServerReturns?: CheckLike;
@@ -42,6 +54,12 @@ export interface AsyncFunctionDeclaration<
 }
 
 export interface EventDeclarationLike {
+	/**
+	 * @deprecated
+	 * @internal Do not use, used to force using the creators
+	 */
+	readonly _nominal_EventDeclaration: unique symbol;
+
 	Type: "Event";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	ClientArguments?: ReadonlyArray<CheckLike>;

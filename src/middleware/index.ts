@@ -1,4 +1,5 @@
 import { NetManagedInstance } from "../internal";
+import createLoggerMiddleware from "./LoggerMiddleware";
 import createRateLimiter from "./RateLimitMiddleware";
 import createTypeChecker from "./TypeCheckMiddleware";
 
@@ -14,7 +15,8 @@ export type NetMiddleware<
 
 export namespace NetMiddlewares {
 	export const RateLimit = createRateLimiter;
-	export const RuntimeTypeCheck = createTypeChecker;
+	export const Logging = createLoggerMiddleware;
+	export const TypeChecking = createTypeChecker;
 }
 
 export { createRateLimiter, createTypeChecker };

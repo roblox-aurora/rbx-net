@@ -1,15 +1,10 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
 import { createTypeChecker } from "./middleware";
+import createLoggerMiddleware from "./middleware/LoggerMiddleware";
 
 const Remotes = Net.Definitions.Create({
-	TestDefinition: {
-		Type: "Event",
-		ServerMiddleware: [createTypeChecker(t.string)],
-	},
-	TestFun: {
-		Type: "Function",
-		ServerMiddleware: [createTypeChecker(t.string)],
-	},
+	TestDefinition: Net.Definitions.Event<[message: string]>([createLoggerMiddleware(), createTypeChecker(t.string)]),
+	TestFun: Net.Definitions.Function(),
 });
 export default Remotes;

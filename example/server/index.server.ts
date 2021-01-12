@@ -2,6 +2,7 @@ import Net from "@rbxts/net";
 import t from "@rbxts/t";
 import Remotes from "./definitions";
 import { createRateLimiter, createTypeChecker, NetMiddleware } from "./middleware";
+import createLoggerMiddleware from "./middleware/LoggerMiddleware";
 
 Net.Server.SetConfiguration("EnableDebugMessages", true);
 
@@ -17,9 +18,17 @@ async function wait(time: number) {
 	});
 }
 
-Net.Server.CreateListener("Say", [createRateLimiter(1), createTypeChecker(t.string)], async (player, message) => {
-	await wait(1);
-	print(`${player}: ${message}`);
+Net.Server.CreateListener(
+	"Say",
+	[createLoggerMiddleware(), createRateLimiter({ MaxRequestsPerMinute: 1 }), createTypeChecker(t.string)],
+	async (player, message) => {
+		await wait(1);
+		print(`${player}: ${message}`);
+	},
+);
+
+Remotes.Server.ConnectEvent("TestDefinition", (message: string) => {
+	print("Server Recieved", message);
 });
 
 new Net.Server.Event("test");

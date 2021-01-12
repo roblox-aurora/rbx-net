@@ -17,5 +17,5 @@ Net.Client.GetAsyncFunctionAsync("TestAsync").then((event) => {
 		.catch((err) => warn("failed: " + tostring(err)));
 });
 
-const remote = Remotes.GetClient("TestDefinition");
+const remote = Remotes.Client.Get("TestDefinition");
 remote.SendToServer("Hello there!! :D");

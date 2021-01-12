@@ -33,7 +33,8 @@
 				"api/api",
 				"api/net.server",
 				"api/net.client",
-				"api/net.definitions"
+				"api/net.definitions",
+				"api/net.middleware"
 			]
 		}
 	]

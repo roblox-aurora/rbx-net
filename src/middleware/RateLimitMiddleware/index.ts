@@ -1,4 +1,4 @@
-import { errorft, NetManagedInstance, RequestCounter } from "../../internal";
+import { errorft, format, IS_SERVER, NetManagedInstance, RequestCounter, ServerTickFunctions } from "../../internal";
 import throttler from "./throttle";
 import { GetConfiguration } from "../../configuration";
 import { NetMiddleware } from "../../middleware";
@@ -6,6 +6,22 @@ import { NetMiddleware } from "../../middleware";
 const throttles = new Map<NetManagedInstance, RequestCounter>();
 
 type RateLimitMiddleware = NetMiddleware<any, Array<unknown>>;
+
+export interface RateLimitError {
+	Message: string;
+	UserId: number;
+	RemoteId: string;
+	MaxRequestsPerMinute: number;
+}
+
+export interface RateLimitOptions {
+	MaxRequestsPerMinute: number;
+	ErrorHandler?: (error: RateLimitError) => void;
+}
+
+export function rateLimitWarningHandler(error: RateLimitError) {
+	warn("[rbx-net]", error.Message);
+}
 
 /**
  * Creates a throttle middleware for this event
@@ -15,7 +31,9 @@ type RateLimitMiddleware = NetMiddleware<any, Array<unknown>>;
  * _NOTE: Must be used before **other** middlewares as it's not a type altering middleware_
  * @param maxRequestsPerMinute The maximum requests per minute
  */
-function createRateLimiter(maxRequestsPerMinute: number): RateLimitMiddleware {
+function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
+	const maxRequestsPerMinute = options.MaxRequestsPerMinute;
+	const errorHandler = options.ErrorHandler ?? rateLimitWarningHandler;
 	return (next, event) => {
 		const instance = event.GetInstance();
 		let throttle = throttles.get(event)!;
@@ -26,10 +44,15 @@ function createRateLimiter(maxRequestsPerMinute: number): RateLimitMiddleware {
 		return (player, ...args) => {
 			const count = throttle.Get(player);
 			if (count >= maxRequestsPerMinute) {
-				errorft(GetConfiguration("ServerThrottleMessage"), {
-					player: player.UserId,
-					remote: instance.Name,
-					limit: maxRequestsPerMinute,
+				errorHandler?.({
+					Message: format(GetConfiguration("ServerThrottleMessage"), {
+						player: player.UserId,
+						remote: instance.Name,
+						limit: maxRequestsPerMinute,
+					}),
+					MaxRequestsPerMinute: maxRequestsPerMinute,
+					RemoteId: instance.Name,
+					UserId: player.UserId,
 				});
 			} else {
 				throttle.Increment(player);
@@ -38,4 +61,15 @@ function createRateLimiter(maxRequestsPerMinute: number): RateLimitMiddleware {
 		};
 	};
 }
+
+if (IS_SERVER) {
+	let lastTick = 0;
+	ServerTickFunctions.push(() => {
+		if (tick() > lastTick + GetConfiguration("ServerThrottleResetTimer")) {
+			lastTick = tick();
+			throttler.Clear();
+		}
+	});
+}
+
 export default createRateLimiter;

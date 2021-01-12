@@ -89,6 +89,15 @@ export function errorft(message: string, vars: { [name: string]: unknown }): nev
 	error(message, 2);
 }
 
+export function format(message: string, vars: { [name: string]: unknown }) {
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+		return vars[token] || token;
+	});
+	return message;
+}
+
 /** @internal */
 export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: string, timeout: number) {
 	return Promise.defer<RemoteTypes[K]>((resolve, reject) => {

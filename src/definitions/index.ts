@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MiddlewareOverload } from "helpers/EventConstructor";
+import { MiddlewareOverload } from "../helpers/EventConstructor";
 import CreateNetDefinitionBuilder from "./CreateDefinitions";
 import {
 	AsyncFunctionDeclaration,
@@ -7,6 +7,7 @@ import {
 	FunctionDeclaration,
 	FunctionDeclarationLike,
 	EventDeclaration,
+	EventDeclarationLike,
 } from "./Types";
 
 namespace NetDefinitions {
@@ -30,7 +31,7 @@ namespace NetDefinitions {
 		return {
 			Type: "AsyncFunction",
 			ServerMiddleware: mw,
-		} as const;
+		} as AsyncFunctionDeclarationLike;
 	}
 
 	/**
@@ -46,20 +47,19 @@ namespace NetDefinitions {
 		return {
 			Type: "Function",
 			ServerMiddleware: mw,
-		} as const;
+		} as FunctionDeclarationLike;
 	}
 
 	/**
 	 * Creates a definition for an event
 	 */
 	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
-		mw?: MiddlewareOverload<ServerArgs>,
-	): EventDeclaration<ServerArgs, ClientArgs>;
-	export function Event(mw?: MiddlewareOverload<any>) {
+		mw?: MiddlewareOverload<any>,
+	): EventDeclaration<ServerArgs, ClientArgs> {
 		return {
 			Type: "Event",
 			ServerMiddleware: mw,
-		} as const;
+		} as EventDeclaration<ServerArgs, ClientArgs>;
 	}
 }
 
