@@ -44,33 +44,44 @@ One of the new cool features of v2.0 is the [Net.Definitions](api/definitions) n
 
 ```ts title="shared/remotes.ts"
 import Net from "@rbxts/net";
+
 const Remotes = Net.Definitions.Create({
-    PrintMessage: Net.Definitions.Event<[message: string]>(),
-    MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>()
+  PrintMessage: Net.Definitions.Event<[message: string, other: string]>(),
+  MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>(),
 });
-export = Remotes;
+
+export { Remotes };
 ```
 
 And how do we use these in the client and server?
 
 ```ts title="server/test.server.ts"
-import { Server } from "shared/remotes.ts";
-const PrintMessage = Server.Create("PrintMessage")
-const MakeHello = Server.Create("MakeHello")
+import { Remotes } from "shared/remotes";
 
-PrintMessage.Connect((message) => {
-    print(message);
+// listen to messages
+const PrintMessage = Remotes.CreateServer("PrintMessage");
+PrintMessage.Connect((player, message, other) => {
+  print(`Server recieved message: ${message} from player: ${player} ${other}`);
 });
-MakeHello.SetCallback((message) => `Hello, ${message}!`);
+
+// listen and respond to messages
+const MakeHello = Remotes.CreateServer("MakeHello");
+MakeHello.SetCallback((player, message) => {
+  print(`Server got an async message from ${player} containing the message ${message}`);
+  return `Hello, ${player}! We got your message: ${message}`;
+});
 ```
 ```ts title="client/test.client.ts"
-import { Client } from "shared/remotes.ts";
-const PrintMessage = Client.Get("PrintMessage")
-const MakeHello = Client.Get("MakeHello")
+import { Remotes } from "shared/remotes";
 
-PrintMessage.SendToServer("Hello there!");
-MakeHello.CallServerAsync("Roblox").then(result => {
-    print(result); // Should be Hello, Roblox!
+// send a message to the server
+const PrintMessage = Remotes.GetClient("PrintMessage");
+PrintMessage.SendToServer("Hello there!", "other");
+
+// send a message to the server, while listening for a response
+const MakeHello = Remotes.GetClient("MakeHello");
+MakeHello.CallServerAsync("Net is cool right??").then((result) => {
+  print(`Client got a response to the async message from server: ${result}`);
 });
 ```
 
