@@ -6,6 +6,8 @@ import { $env, $ifEnv } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
 import { IS_SERVER } from "./internal";
 
+const BUILD_TYPE = $env("TYPE", "TS");
+
 /**
  * Networking Library for Roblox
  * @version 2.0
@@ -26,11 +28,11 @@ namespace Net {
 	 */
 	export const Definitions = CreateNetDefinitionBuilder;
 
-	export const VERSION = `${PKG_VERSION}${
+	export const VERSION = `${PKG_VERSION} (${
 		$env<"production" | "development">("NODE_ENV", "production") === "development"
-			? "-dev-" + $env("TYPE", "ts")
-			: "-" + $env("TYPE", "ts")
-	}`;
+			? "DEV " + BUILD_TYPE
+			: BUILD_TYPE
+	})`;
 
 	/**
 	 * Built-in middlewares
