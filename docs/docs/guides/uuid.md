@@ -14,7 +14,7 @@ A feature that can be leveraged with the power of the roblox-ts compiler, is a t
 If used correctly it should make it quite hard to make exploit tools for your game, and throw off most exploiters.
 
 :::caution
-It is not an anti-exploit solution, but a [good piece of cheese](https://utkusen.com/blog/security-by-obscurity-is-underrated.html) in preventing exploits. You _should always_ secure your remotes yourself, using things like the [runtime type checking middleware](/docs/2.x/middleware/types). Doesn't hurt to add another layer of cheese.
+It is not an anti-exploit solution, but a [good piece of cheese](https://utkusen.com/blog/security-by-obscurity-is-underrated.html) in preventing exploits. You _should always_ secure your remotes yourself, using things like the [runtime type checking middleware](/docs/2.0/middleware/types). Doesn't hurt to add another layer of cheese.
 :::
 
 

@@ -34,10 +34,10 @@ const features = [
     description: (
       <>
         RbxNet comes with built-in useful middleware such as{" "}
-        <Link to="/docs/2.x/middleware/types">RuntimeTypeCheck</Link> and{" "}
-        <Link to="/docs/2.x/middleware/rate-limit">RateLimit</Link>, but you can
+        <Link to="/docs/2.0/middleware/types">RuntimeTypeCheck</Link> and{" "}
+        <Link to="/docs/2.0/middleware/rate-limit">RateLimit</Link>, but you can
         also roll your{" "}
-        <Link to="/docs/2.x/middleware/custom">own custom middleware</Link>.
+        <Link to="/docs/2.0/middleware/custom">own custom middleware</Link>.
       </>
     ),
   },
@@ -47,7 +47,7 @@ const features = [
     description: (
       <>
         Take advantage of the declarative{" "}
-        <Link to="/docs/2.x/definitions">Definitions API</Link>, which allows
+        <Link to="/docs/2.0/definitions">Definitions API</Link>, which allows
         you to define your remote instances in one place, and use anywhere else.
         Types generated for you.
       </>
