@@ -49,7 +49,7 @@ jobs:
           
           echo "Generating vendors from include"
           mkdir -p luau/TS
-          cp -r luau/include/* luau/TS
+          cp -r rbx-net/include/* luau/TS
           
           echo "Removing declaration files"
           find luau -name '*.d.ts' -delete
