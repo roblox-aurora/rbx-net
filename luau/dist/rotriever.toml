@@ -1,0 +1,6 @@
+[package]
+name = "vorlias/net"
+author = "Vorlias"
+license = "MIT"
+content_root = "."
+version = "2.0.0"

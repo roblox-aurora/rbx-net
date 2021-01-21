@@ -12,34 +12,44 @@ import Code from "@site/src/components/Code";
 
 const features = [
   {
-    title: "Simplified Networking & Contextual API",
+    title: "Contextual Networking API",
     // imageUrl: 'img/undraw_docusaurus_mountain.svg',
     description: (
       <>
-        Remotes are managed entirely by Net. All you need are identifiers. The
-        API is built to make things more simple and easy to follow as well. <br/><br/>
-        <code>Server</code> objects are explicitly for the server, while{" "}
-        <code>Client</code> objects are explicitly for the client
+        Remotes are managed entirely by RbxNet. All you need are identifiers for
+        the remotes.
+        <br />
+        <br />
+        The code is segregated, to make the APIs more clean and clear.
+        <br />
+        <br />
+        <code>Net.Server</code> is for server code, <code>Net.Client</code> is
+        for client code. Simple as that.
       </>
     ),
   },
   {
-    title: "Powered by roblox-ts",
+    title: "Networking Middleware",
     // imageUrl: 'img/undraw_docusaurus_tree.svg',
     description: (
       <>
-        Takes leverage of the feature set of roblox-ts, including <code>asynchronous</code> methods.
+        RbxNet comes with built-in useful middleware such as{" "}
+        <Link to="/docs/2.x/middleware/types">RuntimeTypeCheck</Link> and{" "}
+        <Link to="/docs/2.x/middleware/rate-limit">RateLimit</Link>, but you can
+        also roll your{" "}
+        <Link to="/docs/2.x/middleware/custom">own custom middleware</Link>.
       </>
     ),
   },
   {
-    title: "Powerful Extensions",
+    title: "Definitions API",
     // imageUrl: 'img/undraw_docusaurus_react.svg',
     description: (
       <>
-        <Link to="/docs/1.3.x/type-safety">Type Safety</Link>,{" "}
-        <Link to="/docs/1.3.x/caching">Caching</Link> and{" "}
-        <Link to="/docs/1.3.x/throttling">Throttling</Link> are examples of features available in RbxNet.
+        Take advantage of the declarative{" "}
+        <Link to="/docs/2.x/definitions">Definitions API</Link>, which allows
+        you to define your remote instances in one place, and use anywhere else.
+        Types generated for you.
       </>
     ),
   },
@@ -61,10 +71,31 @@ function Feature({ imageUrl, title, description }) {
 }
 
 const EXAMPLE_CODE_TS = `import Net from "@rbxts/net";
-const TestIdRemote = new Net.Server.Event("TestId");
-TestIdRemote.Connect((message: string) => {
+const Remotes = Net.Definitions.Create({
+    PrintMessage: Net.Definitions.Event<[message: string]>(),
+    MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>()
+});
+export default Remotes;`;
+const EXAMPLE_CODE_CLIENT_TS = `import Remotes from "shared/remotes.ts";
+const PrintMessage = Remotes.GetClient("PrintMessage")
+const MakeHello = Remotes.GetClient("MakeHello")
 
-})`;
+// should print "Hello there!" on the server
+PrintMessage.SendToServer("Hello there!");
+MakeHello.CallServerAsync("Roblox").then(result => {
+    print(result); // Should print Hello, Roblox! on the client
+});`;
+const EXAMPLE_CODE_SERVER_TS = `import Remotes from "shared/remotes.ts";
+const PrintMessage = Remotes.CreateServer("PrintMessage")
+const MakeHello = Remotes.CreateServer("MakeHello")
+
+PrintMessage.Connect((message) => {
+    // Will print the message given to it
+    print(message);
+});
+// This will take the input string
+// e.g. 'Roblox' and turn it into 'Hello, Roblox!', and send it back to the client
+MakeHello.SetCallback((message) => \`Hello, \${message}!\`);`;
 const EXAMPLE_CODE_LUA = `local Net = require(game:GetService("ReplicatedStorage").Net)
 local TestIdRemote = Net.Server.Event.new("TestId")
 TestIdRemote:Connect(function()
@@ -89,7 +120,7 @@ function Home() {
                 "button button--outline button--primary button--lg",
                 styles.getStarted
               )}
-              to={useBaseUrl("docs/1.3.x")}
+              to={useBaseUrl("docs/2.0")}
             >
               Get Started
             </Link>
@@ -97,6 +128,51 @@ function Home() {
         </div>
       </header>
       <main>
+        <section className={styles.codeExample}>
+          <div className="container">
+            <div className="row row--no-gutters">
+              <div className="col col--2" />
+              <div className="col col--16">
+                <Tabs
+                  defaultValue="defs"
+                  groupId="code"
+                  values={[
+                    { label: "Definitions", value: "defs" },
+                    { label: "Client", value: "client" },
+                    { label: "Server", value: "server" },
+                  ]}
+                >
+                  <TabItem value="defs">
+                    <CodeBlock
+                      metastring={`title="shared/remotes.ts"`}
+                      className="ts"
+                    >
+                      {EXAMPLE_CODE_TS}
+                    </CodeBlock>
+                  </TabItem>
+                  <TabItem value="client">
+                    <CodeBlock
+                      metastring={`title="client/main.client.ts"`}
+                      className="ts"
+                    >
+                      {EXAMPLE_CODE_CLIENT_TS}
+                    </CodeBlock>
+                  </TabItem>
+                  <TabItem value="server">
+                    <CodeBlock
+                      metastring={`title="server/main.server.ts"`}
+                      className="ts"
+                    >
+                      {EXAMPLE_CODE_SERVER_TS}
+                    </CodeBlock>
+                  </TabItem>
+                </Tabs>
+              </div>
+              <div className="col col--2" />
+            </div>
+          </div>
+        </section>
+
         {features && features.length > 0 && (
           <section className={styles.features}>
             <div className="container">

@@ -39,18 +39,19 @@ function TypeCheckMiddleware.__call(_, ...)
     return typeCheckMiddleware({}, {...})
 end
 
-function TypeCheckMiddleware.new()
+function TypeCheckMiddleware.new(options)
     local self = {}
+    self.ErrorHandler = options.ErrorHandler
     return setmetatable(self, TypeCheckMiddleware)
 end
 
-function TypeCheckMiddleware:For(...)
+function TypeCheckMiddleware:Check(...)
     return typeCheckMiddleware(self, {...})
 end
 
 function TypeCheckMiddleware:SetErrorHandler(handler)
     assert(type(handler) == "function")
-    self.errorHandler = handler
+    self.ErrorHandler = handler
 end
 
 return setmetatable({}, TypeCheckMiddleware)

@@ -5,7 +5,8 @@
 			"type": "category",
 			"label": "Installation",
 			"items": [
-				"install"
+				"install",
+				"install-luau"
 			]
 		},
 		{

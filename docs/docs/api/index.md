@@ -5,10 +5,6 @@ sidebar_label: Overview
 slug: /api
 ---
 
-:::caution Alpha Build
-This is currently an alpha build of Net. The API is subject to change.
-:::
-
 ## [Net.Server](api/server)
 Base namespace for the server
 

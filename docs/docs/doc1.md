@@ -7,10 +7,6 @@ slug: /
 import ThemedImage from "@theme/ThemedImage";
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-:::danger Experimental Build
-This version of Net is still quite experimental, and the API is subject to change.
-:::
-
 <div align="center">
     <ThemedImage
         alt="Net Logo"

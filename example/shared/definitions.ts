@@ -4,7 +4,10 @@ import { createTypeChecker } from "./middleware";
 import createLoggerMiddleware from "./middleware/LoggerMiddleware";
 
 const Remotes = Net.Definitions.Create({
-	TestDefinition: Net.Definitions.Event<[message: string]>([createLoggerMiddleware(), createTypeChecker(t.string)]),
+	TestDefinition: Net.Definitions.Event<[message: string]>([
+		Net.Middleware.Logging(),
+		Net.Middleware.TypeChecking(t.string),
+	]),
 	TestFun: Net.Definitions.Function(),
 });
 export default Remotes;

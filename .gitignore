@@ -3,3 +3,4 @@ out
 include
 build
 roblox.toml
+*.rbxmx

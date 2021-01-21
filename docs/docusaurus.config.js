@@ -16,7 +16,7 @@ module.exports = {
     },
     prism: {
       theme: require("prism-react-renderer/themes/vsDark"),
-      additionalLanguages: ["typescript", "lua"],
+      additionalLanguages: ["typescript", "lua", "powershell", "toml"],
     },
     navbar: {
       title: "Roblox Networking",
@@ -98,11 +98,11 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.json"),
-          lastVersion: "1.3.0",
+          lastVersion: "current",
           versions: {
             current: {
-              label: "2.0.0-alpha.7",
-              path: "2.x"
+              label: "2.0.0-rc.0",
+              path: "2.0"
             },
             "1.3.0": {
               label: "1.3.0-beta.6.2",
