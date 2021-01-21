@@ -1,17 +1,11 @@
-
-local TS = _G[script]
-local _0 = TS.import(script, script.Parent, "internal")
-local ServerTickFunctions = _0.ServerTickFunctions
+-- Compiled with roblox-ts v1.0.0-beta.14
+local TS = require(script.Parent.Parent.TS.RuntimeLib)
+local _0 = TS.import(script, script.Parent.Parent, "internal")
 local isLuaTable = _0.isLuaTable
-local MockMessagingService = TS.import(script, script.Parent, "MockMessagingService")
-local MessagingService = game:GetService("MessagingService")
+local ServerTickFunctions = _0.ServerTickFunctions
+local MessagingService = TS.import(script, script.Parent.Parent, "internal", "MessagingService")
 local Players = game:GetService("Players")
 local IS_STUDIO = game:GetService("RunService"):IsStudio()
---[[
-	*
-	* Checks if a value matches that of a subscription message
-	* @param value The value
-]]
 local function isSubscriptionMessage(value)
 	if isLuaTable(value) then
 		local hasData = value.Data ~= nil
@@ -39,11 +33,11 @@ local function processMessageQueue()
 		globalSubscriptionCounter = 0
 		lastQueueTick = tick()
 		while #globalMessageQueue > 0 do
-			
+			-- ▼ Array.pop ▼
 			local _1 = #globalMessageQueue
 			local _2 = globalMessageQueue[_1]
 			globalMessageQueue[_1] = nil
-			
+			-- ▲ Array.pop ▲
 			local message = _2
 			MessagingService:PublishAsync(message.Name, message.Data)
 			globalEventMessageCounter += 1
@@ -53,20 +47,6 @@ local function processMessageQueue()
 		end
 	end
 end
---[[
-	*
-	* Message Size: 1kB
-	* MessagesPerMin: 150 + 60 * NUMPLAYERS
-	* MessagesPerTopicMin: 30M
-	* MessagesPerUniversePerMin: 30M
-	* SubsPerServer: 5 + 2 * numPlayers
-	* SubsPerUniverse: 10K
-]]
---[[
-	*
-	* An event that works across all servers
-	* @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
-]]
 do
 	NetGlobalEvent = setmetatable({}, {
 		__tostring = function()
@@ -103,13 +83,12 @@ do
 				Name = self.name,
 				Data = message,
 			}
-			
+			-- ▼ Array.push ▼
 			_1[#_1 + 1] = _2
-			
+			-- ▲ Array.push ▲
 		else
 			globalEventMessageCounter += 1
-			
-			((IS_STUDIO and MockMessagingService) or MessagingService):PublishAsync(self.name, message)
+			MessagingService:PublishAsync(self.name, message)
 		end
 	end
 	function NetGlobalEvent:Connect(handler)
@@ -118,7 +97,7 @@ do
 			error("[rbx-net] Exceeded Subscription limit of " .. tostring(limit) .. "!")
 		end
 		globalSubscriptionCounter += 1
-		return ((IS_STUDIO and MockMessagingService) or MessagingService):SubscribeAsync(self.name, function(recieved)
+		return MessagingService:SubscribeAsync(self.name, function(recieved)
 			local _1 = recieved
 			local Sent = _1.Sent
 			if isJobTargetMessage(recieved) then
@@ -135,9 +114,9 @@ do
 end
 local _1 = ServerTickFunctions
 local _2 = processMessageQueue
-
+-- ▼ Array.push ▼
 _1[#_1 + 1] = _2
-
+-- ▲ Array.push ▲
 return {
 	isSubscriptionMessage = isSubscriptionMessage,
 	default = NetGlobalEvent,

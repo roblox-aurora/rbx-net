@@ -1,5 +1,5 @@
-
-local TS = _G[script]
+-- Compiled with roblox-ts v1.0.0-beta.14
+local TS = require(script.Parent.TS.RuntimeLib)
 local IS_CLIENT = TS.import(script, script.Parent, "internal").IS_CLIENT
 local runService = game:GetService("RunService")
 local IS_SERVER = runService:IsServer()
@@ -8,37 +8,35 @@ local rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} vi
 local NetConfig = {}
 do
 	local _0 = NetConfig
-	
 	_0.DebugEnabled = false
-	
-	
 	local function SetClientConfiguration(key, value)
-		assert(IS_CLIENT, "Use SetConfiguration on the server!")
+		local _1 = IS_CLIENT
+		assert(_1, "Use SetConfiguration on the server!")
 		if key == "EnableDebugMessages" then
 			_0.DebugEnabled = value
 		end
 	end
 	_0.SetClientConfiguration = SetClientConfiguration
-	
 	local function SetConfiguration(key, value)
-		assert(IS_SERVER, "Cannot set configuration on client!")
+		local _1 = IS_SERVER
+		assert(_1, "Cannot set configuration on client!")
 		if key == "ServerThrottleResetTimer" then
 			throttleResetTimer = value
 		elseif key == "ServerThrottleMessage" then
 			rateLimitReachedMessage = value
 		elseif key == "EnableDebugMessages" then
 			_0.DebugEnabled = value
-		elseif key == "InvalidPropTypesHandler" then
-			_0.InvalidPropTypesHandlerFunc = value
 		end
 	end
 	_0.SetConfiguration = SetConfiguration
 	local function GetConfiguration(key)
 		if key == "ServerThrottleResetTimer" then
-			assert(IS_SERVER, "ServerThrottleResetTimer is not used on the client!")
+			local _1 = IS_SERVER
+			assert(_1, "ServerThrottleResetTimer is not used on the client!")
 			return throttleResetTimer
 		elseif key == "ServerThrottleMessage" then
-			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!")
+			local _1 = IS_SERVER
+			assert(_1, "ServerThrottleMessage is not used on the client!")
 			return rateLimitReachedMessage
 		elseif key == "EnableDebugMessages" then
 			return _0.DebugEnabled
@@ -47,7 +45,6 @@ do
 		end
 	end
 	_0.GetConfiguration = GetConfiguration
-	
 	local function DebugWarn(...)
 		local message = { ... }
 		if _0.DebugEnabled then
@@ -55,7 +52,6 @@ do
 		end
 	end
 	_0.DebugWarn = DebugWarn
-	
 	local function DebugLog(...)
 		local message = { ... }
 		if _0.DebugEnabled then

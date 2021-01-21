@@ -1,28 +1,21 @@
-
+-- Compiled with roblox-ts v1.0.0-beta.14
+local TS = require(script.Parent.TS.RuntimeLib)
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local runService = game:GetService("RunService")
-
-local IS_SERVER = runService:IsServer()
-
-local IS_CLIENT = (__LEMUR__ and not runService:IsServer()) or runService:IsClient()
-
+local collectionService = game:GetService("CollectionService")
+local IS_SERVER = not runService:IsRunning() or runService:IsServer()
+local IS_CLIENT = runService:IsRunning() and runService:IsClient()
+local IS_RUNNING = runService:IsRunning()
 local MAX_CLIENT_WAITFORCHILD_TIMEOUT = 10
-
 local function getGlobalRemote(name)
-	return "$" .. name
+	return ":\\" .. name
 end
-
 local function isLuaTable(value)
 	local _0 = value
 	return type(_0) == "table"
 end
-local REMOTES_FOLDER_NAME = "Remotes"
-local FUNCTIONS_FOLDER_NAME = "Functions"
-local EVENTS_FOLDER_NAME = "Events"
-local ASYNC_FUNCTIONS_FOLDER_NAME = "AsyncFunctions"
-
+local REMOTES_FOLDER_NAME = "NetManagedInstances"
 local ServerTickFunctions = {}
-
 local function findOrCreateFolder(parent, name)
 	local folder = parent:FindFirstChild(name)
 	if folder then
@@ -33,19 +26,15 @@ local function findOrCreateFolder(parent, name)
 		return folder
 	end
 end
-local remoteFolder = findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME)
-local functionFolder = findOrCreateFolder(remoteFolder, FUNCTIONS_FOLDER_NAME)
-local eventFolder = findOrCreateFolder(remoteFolder, EVENTS_FOLDER_NAME)
-local asyncFunctionFolder = findOrCreateFolder(remoteFolder, ASYNC_FUNCTIONS_FOLDER_NAME)
---[[
-	*
-	* Errors with variables formatted in a message
-	* @param message The message
-	* @param vars variables to pass to the error message
-]]
+local dist = "luau"
+local location
+if dist == "ts" then
+	location = script.Parent.Parent
+else
+	location = replicatedStorage
+end
+local remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME)
 local function errorft(message, vars)
-	
-	
 	local _0 = message
 	local _1 = function(token)
 		local _2 = vars[token]
@@ -57,43 +46,86 @@ local function errorft(message, vars)
 	message = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
 	error(message, 2)
 end
-
-local function eventExists(name)
-	return eventFolder:FindFirstChild(name) ~= nil
-end
-
-local function functionExists(name)
-	return functionFolder:FindFirstChild(name) ~= nil
-end
-
-local function waitForEvent(name, timeOut)
-	return eventFolder:WaitForChild(name, timeOut)
-end
-
-local function waitForFunction(name, timeOut)
-	return functionFolder:WaitForChild(name, timeOut)
-end
-
-local function getRemoteFolder(remoteType)
-	local targetFolder
-	if remoteType == "RemoteEvent" then
-		targetFolder = eventFolder
-	elseif remoteType == "RemoteFunction" then
-		targetFolder = functionFolder
-	elseif remoteType == "AsyncRemoteFunction" then
-		targetFolder = asyncFunctionFolder
-	else
-		return error("Invalid type: " .. remoteType)
+local function format(message, vars)
+	local _0 = message
+	local _1 = function(token)
+		local _2 = vars[token]
+		if not (_2 ~= 0 and _2 == _2 and _2 ~= "" and _2) then
+			_2 = token
+		end
+		return _2
 	end
-	return targetFolder
+	message = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
+	return message
 end
-
-local function findRemote(remoteType, name)
-	local targetFolder = getRemoteFolder(remoteType)
-	local existing = targetFolder:FindFirstChild(name)
-	return existing
+local findRemote
+local function waitForRemote(remoteType, name, timeout)
+	return TS.Promise.defer(function(resolve, reject)
+		local i = 0
+		local result
+		repeat
+			do
+				local step = runService.Heartbeat:Wait()
+				i += step
+				result = findRemote(remoteType, name)
+			end
+		until not (i < timeout and not result)
+		if result then
+			resolve(result)
+		else
+			reject("Unable to find remote object")
+		end
+	end)
 end
-
+function findRemote(remoteType, name)
+	if remoteType == "AsyncRemoteFunction" then
+		local _0 = collectionService:GetTagged("NetManagedAsyncFunction")
+		local _1 = function(f)
+			return f.Name == name
+		end
+		-- ▼ ReadonlyArray.find ▼
+		local _2 = nil
+		for _3, _4 in ipairs(_0) do
+			if _1(_4, _3 - 1, _0) == true then
+				_2 = _4
+				break
+			end
+		end
+		-- ▲ ReadonlyArray.find ▲
+		return _2
+	elseif remoteType == "RemoteEvent" then
+		local _0 = collectionService:GetTagged("NetManagedEvent")
+		local _1 = function(f)
+			return f.Name == name
+		end
+		-- ▼ ReadonlyArray.find ▼
+		local _2 = nil
+		for _3, _4 in ipairs(_0) do
+			if _1(_4, _3 - 1, _0) == true then
+				_2 = _4
+				break
+			end
+		end
+		-- ▲ ReadonlyArray.find ▲
+		return _2
+	elseif remoteType == "RemoteFunction" then
+		local _0 = collectionService:GetTagged("NetManagedLegacyFunction")
+		local _1 = function(f)
+			return f.Name == name
+		end
+		-- ▼ ReadonlyArray.find ▼
+		local _2 = nil
+		for _3, _4 in ipairs(_0) do
+			if _1(_4, _3 - 1, _0) == true then
+				_2 = _4
+				break
+			end
+		end
+		-- ▲ ReadonlyArray.find ▲
+		return _2
+	end
+	error("Invalid Remote Access")
+end
 local function getRemoteOrThrow(remoteType, name)
 	local existing = findRemote(remoteType, name)
 	if existing then
@@ -102,7 +134,6 @@ local function getRemoteOrThrow(remoteType, name)
 		error("Could not find Remote of type " .. remoteType .. ' called "' .. name .. '"')
 	end
 end
-
 local function findOrCreateRemote(remoteType, name)
 	local existing = findRemote(remoteType, name)
 	if existing then
@@ -114,15 +145,18 @@ local function findOrCreateRemote(remoteType, name)
 		local remote
 		if remoteType == "RemoteEvent" then
 			remote = Instance.new("RemoteEvent")
+			collectionService:AddTag(remote, "NetManagedEvent")
 		elseif remoteType == "AsyncRemoteFunction" then
 			remote = Instance.new("RemoteEvent")
+			collectionService:AddTag(remote, "NetManagedAsyncFunction")
 		elseif remoteType == "RemoteFunction" then
 			remote = Instance.new("RemoteFunction")
+			collectionService:AddTag(remote, "NetManagedLegacyFunction")
 		else
 			error("Invalid Remote Type: " .. remoteType)
 		end
 		remote.Name = name
-		remote.Parent = getRemoteFolder(remoteType)
+		remote.Parent = remoteFolder
 		return remote
 	end
 end
@@ -159,17 +193,15 @@ return {
 	isLuaTable = isLuaTable,
 	findOrCreateFolder = findOrCreateFolder,
 	errorft = errorft,
-	eventExists = eventExists,
-	functionExists = functionExists,
-	waitForEvent = waitForEvent,
-	waitForFunction = waitForFunction,
-	getRemoteFolder = getRemoteFolder,
+	format = format,
+	waitForRemote = waitForRemote,
 	findRemote = findRemote,
 	getRemoteOrThrow = getRemoteOrThrow,
 	findOrCreateRemote = findOrCreateRemote,
 	checkArguments = checkArguments,
 	IS_SERVER = IS_SERVER,
 	IS_CLIENT = IS_CLIENT,
+	IS_RUNNING = IS_RUNNING,
 	MAX_CLIENT_WAITFORCHILD_TIMEOUT = MAX_CLIENT_WAITFORCHILD_TIMEOUT,
 	ServerTickFunctions = ServerTickFunctions,
 }

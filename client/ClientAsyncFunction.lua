@@ -1,44 +1,48 @@
-
-local TS = _G[script]
-local _0 = TS.import(script, script.Parent, "internal")
-local IS_SERVER = _0.IS_SERVER
-local getRemoteOrThrow = _0.getRemoteOrThrow
-local _1 = TS.import(script, script.Parent, "configuration")
-local DebugLog = _1.DebugLog
-local DebugWarn = _1.DebugWarn
+-- Compiled with roblox-ts v1.0.0-beta.14
+local TS = require(script.Parent.Parent.TS.RuntimeLib)
+local _0 = TS.import(script, script.Parent.Parent, "configuration")
+local DebugLog = _0.DebugLog
+local DebugWarn = _0.DebugWarn
+local _1 = TS.import(script, script.Parent.Parent, "internal")
+local getRemoteOrThrow = _1.getRemoteOrThrow
+local IS_SERVER = _1.IS_SERVER
+local waitForRemote = _1.waitForRemote
 local HttpService = game:GetService("HttpService")
---[[
-	*
-	* An event that behaves like a function
-	* @rbxts client
-]]
-local NetClientAsyncFunction
+local ClientAsyncFunction
 do
-	NetClientAsyncFunction = setmetatable({}, {
+	ClientAsyncFunction = setmetatable({}, {
 		__tostring = function()
-			return "NetClientAsyncFunction"
+			return "ClientAsyncFunction"
 		end,
 	})
-	NetClientAsyncFunction.__index = NetClientAsyncFunction
-	function NetClientAsyncFunction.new(...)
-		local self = setmetatable({}, NetClientAsyncFunction)
+	ClientAsyncFunction.__index = ClientAsyncFunction
+	function ClientAsyncFunction.new(...)
+		local self = setmetatable({}, ClientAsyncFunction)
 		self:constructor(...)
 		return self
 	end
-	function NetClientAsyncFunction:constructor(name)
+	function ClientAsyncFunction:constructor(name)
 		self.timeout = 10
 		self.listeners = {}
 		self.instance = getRemoteOrThrow("AsyncRemoteFunction", name)
-		assert(not IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!")
+		local _2 = not IS_SERVER
+		assert(_2, "Cannot create a Net.ClientAsyncFunction on the Server!")
 	end
-	function NetClientAsyncFunction:SetCallTimeout(timeout)
-		assert(timeout > 0, "timeout must be a positive number")
+	function ClientAsyncFunction:Wait(name)
+		return TS.Promise.defer(TS.async(function(resolve)
+			TS.await(waitForRemote("AsyncRemoteFunction", name, 10))
+			resolve(ClientAsyncFunction.new(name))
+		end))
+	end
+	function ClientAsyncFunction:SetCallTimeout(timeout)
+		local _2 = timeout > 0
+		assert(_2, "timeout must be a positive number")
 		self.timeout = timeout
 	end
-	function NetClientAsyncFunction:GetCallTimeout()
+	function ClientAsyncFunction:GetCallTimeout()
 		return self.timeout
 	end
-	function NetClientAsyncFunction:SetCallback(callback)
+	function ClientAsyncFunction:SetCallback(callback)
 		if self.connector then
 			self.connector:Disconnect()
 			self.connector = nil
@@ -72,7 +76,7 @@ do
 			end
 		end))
 	end
-	NetClientAsyncFunction.CallServerAsync = TS.async(function(self, ...)
+	ClientAsyncFunction.CallServerAsync = TS.async(function(self, ...)
 		local args = { ... }
 		local id = HttpService:GenerateGUID(false)
 		local _2 = self.instance
@@ -109,27 +113,27 @@ do
 				connection = connection,
 				timeout = self.timeout,
 			}
-			
+			-- ▼ Map.set ▼
 			_4[_5] = _6
-			
+			-- ▲ Map.set ▲
 			repeat
 				do
-					game:GetService("RunService").Stepped:Wait()
+					game:GetService("RunService").Heartbeat:Wait()
 				end
 			until not (connection.Connected and tick() < startTime + self.timeout)
 			local _7 = self.listeners
 			local _8 = id
-			
+			-- ▼ Map.delete ▼
 			_7[_8] = nil
-			
+			-- ▲ Map.delete ▲
 			if tick() >= startTime and connection.Connected then
 				DebugWarn("(timeout) Disconnected CallServerAsync EventId", id)
 				connection:Disconnect()
-				reject("Request to client timed out")
+				reject("Request to server timed out after " .. tostring(self.timeout) .. " seconds")
 			end
 		end)
 	end)
 end
 return {
-	default = NetClientAsyncFunction,
+	default = ClientAsyncFunction,
 }
