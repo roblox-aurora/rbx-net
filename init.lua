@@ -4,6 +4,7 @@ local NetServerContext = TS.import(script, script, "server")
 local NetClientContext = TS.import(script, script, "client")
 local CreateNetDefinitionBuilder = TS.import(script, script, "definitions").default
 local NetMiddlewares = TS.import(script, script, "middleware").NetMiddlewares
+local BUILD_TYPE = "Luau"
 local Net = {}
 do
 	local _0 = Net
@@ -13,7 +14,7 @@ do
 	_0.Server = Server
 	local Definitions = CreateNetDefinitionBuilder
 	_0.Definitions = Definitions
-	local VERSION = "2.0.0-rc.0" .. ("production" == "development" and "-dev-" .. "luau" or "-" .. "luau")
+	local VERSION = "2.0.0-rc.0" .. " (" .. ("production" == "development" and "DEV " .. BUILD_TYPE or BUILD_TYPE) .. ")"
 	_0.VERSION = VERSION
 	local Middleware = NetMiddlewares
 	_0.Middleware = Middleware

@@ -26,7 +26,7 @@ local function findOrCreateFolder(parent, name)
 		return folder
 	end
 end
-local dist = "luau"
+local dist = "Luau"
 local location
 if dist == "ts" then
 	location = script.Parent.Parent
