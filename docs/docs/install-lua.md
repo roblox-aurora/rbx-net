@@ -94,3 +94,8 @@ Once you have the module installed, you can then use it in code by importing it 
 ```ts
 import Net from "@rbxts/net";
 ``` -->
+
+## Via Releases
+Releases can be found [here](https://github.com/roblox-aurora/rbx-net/releases)
+
+Each release contains a `.rbxmx` model file, which you can drag into roblox studio.
