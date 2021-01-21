@@ -1,3 +1,4 @@
+import { $ifEnv } from "rbxts-transform-env";
 import { NetMiddleware, NextCaller } from "../middleware";
 
 export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
@@ -9,6 +10,11 @@ abstract class MiddlewareEvent {
 	) {
 		const { middlewares } = this;
 		try {
+			assert(
+				typeIs(middlewares, "table"),
+				"The middleware argument should be an array of middlewares not a " + typeOf(middlewares),
+			);
+
 			if (middlewares.size() > 0) {
 				let callbackFn = callback as NextCaller<R>;
 
