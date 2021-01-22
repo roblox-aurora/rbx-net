@@ -20,7 +20,7 @@ Then run
 kayak pull
 ```
 
-Then you should be able to use it via `packages/Net`. Your `packages` directory should be included in your rojo project. More information on that can be seen [here](https://emozley.uk/kayak/guide/dependencies/).
+Then you should be able to use it via the `packages` directory. Your `packages` directory should be included in your rojo project. More information on that can be seen [here](https://emozley.uk/kayak/guide/dependencies/).
 
 ## Via PowerShell
 
