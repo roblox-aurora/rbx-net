@@ -3,11 +3,8 @@ id: install-luau
 title: Install for Luau
 ---
 
-<!-- ## Via [Kayak](https://emozley.uk/kayak/guide/installation/)
-:::danger
-There are bugs with Kayak that prevent this step working at the moment.
-:::
-Ensure you have followed [Packages](https://emozley.uk/kayak/guide/packages/) guide for setting up your project's `rotriever.toml`.
+## Via Kayak
+Ensure you have  [installed](https://emozley.uk/kayak/guide/installation/) kayak and followed the [packages](https://emozley.uk/kayak/guide/packages/) guide for setting up your project's `rotriever.toml` if you haven't already.
 
 
 In your `rotriever.toml` file for your project, put under `packages`:
@@ -18,7 +15,12 @@ In your `rotriever.toml` file for your project, put under `packages`:
 Net = { git = "github.com/roblox-aurora/rbx-net", rev = "luau" }
 ```
 
-Then you should be able to use it via `packages/Net`. Your `packages` directory should be included in your rojo project. More information on that can be seen [here](https://emozley.uk/kayak/guide/dependencies/). -->
+Then run 
+```
+kayak pull
+```
+
+Then you should be able to use it via `packages/Net`. Your `packages` directory should be included in your rojo project. More information on that can be seen [here](https://emozley.uk/kayak/guide/dependencies/).
 
 ## Via PowerShell
 
@@ -71,7 +73,7 @@ Then you can include it in your `*.project.json` file like so:
     "ReplicatedStorage": {
         // ...
         "Net": {
-            "$path": "submodules/Net"
+            "$path": "submodules/Net/dist"
         }
         // ...
     },
