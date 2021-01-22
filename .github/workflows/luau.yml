@@ -40,13 +40,13 @@ jobs:
           echo "Cloning Net (branch: Luau)"
           git clone --depth=50 --branch=luau https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git luau
           
-          echo "Remove existing .lua files"
-          rm -rf luau/*.lua
-          cp -r rbx-net/out/* luau
+          echo "Remove existing files"
+          rm -rf luau/*
+          cp -r rbx-net/out/* luau/dist
           
           echo "Generating vendors from include"
-          mkdir -p luau/TS
-          cp -r rbx-net/include/* luau/TS
+          mkdir -p luau/dist/TS
+          cp -r rbx-net/include/* luau/dist/TS
           
           echo "Removing declaration files"
           find luau -name '*.d.ts' -delete
