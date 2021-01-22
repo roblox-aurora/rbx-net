@@ -2,5 +2,5 @@
 name = "vorlias/net"
 author = "Vorlias"
 license = "MIT"
-content_root = "."
+content_root = "dist"
 version = "2.0.0"
