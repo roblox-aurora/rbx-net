@@ -39,6 +39,7 @@ jobs:
           
           echo "Cloning Net (branch: Luau)"
           git clone --depth=50 --branch=luau https://vorlias:${{secrets.git_token}}@github.com/roblox-aurora/rbx-net.git luau
+          mkdir -p luau/dist
           
           echo "Remove existing files"
           rm -rf luau/*
