@@ -1,5 +1,5 @@
 {
-    "name": "luau.net",
+    "name": "build.rbxnet.luau",
     "tree": {
       "$path": "../out",
       "TS": {

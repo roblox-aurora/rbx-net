@@ -6,10 +6,11 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "cross-env NODE_ENV=production rbxtsc --verbose",
-    "build:luau": "cross-env NODE_ENV=production TYPE=Luau rbxtsc --verbose --type=model --rojo=\"luau/default.project.json\"",
+    "build:luau": "cross-env NODE_ENV=production TYPE=Luau rbxtsc --verbose --type=model --rojo=\"luau/build.project.json\"",
     "build:docs": "cd docs && npm run build",
+    "start:docs": "cd docs && yarn start",
     "build:dev": "cross-env NODE_ENV=development rbxtsc --verbose",
-    "build:rbxmx": "npm run build:luau && rojo build luau/default.project.json -o luau.net.rbxmx",
+    "build:rbxmx": "npm run build:luau && rojo build luau/build.project.json -o luau.net.rbxmx",
     "build:example": "cross-env NODE_ENV=development rbxtsc-dev --type=game -p ./example -i ./include",
     "watch:example": "cross-env NODE_ENV=development rbxtsc-dev -w --type=game -p ./example -i ./include",
     "serve:example": "rojo serve ./example/default.project.json --port 34567"
