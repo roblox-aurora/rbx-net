@@ -5,7 +5,7 @@ import { NetMiddleware, NetMiddlewares } from "./middleware";
 import { $env, $ifEnv } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
 import { IS_SERVER } from "./internal";
-import Serialization from "./serializer";
+import NetSerialization from "./serializer";
 
 const BUILD_TYPE = $env("TYPE", "TS");
 
@@ -51,7 +51,7 @@ namespace Net {
 	 * Network serialization namespace
 	 * @internal Still in development
 	 */
-	export const Serializer = Serialization;
+	export const Serialization = NetSerialization;
 
 	/**
 	 * An object that contains a `Serialize` method.
