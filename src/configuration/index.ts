@@ -1,3 +1,4 @@
+import { $env } from "rbxts-transform-env";
 import { IS_CLIENT } from "../internal";
 
 const runService = game.GetService("RunService");
@@ -26,7 +27,7 @@ let throttleResetTimer = 60;
 let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via {remote}";
 namespace NetConfig {
 	/** @internal */
-	export let DebugEnabled = false;
+	export let DebugEnabled = $env<string>("NODE_ENV") === "development";
 
 	/** @rbxts client */
 	export function SetClientConfiguration<K extends keyof Pick<RbxNetConfigItem, "EnableDebugMessages">>(

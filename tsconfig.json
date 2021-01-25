@@ -18,6 +18,7 @@
 		"outDir": "out",
 		"removeComments": true,
 		"baseUrl": "src",
+		"stripInternal": true,
 		//"incremental": true,
 		//"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",
 		"declaration": true,
@@ -31,6 +32,7 @@
 	},
 	"exclude": [
 		"example/**/*",
+		"test/**/*",
 		"out"
 	]
 }

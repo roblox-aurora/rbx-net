@@ -40,8 +40,9 @@ export interface NetManagedInstance {
 	GetInstance(): RemoteEvent | RemoteFunction;
 }
 
-const REMOTES_FOLDER_NAME = "NetManagedInstances";
+const REMOTES_FOLDER_NAME = "_managed";
 
+/** @internal */
 export const enum TagId {
 	RecieveOnly = "NetRecieveOnly",
 	Managed = "NetManagedInstance",
@@ -65,13 +66,16 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-const dist = $env<"ts" | "lua">("TYPE", "ts");
+const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
 let location: Instance;
-if (dist === "ts") {
+if (dist === "TS") {
 	location = script.Parent!.Parent!;
 } else {
-	location = replicatedStorage;
+	location = script.Parent!;
 }
+$ifEnv("NODE_ENV", "development", () => {
+	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
+});
 
 const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 /**
@@ -168,6 +172,11 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 
 		remote.Name = name;
 		remote.Parent = remoteFolder;
+
+		$ifEnv("NODE_ENV", "development", () => {
+			print("[rbx-net-dev] Registered remote", remote.GetFullName(), "under", remoteType);
+		});
+
 		return remote as RemoteTypes[K];
 	}
 }
@@ -177,6 +186,7 @@ export interface IAsyncListener {
 	timeout: number;
 }
 
+/** @internal */
 export function checkArguments(types: Array<TypeGuard<any>>, args?: Array<unknown>) {
 	if (args === undefined) {
 		warn("[net-types] Argument length is zero");
