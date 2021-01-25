@@ -16,7 +16,7 @@
 		// configurable
 		"rootDir": "src",
 		"outDir": "out",
-		"removeComments": true,
+		"removeComments": false,
 		"baseUrl": "src",
 		"stripInternal": true,
 		//"incremental": true,

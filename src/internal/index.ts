@@ -1,6 +1,6 @@
 import { $env, $ifEnv } from "rbxts-transform-env";
 
-const replicatedStorage = game.GetService("ReplicatedStorage");
+const HttpService = game.GetService("HttpService");
 const runService = game.GetService("RunService");
 const collectionService = game.GetService("CollectionService");
 
@@ -40,7 +40,7 @@ export interface NetManagedInstance {
 	GetInstance(): RemoteEvent | RemoteFunction;
 }
 
-const REMOTES_FOLDER_NAME = "_managed";
+const REMOTES_FOLDER_NAME = "_NetManaged";
 
 /** @internal */
 export const enum TagId {
