@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MiddlewareOverload } from "../helpers/EventConstructor";
-import { _NetDefinitionBuilders } from "./CreateDefinitions";
 import {
 	AsyncFunctionDeclaration,
 	AsyncFunctionDeclarationLike,
@@ -11,6 +10,8 @@ import {
 	DefinitionsCreateResult,
 } from "./Types";
 import { oneOf } from "../helpers/validator";
+import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
+import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 
 const declarationType = oneOf("Event", "Function", "AsyncFunction");
 
@@ -30,9 +31,12 @@ namespace NetDefinitions {
 	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T): DefinitionsCreateResult<T> {
+	export function Create<T extends RemoteDeclarations>(declarations: T) {
 		validateDeclarations(declarations);
-		return new _NetDefinitionBuilders<T>(declarations);
+		return identity<DefinitionsCreateResult<T>>({
+			Server: new ServerDefinitionBuilder<T>(declarations),
+			Client: new ClientDefinitionBuilder<T>(declarations),
+		});
 	}
 
 	/**

@@ -41,11 +41,11 @@ This namespace contains built-in middleware for RbxNet.
 ### RateLimit(limit)
 ### RuntimeTypeCheck(...typeCheckers)
 
-## DefinitionBuilders&lt;T&gt;
+## DefinitionsCreateResult&lt;T&gt;
 Contains the definition builders for a given definition (returned using [`Create`](definitions#createdefinitions) in Net.Definitions)
 
 ```ts
-class DefinitionBuilders<T extends RemoteDeclarations> {
+interface DefinitionsCreateResult<T extends RemoteDeclarations> {
     readonly Server: ServerDefinitionBuilder<T>;
     readonly Client: ClientDefinitionBuilder<T>;
 }
