@@ -1,7 +1,7 @@
 import { isLuaTable, ServerTickFunctions } from "../internal";
 
 // const MessagingService = game.GetService("MessagingService");
-import MessagingService from "../internal/MessagingService";
+import MessagingService from "./MessagingService";
 const Players = game.GetService("Players");
 const IS_STUDIO = game.GetService("RunService").IsStudio();
 

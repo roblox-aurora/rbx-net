@@ -1,6 +1,6 @@
 import { default as AsyncFunction } from "./ClientAsyncFunction";
 import { default as Event } from "./ClientEvent";
-import { default as CrossServerEvent } from "./ClientGameEvent";
+import { default as GameMessagingEvent } from "./ClientMessagingEvent";
 import config from "../configuration";
 import ClientEvent from "./ClientEvent";
 import ClientAsyncFunction from "./ClientAsyncFunction";
@@ -46,4 +46,4 @@ export function GetAsyncFunction<
 	return new ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>(id);
 }
 
-export { Event, AsyncFunction, CrossServerEvent, Function };
+export { Event, AsyncFunction, GameMessagingEvent, Function };

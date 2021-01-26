@@ -4,7 +4,7 @@ import ClientEvent from "./ClientEvent";
 /**
  * Client counter-part to GlobalServerEvent
  */
-export default class ClientGameEvent<TArgs extends unknown[] = unknown[]> {
+export default class ClientMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	private readonly instance: ClientEvent<TArgs>;
 	constructor(name: string) {
 		this.instance = new ClientEvent(getGlobalRemoteId(name));

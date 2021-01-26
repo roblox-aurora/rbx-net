@@ -2,12 +2,12 @@ import { MiddlewareOverload } from "../helpers/EventConstructor";
 import { MiddlewareList } from "./MiddlewareEvent";
 import { default as AsyncFunction } from "./ServerAsyncFunction";
 import ServerEvent, { default as Event } from "./ServerEvent";
-import { default as CrossServerEvent } from "./ServerGameEvent";
+import { default as GameMessagingEvent } from "./ServerMessagingEvent";
 import { default as CreateListener } from "./CreateServerListener";
 import { default as Function } from "./ServerFunction";
 import config from "../configuration";
 
-export { Event, AsyncFunction, Function, CrossServerEvent, CreateListener };
+export { Event, AsyncFunction, Function, GameMessagingEvent, CreateListener };
 
 /**
  * Creates an event on the server

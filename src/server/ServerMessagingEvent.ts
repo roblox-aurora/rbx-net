@@ -1,4 +1,4 @@
-import MessagingEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./MessagingEvent";
+import MessagingEvent, { isSubscriptionMessage, ISubscriptionMessage } from "../messaging/MessagingEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
 import MiddlewareEvent from "./MiddlewareEvent";
@@ -28,7 +28,7 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class ServerGameEvent<TArgs extends unknown[] = unknown[]> {
+export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	private readonly instance: ServerEvent<[], TArgs>;
 	private readonly event: MessagingEvent;
 	private readonly eventHandler: RBXScriptConnection;
@@ -101,7 +101,7 @@ export default class ServerGameEvent<TArgs extends unknown[] = unknown[]> {
 	 * @param jobId The game.JobId of the target server
 	 * @param args The args of the message
 	 */
-	public SendToServet(jobId: string, ...args: TArgs) {
+	public SendToServer(jobId: string, ...args: TArgs) {
 		this.event.SendToServer(jobId, { data: [...args] });
 	}
 
