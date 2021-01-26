@@ -138,11 +138,11 @@ function Home() {
         </div>
       </header>
       <main>
-        <section style={{marginTop: "10px"}}>
+        {/* <section style={{marginTop: "10px"}}>
           <div className="container">
             <h3>Test</h3>
           </div>
-        </section>
+        </section> */}
         <section className={styles.codeExample}>
           <div className="container">
             <div className="row row--no-gutters">
