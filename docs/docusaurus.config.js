@@ -101,7 +101,7 @@ module.exports = {
           lastVersion: "current",
           versions: {
             current: {
-              label: "2.0.0-rc.0",
+              label: require("../package.json").version,
               path: "2.0"
             },
             "1.3.0": {
