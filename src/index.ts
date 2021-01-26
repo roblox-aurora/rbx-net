@@ -68,11 +68,6 @@ namespace Net {
 
 $ifEnv("NODE_ENV", "development", () => {
 	$dbg(Net.VERSION);
-	if (IS_SERVER) {
-		Net.Server.SetConfiguration("EnableDebugMessages", true);
-	} else {
-		Net.Client.SetConfiguration("EnableDebugMessages", true);
-	}
 });
 
 export = Net;
