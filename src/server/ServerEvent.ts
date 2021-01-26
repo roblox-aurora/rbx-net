@@ -1,7 +1,7 @@
 import { NetMiddleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
-import { MiddlewareOverload } from "../helpers/EventConstructor";
+import { MiddlewareOverload } from "../middleware";
 
 interface Signalable<CallArguments extends ReadonlyArray<unknown>, PlayerArgument extends defined = Player> {
 	Connect(callback: (player: PlayerArgument, ...args: CallArguments) => void): RBXScriptConnection;

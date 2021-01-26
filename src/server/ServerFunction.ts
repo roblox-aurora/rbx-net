@@ -1,4 +1,4 @@
-import { MiddlewareOverload } from "../helpers/EventConstructor";
+import { MiddlewareOverload } from "../middleware";
 import { findOrCreateRemote, IS_SERVER } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";

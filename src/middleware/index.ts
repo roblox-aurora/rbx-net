@@ -5,6 +5,14 @@ import createTypeChecker from "./TypeCheckMiddleware";
 
 export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unknown>) => R;
 
+export type MiddlewareOverload<T extends readonly unknown[]> =
+	| []
+	| [NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>]
+	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>];
+
 export type NetMiddleware<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
 	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>

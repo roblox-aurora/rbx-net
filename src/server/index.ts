@@ -1,5 +1,4 @@
-import { MiddlewareOverload } from "../helpers/EventConstructor";
-import { MiddlewareList } from "./MiddlewareEvent";
+import { MiddlewareOverload } from "../middleware";
 import { default as AsyncFunction } from "./ServerAsyncFunction";
 import ServerEvent, { default as Event } from "./ServerEvent";
 import { default as GameMessagingEvent } from "./ServerMessagingEvent";

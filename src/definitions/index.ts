@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MiddlewareOverload } from "../helpers/EventConstructor";
+import { MiddlewareOverload } from "../middleware";
 import {
 	AsyncFunctionDeclaration,
 	AsyncFunctionDeclarationLike,
@@ -9,7 +9,7 @@ import {
 	RemoteDeclarations,
 	DefinitionsCreateResult,
 } from "./Types";
-import { oneOf } from "../helpers/validator";
+import { oneOf } from "../internal/validator";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 

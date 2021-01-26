@@ -1,8 +1,6 @@
 import MessagingEvent, { isSubscriptionMessage, ISubscriptionMessage } from "../messaging/MessagingEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
-import MiddlewareEvent from "./MiddlewareEvent";
-import { MiddlewareOverload } from "helpers/EventConstructor";
 const Players = game.GetService("Players");
 
 export interface IMessage<TArgs> {

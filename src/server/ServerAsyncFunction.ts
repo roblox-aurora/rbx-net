@@ -2,7 +2,7 @@ import { NetMiddleware } from "../middleware";
 import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
-import { MiddlewareOverload } from "../helpers/EventConstructor";
+import { MiddlewareOverload } from "../middleware";
 const HttpService = game.GetService("HttpService");
 
 type AsyncEventArgs = [eventId: string, data: unknown];
