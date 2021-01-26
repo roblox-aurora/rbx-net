@@ -15,7 +15,8 @@
 			"items": [
 				"guides/basics",
 				"guides/definitions",
-				"guides/uuid"
+				"guides/uuid",
+				"guides/custom-player-objects"
 			]
 		},
 		{
