@@ -66,13 +66,9 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
-let location: Instance;
-if (dist === "TS") {
-	location = script.Parent!.Parent!;
-} else {
-	location = script.Parent!;
-}
+// const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
+const location = script.Parent!;
+
 $ifEnv("NODE_ENV", "development", () => {
 	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
 });
