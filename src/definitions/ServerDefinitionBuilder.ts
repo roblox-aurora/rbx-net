@@ -2,17 +2,16 @@ import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import {
-	AsyncFunctionDeclarationLike,
+	DeclarationLike,
+	DeclarationsOf,
 	EventDeclarationLike,
-	FunctionDeclarationLike,
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
 } from "./Types";
-import { DeclarationsOf } from "./CreateDefinitions";
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(private decl: T) {}
+	public constructor(private declarations: T) {}
 	/**
 	 * Create a receive-only event for the server.
 	 *
@@ -36,8 +35,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Creates a server remote from a declaration
 	 */
 	Create<K extends keyof T & string>(k: K): InferServerRemote<T[K]> {
-		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
-		assert(item && item.Type, `'${k}' is not defined`);
+		const item = this.declarations[k];
+		assert(item && item.Type, `'${k}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			if (item.ServerMiddleware) {
 				return new ServerFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;

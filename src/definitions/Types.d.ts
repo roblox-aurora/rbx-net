@@ -10,6 +10,8 @@ import { MiddlewareOverload } from "../helpers/EventConstructor";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
+import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
+import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 
 export interface FunctionDeclarationLike {
 	/**
@@ -27,6 +29,25 @@ export interface FunctionDeclaration<T extends readonly unknown[], R extends unk
 	ServerMiddleware: [...mw: MiddlewareOverload<T>];
 	ServerReturns: Check<R>;
 }
+
+/**
+ * The DefinitionBuilders type
+ */
+export interface DefinitionsCreateResult<T extends RemoteDeclarations> {
+	readonly Server: ServerDefinitionBuilder<T>;
+	readonly Client: ClientDefinitionBuilder<T>;
+}
+
+export type DeclarationType<T extends DefinitionsCreateResult<any>> = T extends DefinitionsCreateResult<infer D>
+	? D
+	: never;
+
+export type DeclarationsOf<
+	T extends RemoteDeclarations,
+	U extends EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike
+> = {
+	[K in ExtractKeys<T, U>]: T[K];
+};
 
 export interface AsyncFunctionDeclarationLike {
 	/**
@@ -71,19 +92,31 @@ export interface EventDeclaration<ServerArgs extends readonly unknown[], ClientA
 	ClientArguments: Checks<ClientArgs>;
 }
 
-type RemoteDeclarations = Record<string, FunctionDeclarationLike | EventDeclarationLike | AsyncFunctionDeclarationLike>;
+export type DeclarationLike = FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
+export type RemoteDeclarations = Record<string, DeclarationLike>;
 
-export type InferServerConnect<T> = T extends EventDeclaration<infer A, any> ? (...args: A) => void : never;
-export type InferClientConnect<T> = T extends EventDeclaration<any, infer A> ? (...args: A) => void : never;
+////////////////////////////////
+// * Checks
+///////////////////////////////
 
 export type CheckLike = (value: unknown) => boolean;
 export type Check<T> = (value: unknown) => value is T;
 export type Checks<Tuple extends readonly [...unknown[]]> = { [Index in keyof Tuple]: Check<Tuple[Index]> };
 export type CheckMap<T> = { [P in keyof T]: Check<T[P]> };
-type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
+
 type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
 	[Index in keyof Tuple]: InferCheck<Tuple[Index]>;
 };
+
+////////////////////////////////
+// * Inference Magic
+///////////////////////////////
+
+export type InferServerConnect<T> = T extends EventDeclaration<infer A, any> ? (...args: A) => void : never;
+export type InferClientConnect<T> = T extends EventDeclaration<any, infer A> ? (...args: A) => void : never;
+
+type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
+
 type InferArgs<T extends readonly CheckLike[] | CheckLike | undefined> = T extends readonly [...CheckLike[]]
 	? CheckTupleToInferedValues<T>
 	: T extends CheckLike
@@ -152,7 +185,7 @@ export type InferServerRemote<T> = T extends FunctionDeclarationLike
 	: never;
 
 /////////////////////////////////////////
-// Building
+// * Results
 /////////////////////////////////////////
 
 export type ClientBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferClientRemote<T[P]> };

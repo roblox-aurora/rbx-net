@@ -2,23 +2,22 @@ import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import {
-	AsyncFunctionDeclarationLike,
+	DeclarationLike,
+	DeclarationsOf,
 	EventDeclarationLike,
-	FunctionDeclarationLike,
 	InferClientConnect,
 	InferClientRemote,
 	RemoteDeclarations,
 } from "./Types";
-import { DeclarationsOf } from "./CreateDefinitions";
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(private decl: T) {}
+	public constructor(private declarations: T) {}
 	/**
 	 * Gets a client remote from a declaration
 	 */
 	Get<K extends keyof T & string>(k: K): InferClientRemote<T[K]> {
-		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
-		assert(item && item.Type, `'${k}' is not defined`);
+		const item = this.declarations[k];
+		assert(item && item.Type, `'${k}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			return new ClientFunction(k) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MiddlewareOverload } from "../helpers/EventConstructor";
-import { _NetDefinitionBuilders, DefinitionsCreateResult } from "./CreateDefinitions";
+import { _NetDefinitionBuilders } from "./CreateDefinitions";
 import {
 	AsyncFunctionDeclaration,
 	AsyncFunctionDeclarationLike,
 	FunctionDeclaration,
 	FunctionDeclarationLike,
 	EventDeclaration,
-	EventDeclarationLike,
 	RemoteDeclarations,
+	DefinitionsCreateResult,
 } from "./Types";
 import { oneOf } from "../helpers/validator";
 
@@ -27,9 +27,6 @@ namespace NetDefinitions {
 
 	/**
 	 * Creates definitions for Remote instances that can be used on both the client and server.
-	 *
-	 *
-	 *
 	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
