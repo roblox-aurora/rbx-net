@@ -17,7 +17,7 @@ export interface ISubscriptionMessage {
 
 interface IJobData {
 	JobId: string;
-	InnerData: string;
+	InnerData: unknown;
 }
 
 export interface ISubscriptionJobIdMessage extends ISubscriptionMessage {
@@ -64,7 +64,7 @@ function processMessageQueue() {
 			globalEventMessageCounter++;
 		}
 
-		if (globalEventMessageCounter >= NetGlobalEvent.GetMessageLimit()) {
+		if (globalEventMessageCounter >= MessagingEvent.GetMessageLimit()) {
 			warn("[rbx-net] Too many messages are being sent, any further messages will be queued!");
 		}
 	}
@@ -79,11 +79,13 @@ function processMessageQueue() {
  * SubsPerUniverse: 10K
  */
 
+type JobIdMessage<TMessage> = { jobId: string; message: TMessage };
+
 /**
  * An event that works across all servers
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
-export default class NetGlobalEvent {
+export default class MessagingEvent<TMessage extends unknown = unknown> {
 	constructor(private name: string) {}
 
 	/**
@@ -101,37 +103,46 @@ export default class NetGlobalEvent {
 	}
 
 	/**
+	 * Internal method for sending a message to all servers.
+	 *
+	 * @param data The data to send
+	 */
+	private sendToAllServersOrQueue(data: TMessage | JobIdMessage<TMessage>) {
+		const limit = MessagingEvent.GetMessageLimit();
+		if (globalEventMessageCounter >= limit) {
+			warn(`[rbx-net] Exceeded message limit of ${limit}, adding to queue...`);
+			globalMessageQueue.push({ Name: this.name, Data: data });
+		} else {
+			globalEventMessageCounter++;
+
+			// Since this yields
+			MessagingService.PublishAsync(this.name, data);
+		}
+	}
+
+	/**
 	 * Sends a message to a specific server
 	 * @param jobId The game.JobId of the target server
 	 * @param message The message to send
 	 */
-	public SendToServer(jobId: string, message: unknown) {
-		this.SendToAllServers({ jobId, message });
+	public SendToServer(jobId: string, message: TMessage) {
+		this.sendToAllServersOrQueue({ jobId, message });
 	}
 
 	/**
 	 * Sends a message to all servers
 	 * @param message The message to send
 	 */
-	public SendToAllServers(message: unknown) {
-		const limit = NetGlobalEvent.GetMessageLimit();
-		if (globalEventMessageCounter >= limit) {
-			warn(`[rbx-net] Exceeded message limit of ${limit}, adding to queue...`);
-			globalMessageQueue.push({ Name: this.name, Data: message });
-		} else {
-			globalEventMessageCounter++;
-
-			// Since this yields
-			MessagingService.PublishAsync(this.name, message);
-		}
+	public SendToAllServers(message: TMessage) {
+		this.sendToAllServersOrQueue(message);
 	}
 
 	/**
 	 * Connects a function to a global event
 	 * @param handler The message handler
 	 */
-	public Connect(handler: (message: unknown, time: number) => void) {
-		const limit = NetGlobalEvent.GetSubscriptionLimit();
+	public Connect(handler: (message: TMessage, time: number) => void) {
+		const limit = MessagingEvent.GetSubscriptionLimit();
 		if (globalSubscriptionCounter >= limit) {
 			error(`[rbx-net] Exceeded Subscription limit of ${limit}!`);
 		}
@@ -144,10 +155,10 @@ export default class NetGlobalEvent {
 				const { Data } = recieved;
 
 				if (game.JobId === Data.JobId) {
-					handler(Data.InnerData, Sent);
+					handler(Data.InnerData as TMessage, Sent);
 				}
 			} else {
-				handler(recieved.Data, Sent);
+				handler(recieved.Data as TMessage, Sent);
 			}
 		});
 	}

@@ -1,16 +1,18 @@
-import NetGlobalEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./GlobalEvent";
+import MessagingEvent, { isSubscriptionMessage, ISubscriptionMessage } from "./MessagingEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
+import MiddlewareEvent from "./MiddlewareEvent";
+import { MiddlewareOverload } from "helpers/EventConstructor";
 const Players = game.GetService("Players");
 
-export interface IMessage {
-	InnerData: Array<unknown>;
+export interface IMessage<TArgs> {
+	InnerData: TArgs;
 	TargetId?: number;
 	TargetIds?: Array<number>;
 }
 
 export interface ISubscriptionTargetedMessage extends ISubscriptionMessage {
-	Data: IMessage;
+	Data: IMessage<any>;
 }
 
 function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTargetedMessage {
@@ -26,21 +28,21 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class CrossServerEvent {
-	private readonly instance: ServerEvent;
-	private readonly event: NetGlobalEvent;
+export default class ServerGameEvent<TArgs extends unknown[] = unknown[]> {
+	private readonly instance: ServerEvent<[], TArgs>;
+	private readonly event: MessagingEvent;
 	private readonly eventHandler: RBXScriptConnection;
 
 	constructor(name: string) {
 		this.instance = new ServerEvent(getGlobalRemote(name));
-		this.event = new NetGlobalEvent(name);
+		this.event = new MessagingEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
 		this.eventHandler = this.event.Connect((message) => {
 			if (isTargetedSubscriptionMessage(message)) {
 				this.recievedMessage(message.Data);
 			} else {
-				warn(`[rbx-net] Recieved malformed message for GlobalServerEvent: ${name}`);
+				warn(`[rbx-net] Recieved malformed message for ServerGameEvent: ${name}`);
 			}
 		});
 	}
@@ -61,7 +63,7 @@ export default class CrossServerEvent {
 		}
 	}
 
-	private recievedMessage(message: IMessage) {
+	private recievedMessage(message: IMessage<TArgs>) {
 		if (message.TargetIds) {
 			const players = this.getPlayersMatchingId(message.TargetIds);
 			if (players) {
@@ -90,7 +92,7 @@ export default class CrossServerEvent {
 	 * SEnds an event to all servers in the game
 	 * @param args The args of the message
 	 */
-	public SendToAllServers<T extends Array<unknown>>(...args: T) {
+	public SendToAllServers(...args: TArgs) {
 		this.event.SendToAllServers({ data: [...args] });
 	}
 
@@ -99,7 +101,7 @@ export default class CrossServerEvent {
 	 * @param jobId The game.JobId of the target server
 	 * @param args The args of the message
 	 */
-	public SendToServer<T extends Array<unknown>>(jobId: string, ...args: T) {
+	public SendToServet(jobId: string, ...args: TArgs) {
 		this.event.SendToServer(jobId, { data: [...args] });
 	}
 
@@ -108,7 +110,7 @@ export default class CrossServerEvent {
 	 * @param userId The userId of the target player
 	 * @param args The args
 	 */
-	public SendToPlayer<T extends Array<unknown>>(userId: number, ...args: T) {
+	public SendToPlayer(userId: number, ...args: TArgs) {
 		const player = Players.GetPlayerByUserId(userId);
 		// If the player exists in this instance, just send it straight to them.
 		if (player) {
@@ -123,7 +125,7 @@ export default class CrossServerEvent {
 	 * @param userIds The list of user ids to send this message to
 	 * @param args The args of the message
 	 */
-	public SendToPlayers<T extends Array<unknown>>(userIds: Array<number>, ...args: T) {
+	public SendToPlayers(userIds: Array<number>, ...args: TArgs) {
 		// Check to see if any of these users are in this server first, and handle accordingly.
 		for (const targetId of userIds) {
 			const player = Players.GetPlayerByUserId(targetId);
