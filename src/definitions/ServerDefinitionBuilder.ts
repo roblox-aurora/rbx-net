@@ -37,6 +37,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 */
 	Create<K extends keyof T & string>(k: K): InferServerRemote<T[K]> {
 		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
+		assert(item && item.Type, `'${k}' is not defined`);
 		if (item.Type === "Function") {
 			if (item.ServerMiddleware) {
 				return new ServerFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;

@@ -10,7 +10,8 @@ const HttpService = game.GetService("HttpService");
 export default class ClientAsyncFunction<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	ServerReturnType = unknown
+	CallReturnType = unknown,
+	CallbackReturnType = unknown
 > {
 	private instance: RemoteEvent;
 	private timeout = 10;
@@ -42,7 +43,7 @@ export default class ClientAsyncFunction<
 		return this.timeout;
 	}
 
-	public SetCallback<R>(callback: (...args: CallbackArgs) => R) {
+	public SetCallback<R extends CallbackReturnType>(callback: (...args: CallbackArgs) => R) {
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
@@ -69,7 +70,7 @@ export default class ClientAsyncFunction<
 		});
 	}
 
-	public async CallServerAsync(...args: CallArgs): Promise<ServerReturnType> {
+	public async CallServerAsync(...args: CallArgs): Promise<CallReturnType> {
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 
@@ -83,7 +84,7 @@ export default class ClientAsyncFunction<
 					if (eventId === id) {
 						DebugLog("Disconnected CallServerAsync EventId", eventId);
 						connection.Disconnect();
-						resolve(data as ServerReturnType);
+						resolve(data as CallReturnType);
 					}
 				}
 			});

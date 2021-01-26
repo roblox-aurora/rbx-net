@@ -111,7 +111,12 @@ type InferClientFunction<T extends FunctionDeclarationLike> = T["ServerMiddlewar
 type InferClientAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["ServerMiddleware"] extends [
 	...mw: MiddlewareOverload<infer A>
 ]
-	? ClientAsyncFunction<InferArgs<T["ClientArguments"]>, A, InferArgs<T["ServerReturns"]>>
+	? ClientAsyncFunction<
+			InferArgs<T["ClientArguments"]>,
+			A,
+			InferArgs<T["ServerReturns"]>,
+			InferArgs<T["ClientReturns"]>
+	  >
 	: ClientAsyncFunction<InferArgs<T["ClientArguments"]>, unknown[], InferArgs<T["ServerReturns"]>>;
 
 type InferServerFunction<T extends FunctionDeclarationLike> = T["ServerMiddleware"] extends [
@@ -123,7 +128,12 @@ type InferServerFunction<T extends FunctionDeclarationLike> = T["ServerMiddlewar
 type InferServerAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["ServerMiddleware"] extends [
 	...mw: MiddlewareOverload<infer A>
 ]
-	? ServerAsyncFunction<A, InferArgs<T["ClientArguments"]>, InferArgs<T["ClientReturns"]>>
+	? ServerAsyncFunction<
+			A,
+			InferArgs<T["ClientArguments"]>,
+			InferArgs<T["ClientReturns"]>,
+			InferArgs<T["ServerReturns"]>
+	  >
 	: ServerAsyncFunction<unknown[], InferArgs<T["ClientArguments"]>, InferArgs<T["ClientReturns"]>>;
 
 export type InferClientRemote<T> = T extends FunctionDeclarationLike

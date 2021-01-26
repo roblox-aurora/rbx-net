@@ -18,6 +18,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 */
 	Get<K extends keyof T & string>(k: K): InferClientRemote<T[K]> {
 		const item = this.decl[k] as FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
+		assert(item && item.Type, `'${k}' is not defined`);
 		if (item.Type === "Function") {
 			return new ClientFunction(k) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
