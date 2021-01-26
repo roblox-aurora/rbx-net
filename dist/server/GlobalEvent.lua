@@ -3,9 +3,15 @@ local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local isLuaTable = _0.isLuaTable
 local ServerTickFunctions = _0.ServerTickFunctions
+-- const MessagingService = game.GetService("MessagingService");
 local MessagingService = TS.import(script, script.Parent.Parent, "internal", "MessagingService")
 local Players = game:GetService("Players")
 local IS_STUDIO = game:GetService("RunService"):IsStudio()
+--[[
+	*
+	* Checks if a value matches that of a subscription message
+	* @param value The value
+]]
 local function isSubscriptionMessage(value)
 	if isLuaTable(value) then
 		local hasData = value.Data ~= nil
@@ -47,6 +53,20 @@ local function processMessageQueue()
 		end
 	end
 end
+--[[
+	*
+	* Message Size: 1kB
+	* MessagesPerMin: 150 + 60 * NUMPLAYERS
+	* MessagesPerTopicMin: 30M
+	* MessagesPerUniversePerMin: 30M
+	* SubsPerServer: 5 + 2 * numPlayers
+	* SubsPerUniverse: 10K
+]]
+--[[
+	*
+	* An event that works across all servers
+	* @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
+]]
 do
 	NetGlobalEvent = setmetatable({}, {
 		__tostring = function()
@@ -88,6 +108,7 @@ do
 			-- ▲ Array.push ▲
 		else
 			globalEventMessageCounter += 1
+			-- Since this yields
 			MessagingService:PublishAsync(self.name, message)
 		end
 	end

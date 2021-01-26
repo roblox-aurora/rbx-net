@@ -15,6 +15,7 @@ do
 		local _1, _2 = TS.try(function()
 			if #middlewares > 0 then
 				local callbackFn = callback
+				-- Run through each middleware
 				for _, middleware in ipairs(middlewares) do
 					callbackFn = middleware(callbackFn, self)
 				end

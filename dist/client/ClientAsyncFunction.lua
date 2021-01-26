@@ -8,6 +8,11 @@ local getRemoteOrThrow = _1.getRemoteOrThrow
 local IS_SERVER = _1.IS_SERVER
 local waitForRemote = _1.waitForRemote
 local HttpService = game:GetService("HttpService")
+--[[
+	*
+	* An event that behaves like a function
+	* @rbxts client
+]]
 local ClientAsyncFunction
 do
 	ClientAsyncFunction = setmetatable({}, {

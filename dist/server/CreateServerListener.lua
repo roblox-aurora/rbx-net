@@ -9,6 +9,10 @@ local function isMiddlewareArgument(args)
 	end
 	return _0
 end
+--[[
+	*
+	* Creates a server listening event
+]]
 local function createServerListener(id, ...)
 	local args = { ... }
 	local event

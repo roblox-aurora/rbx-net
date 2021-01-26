@@ -8,7 +8,9 @@ local rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} vi
 local NetConfig = {}
 do
 	local _0 = NetConfig
-	_0.DebugEnabled = false
+	-- * @internal
+	_0.DebugEnabled = "production" == "development"
+	-- * @rbxts client
 	local function SetClientConfiguration(key, value)
 		local _1 = IS_CLIENT
 		assert(_1, "Use SetConfiguration on the server!")
@@ -17,6 +19,7 @@ do
 		end
 	end
 	_0.SetClientConfiguration = SetClientConfiguration
+	-- * @rbxts server
 	local function SetConfiguration(key, value)
 		local _1 = IS_SERVER
 		assert(_1, "Cannot set configuration on client!")
@@ -45,6 +48,7 @@ do
 		end
 	end
 	_0.GetConfiguration = GetConfiguration
+	-- * @internal
 	local function DebugWarn(...)
 		local message = { ... }
 		if _0.DebugEnabled then
@@ -52,6 +56,7 @@ do
 		end
 	end
 	_0.DebugWarn = DebugWarn
+	-- * @internal
 	local function DebugLog(...)
 		local message = { ... }
 		if _0.DebugEnabled then

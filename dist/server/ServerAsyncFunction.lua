@@ -23,6 +23,10 @@ local function isEventArgs(value)
 	end
 	return _4
 end
+--[[
+	*
+	* An asynchronous function for two way communication between the client and server
+]]
 local ServerAsyncFunction
 do
 	local super = MiddlewareEvent

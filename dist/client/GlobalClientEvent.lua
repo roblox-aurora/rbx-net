@@ -2,6 +2,10 @@
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local getGlobalRemoteId = TS.import(script, script.Parent.Parent, "internal").getGlobalRemote
 local ClientEvent = TS.import(script, script.Parent, "ClientEvent").default
+--[[
+	*
+	* Client counter-part to GlobalServerEvent
+]]
 local CrossServerEvent
 do
 	CrossServerEvent = setmetatable({}, {

@@ -10,6 +10,15 @@ local throttles = {}
 local function rateLimitWarningHandler(error)
 	warn("[rbx-net]", error.Message)
 end
+--[[
+	*
+	* Creates a throttle middleware for this event
+	*
+	* Will limit the amount of requests a player can make to this event
+	*
+	* _NOTE: Must be used before **other** middlewares as it's not a type altering middleware_
+	* @param maxRequestsPerMinute The maximum requests per minute
+]]
 local function createRateLimiter(options)
 	local maxRequestsPerMinute = options.MaxRequestsPerMinute
 	local _1 = options.ErrorHandler

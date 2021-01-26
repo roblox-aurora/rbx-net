@@ -17,6 +17,10 @@ local function isTargetedSubscriptionMessage(value)
 	end
 	return false
 end
+--[[
+	*
+	* Similar to a ServerEvent, but works across all servers.
+]]
 local CrossServerEvent
 do
 	CrossServerEvent = setmetatable({}, {
@@ -109,6 +113,7 @@ do
 	function CrossServerEvent:SendToPlayer(userId, ...)
 		local args = { ... }
 		local player = Players:GetPlayerByUserId(userId)
+		-- If the player exists in this instance, just send it straight to them.
 		if player then
 			self.instance:SendToPlayer(player, unpack(args))
 		else
@@ -127,6 +132,7 @@ do
 	end
 	function CrossServerEvent:SendToPlayers(userIds, ...)
 		local args = { ... }
+		-- Check to see if any of these users are in this server first, and handle accordingly.
 		for _, targetId in ipairs(userIds) do
 			local player = Players:GetPlayerByUserId(targetId)
 			if player then

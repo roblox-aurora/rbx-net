@@ -20,6 +20,7 @@ do
 			assert(_4, _6)
 			if #middlewares > 0 then
 				local callbackFn = callback
+				-- Run through each middleware
 				for _, middleware in ipairs(middlewares) do
 					callbackFn = middleware(callbackFn, self)
 				end

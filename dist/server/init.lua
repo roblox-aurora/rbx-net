@@ -8,16 +8,63 @@ local CrossServerEvent = TS.import(script, script, "GlobalServerEvent").default
 local CreateListener = TS.import(script, script, "CreateServerListener").default
 local Function = TS.import(script, script, "ServerFunction").default
 local config = TS.import(script, script.Parent, "configuration")
+--[[
+	*
+	* Creates an event on the server
+	*
+	* Programmatically equivalent to `new Net.Server.Event(name, middleware)`
+	*
+	* @param name The name of the event
+	* @param middleware The middleware attached to this event
+]]
 local function CreateEvent(name, middleware)
 	return ServerEvent.new(name, middleware)
 end
+--[[
+	*
+	* Creates an event on the server
+	* Same as `CreateEvent`, but type-wise removes `Connect`.
+]]
 local CreateSender = CreateEvent
+--[[
+	*
+	* Creates a function on the server
+	*
+	* Programmatically equivalent to `new Net.Server.AsyncFunction(name, middleware)`
+	*
+	* @param name The name of the function
+	* @param middleware The middleware attached to this function
+]]
 local function CreateAsyncFunction(name, middleware)
 	if middleware == nil then
 		middleware = {}
 	end
 	return AsyncFunction.new(name, middleware)
 end
+--[[
+	*
+	* An event declaration
+]]
+--[[
+	*
+	* Creates multiple server events by name, or declaration
+	*
+	* An example of a simple list of events is:
+	*
+	* ```ts
+	* const [eventA, eventB] = Net.Server.CreateEvents("A", "B");
+	* ```
+	* Both `eventA` and `eventB` will be generic server events. If you want to include middleware, you can do:
+	*
+	* ```ts
+	* const [eventA, middlewareEventB] = Net.Server.CreateEvents(
+	* 	"A",
+	* 	["B", createTypeChecker(t.string)]
+	* )
+	* ```
+	* In this instance, it would be like doing `const middlewareEventB = new Net.Server.Event("B", [createTypeChecker(t.string)])`
+	* Event A would still take any arguments, and Event B would take specific arguments (in this case, `string`)
+]]
 local function CreateEvents(...)
 	local evts = { ... }
 	local evtMap = {}
@@ -42,7 +89,15 @@ local function CreateEvents(...)
 	end
 	return unpack(evtMap)
 end
+--[[
+	*
+	* Set a configuration value for the server
+]]
 local SetConfiguration = config.SetConfiguration
+--[[
+	*
+	* Get a configuration value for the server
+]]
 local GetConfiguration = config.GetConfiguration
 return {
 	CreateEvent = CreateEvent,
