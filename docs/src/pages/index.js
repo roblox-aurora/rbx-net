@@ -10,6 +10,14 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import Code from "@site/src/components/Code";
 
+const LATEST_URL = "/docs/2.0";
+/**
+ * @param {string} url URL
+ */
+function getRelative(url) {
+  return `${LATEST_URL}/${url}`;
+}
+
 const features = [
   {
     title: "Contextual Networking API",
@@ -34,10 +42,11 @@ const features = [
     description: (
       <>
         RbxNet comes with built-in useful middleware such as{" "}
-        <Link to="/docs/2.0/middleware/types">RuntimeTypeCheck</Link> and{" "}
-        <Link to="/docs/2.0/middleware/rate-limit">RateLimit</Link>, but you can
-        also roll your{" "}
-        <Link to="/docs/2.0/middleware/custom">own custom middleware</Link>.
+        <Link to={getRelative("middleware/types")}>TypeChecking</Link> and{" "}
+        <Link to={getRelative("middleware/rate-limit")}>RateLimit</Link>, but
+        you can also roll your{" "}
+        <Link to={getRelative("middleware/custom")}>own custom middleware</Link>
+        .
       </>
     ),
   },
@@ -47,9 +56,10 @@ const features = [
     description: (
       <>
         Take advantage of the declarative{" "}
-        <Link to="/docs/2.0/definitions">Definitions API</Link>, which allows
-        you to define your remote instances in one place, and use anywhere else.
-        Types generated for you.
+        <Link to={getRelative("definitions")}>Definitions API</Link>, which
+        allows you to define your remote instances in one place, and use from
+        both the server and client.
+        <br />
       </>
     ),
   },
@@ -106,7 +116,7 @@ function Home() {
   const { siteConfig = {} } = context;
   return (
     <Layout
-      title={`${siteConfig.title}`}
+      // title={`${siteConfig.title}`}
       description="Description will go into a meta tag in <head />"
     >
       <header className={clsx("hero", styles.heroBanner)}>
@@ -128,11 +138,16 @@ function Home() {
         </div>
       </header>
       <main>
+        <section style={{marginTop: "10px"}}>
+          <div className="container">
+            <h3>Test</h3>
+          </div>
+        </section>
         <section className={styles.codeExample}>
           <div className="container">
             <div className="row row--no-gutters">
               <div className="col col--2" />
-              <div className="col col--16">
+              <div className="col col--17">
                 <Tabs
                   defaultValue="defs"
                   groupId="code"

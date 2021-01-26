@@ -1,6 +1,6 @@
 module.exports = {
   title: "Roblox Networking",
-  tagline: "Networking Library for Roblox",
+  tagline: "Advanced multi-language networking library for Roblox.",
   url: "https://docs.vorlias.com/rbx-net",
   baseUrl: "/rbx-net/",
   onBrokenLinks: "throw",

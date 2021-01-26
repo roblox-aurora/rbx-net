@@ -2,8 +2,12 @@
 id: install-luau
 title: Install for Luau
 ---
+Depending on your stack for Roblox, you might want to either use the [Rojo](#via-rojo) step or the [Studio](#via-studio) step. If you don't know what _Rojo_ is, use the Studio step.
 
-## Via Kayak
+## Via Rojo
+The following steps require knowledge and use of [rojo](https://rojo.space). If you're not using rojo, look at [studio](#via-studio) instructions.
+
+### Using Kayak
 Ensure you have  [installed](https://emozley.uk/kayak/guide/installation/) kayak and followed the [packages](https://emozley.uk/kayak/guide/packages/) guide for setting up your project's `rotriever.toml` if you haven't already.
 
 
@@ -22,7 +26,7 @@ kayak pull
 
 Then you should be able to use it via the `packages` directory. Your `packages` directory should be included in your rojo project. More information on that can be seen [here](https://emozley.uk/kayak/guide/dependencies/).
 
-## Via PowerShell
+### Using PowerShell
 
 Enter into powershell: 
 ```powershell
@@ -57,7 +61,7 @@ And now you can use rbx-net like so:
 local Net = require(game:GetService("ReplicatedStorage").Net)
 ```
 
-## Via Git submodules
+### Using Git submodules
 :::caution
 This method, while works... isn't the nicest way to do it.
 :::
@@ -97,7 +101,6 @@ Once you have the module installed, you can then use it in code by importing it 
 import Net from "@rbxts/net";
 ``` -->
 
-## Via Releases
-Releases can be found [here](https://github.com/roblox-aurora/rbx-net/releases)
-
-Each release contains a `.rbxmx` model file, which you can drag into roblox studio.
+## Via Studio
+### RBXMX model file
+Releases can be found [here](https://github.com/roblox-aurora/rbx-net/releases). Download the appropriate `.rbxmx` file under the `Assets` dropdown, then drag it into studio. Ensure the library is under `ReplicatedStorage` so it can be used by all your code.

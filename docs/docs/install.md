@@ -2,6 +2,7 @@
 id: install
 title: Install for TypeScript
 ---
+The TypeScript version of RbxNet requires knowledge and usage of [roblox-ts](https://roblox-ts.com).
 
 ## From NPM
 RbxNet is available on NPM. To install it to your roblox-ts project, type the following in command line/terminal
