@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[36],{107:function(e){e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"v2.0.0-alpha.7","permalink":"/rbx-net/blog/update7"},{"title":"v2.0.0-alpha.6","permalink":"/rbx-net/blog/update6"}]}')}}]);
