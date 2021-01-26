@@ -2,9 +2,10 @@ import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import {
-	DeclarationLike,
+	AsyncFunctionDeclarationLike,
 	DeclarationsOf,
 	EventDeclarationLike,
+	InferServerCallback,
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
@@ -15,6 +16,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	/**
 	 * Create a receive-only event for the server.
 	 *
+	 * @internal
+	 *
 	 * @param name The name
 	 * @param fn The callback
 	 *
@@ -23,7 +26,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.CreateServer(name).Connect(fn)
 	 * ```
 	 */
-	ConnectEvent<K extends keyof DeclarationsOf<T, EventDeclarationLike> & string>(
+	OnEvent<K extends keyof DeclarationsOf<T, EventDeclarationLike> & string>(
 		name: K,
 		fn: InferServerConnect<Extract<T[K], EventDeclarationLike>>,
 	) {
@@ -58,5 +61,14 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		}
 
 		throw `Invalid Type`;
+	}
+
+	/** @internal */
+	OnFunction<K extends keyof DeclarationsOf<T, AsyncFunctionDeclarationLike> & string>(
+		name: K,
+		fn: InferServerCallback<Extract<T[K], AsyncFunctionDeclarationLike>>,
+	) {
+		const result = this.Create(name) as InferServerRemote<AsyncFunctionDeclarationLike>;
+		result.SetCallback(fn);
 	}
 }

@@ -2,9 +2,11 @@ import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import {
+	AsyncFunctionDeclarationLike,
 	DeclarationLike,
 	DeclarationsOf,
 	EventDeclarationLike,
+	InferClientCallback,
 	InferClientConnect,
 	InferClientRemote,
 	RemoteDeclarations,
@@ -32,6 +34,8 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	/**
 	 * Create a receive-only event for the client.
 	 *
+	 * @internal
+	 *
 	 * @param name The name
 	 * @param fn The callback
 	 *
@@ -40,11 +44,20 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.GetClient(name).Connect(fn)
 	 * ```
 	 */
-	ConnectEvent<K extends keyof DeclarationsOf<T, EventDeclarationLike> & string>(
+	OnEvent<K extends keyof DeclarationsOf<T, EventDeclarationLike> & string>(
 		name: K,
 		fn: InferClientConnect<Extract<T[K], EventDeclarationLike>>,
 	) {
 		const result = this.Get(name) as InferClientRemote<EventDeclarationLike>;
 		result.Connect(fn);
+	}
+
+	/** @internal */
+	OnFunction<K extends keyof DeclarationsOf<T, AsyncFunctionDeclarationLike> & string>(
+		name: K,
+		fn: InferClientCallback<Extract<T[K], AsyncFunctionDeclarationLike>>,
+	) {
+		const result = this.Get(name) as InferClientRemote<AsyncFunctionDeclarationLike>;
+		result.SetCallback(fn);
 	}
 }
