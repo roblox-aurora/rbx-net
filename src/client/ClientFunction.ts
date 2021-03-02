@@ -17,6 +17,18 @@ export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, Ser
 		});
 	}
 
+	/**
+	 * Will call the server synchronously
+	 * @param args The call arguments
+	 */
+	public CallServer(...args: CallArgs): ServerReturnType {
+		return this.instance.InvokeServer(...args);
+	}
+
+	/**
+	 * Will call the server asynchronously
+	 * @param args The call arguments
+	 */
 	public async CallServerAsync(...args: CallArgs): Promise<ServerReturnType> {
 		return Promise.defer<ServerReturnType>((resolve) => {
 			const result = this.instance.InvokeServer(...args) as ServerReturnType;
