@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local isMixed = TS.import(script, script.Parent, "tables").isMixed
 local Workspace = game:GetService("Workspace")

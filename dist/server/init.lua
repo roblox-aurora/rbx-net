@@ -1,10 +1,10 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.TS.RuntimeLib)
 local AsyncFunction = TS.import(script, script, "ServerAsyncFunction").default
 local _0 = TS.import(script, script, "ServerEvent")
 local ServerEvent = _0.default
 local Event = _0.default
-local CrossServerEvent = TS.import(script, script, "GlobalServerEvent").default
+local GameMessagingEvent = TS.import(script, script, "ServerMessagingEvent").default
 local CreateListener = TS.import(script, script, "CreateServerListener").default
 local Function = TS.import(script, script, "ServerFunction").default
 local config = TS.import(script, script.Parent, "configuration")
@@ -106,7 +106,7 @@ return {
 	Event = Event,
 	AsyncFunction = AsyncFunction,
 	Function = Function,
-	CrossServerEvent = CrossServerEvent,
+	GameMessagingEvent = GameMessagingEvent,
 	CreateListener = CreateListener,
 	CreateSender = CreateSender,
 	SetConfiguration = SetConfiguration,

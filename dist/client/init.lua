@@ -1,8 +1,8 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.TS.RuntimeLib)
 local AsyncFunction = TS.import(script, script, "ClientAsyncFunction").default
 local Event = TS.import(script, script, "ClientEvent").default
-local CrossServerEvent = TS.import(script, script, "GlobalClientEvent").default
+local GameMessagingEvent = TS.import(script, script, "ClientMessagingEvent").default
 local config = TS.import(script, script.Parent, "configuration")
 local ClientEvent = TS.import(script, script, "ClientEvent").default
 local ClientAsyncFunction = TS.import(script, script, "ClientAsyncFunction").default
@@ -36,6 +36,6 @@ return {
 	GetConfiguration = GetConfiguration,
 	Event = Event,
 	AsyncFunction = AsyncFunction,
-	CrossServerEvent = CrossServerEvent,
+	GameMessagingEvent = GameMessagingEvent,
 	Function = Function,
 }

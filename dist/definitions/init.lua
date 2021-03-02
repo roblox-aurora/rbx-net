@@ -1,8 +1,9 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.TS.RuntimeLib)
 -- eslint-disable @typescript-eslint/no-explicit-any
-local _NetDefinitionBuilders = TS.import(script, script, "CreateDefinitions")._NetDefinitionBuilders
-local oneOf = TS.import(script, script.Parent, "helpers", "validator").oneOf
+local oneOf = TS.import(script, script.Parent, "internal", "validator").oneOf
+local ServerDefinitionBuilder = TS.import(script, script, "ServerDefinitionBuilder").ServerDefinitionBuilder
+local ClientDefinitionBuilder = TS.import(script, script, "ClientDefinitionBuilder").ClientDefinitionBuilder
 local declarationType = oneOf("Event", "Function", "AsyncFunction")
 local NetDefinitions = {}
 do
@@ -22,15 +23,16 @@ do
 	--[[
 		*
 		* Creates definitions for Remote instances that can be used on both the client and server.
-		*
-		*
-		*
 		* @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
 		* @param declarations
 	]]
 	local function Create(declarations)
 		validateDeclarations(declarations)
-		return _NetDefinitionBuilders.new(declarations)
+		local _1 = {
+			Server = ServerDefinitionBuilder.new(declarations),
+			Client = ClientDefinitionBuilder.new(declarations),
+		}
+		return _1
 	end
 	_0.Create = Create
 	--[[

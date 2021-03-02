@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local getRemoteOrThrow = _0.getRemoteOrThrow
@@ -27,6 +27,10 @@ do
 			TS.await(waitForRemote("RemoteFunction", name, 10))
 			resolve(ClientFunction.new(name))
 		end))
+	end
+	function ClientFunction:CallServer(...)
+		local args = { ... }
+		return self.instance:InvokeServer(unpack(args))
 	end
 	ClientFunction.CallServerAsync = TS.async(function(self, ...)
 		local args = { ... }

@@ -19,7 +19,8 @@ end
 function MockMessagingService:SubscribeAsync(topicName, callback)
 	local topic = topics[topicName]
 	if not topic then
-		topic = Instance.new("BindableEvent", script)
+		topic = Instance.new("BindableEvent")
+		topic.Parent = script
 		topic.Name = topicName
 		topics[topicName] = topic
 	end

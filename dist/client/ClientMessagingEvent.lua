@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local getGlobalRemoteId = TS.import(script, script.Parent.Parent, "internal").getGlobalRemote
 local ClientEvent = TS.import(script, script.Parent, "ClientEvent").default
@@ -6,26 +6,26 @@ local ClientEvent = TS.import(script, script.Parent, "ClientEvent").default
 	*
 	* Client counter-part to GlobalServerEvent
 ]]
-local CrossServerEvent
+local ClientMessagingEvent
 do
-	CrossServerEvent = setmetatable({}, {
+	ClientMessagingEvent = setmetatable({}, {
 		__tostring = function()
-			return "CrossServerEvent"
+			return "ClientMessagingEvent"
 		end,
 	})
-	CrossServerEvent.__index = CrossServerEvent
-	function CrossServerEvent.new(...)
-		local self = setmetatable({}, CrossServerEvent)
+	ClientMessagingEvent.__index = ClientMessagingEvent
+	function ClientMessagingEvent.new(...)
+		local self = setmetatable({}, ClientMessagingEvent)
 		self:constructor(...)
 		return self
 	end
-	function CrossServerEvent:constructor(name)
+	function ClientMessagingEvent:constructor(name)
 		self.instance = ClientEvent.new(getGlobalRemoteId(name))
 	end
-	function CrossServerEvent:Connect(callback)
+	function ClientMessagingEvent:Connect(callback)
 		self.instance:Connect(callback)
 	end
 end
 return {
-	default = CrossServerEvent,
+	default = ClientMessagingEvent,
 }

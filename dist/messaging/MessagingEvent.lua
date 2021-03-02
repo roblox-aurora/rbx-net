@@ -1,10 +1,10 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local isLuaTable = _0.isLuaTable
 local ServerTickFunctions = _0.ServerTickFunctions
 -- const MessagingService = game.GetService("MessagingService");
-local MessagingService = TS.import(script, script.Parent.Parent, "internal", "MessagingService")
+local MessagingService = TS.import(script, script.Parent, "MessagingService")
 local Players = game:GetService("Players")
 local IS_STUDIO = game:GetService("RunService"):IsStudio()
 --[[
@@ -32,7 +32,7 @@ local globalMessageQueue = {}
 local lastQueueTick = 0
 local globalEventMessageCounter = 0
 local globalSubscriptionCounter = 0
-local NetGlobalEvent
+local MessagingEvent
 local function processMessageQueue()
 	if tick() >= lastQueueTick + 60 then
 		globalEventMessageCounter = 0
@@ -48,7 +48,7 @@ local function processMessageQueue()
 			MessagingService:PublishAsync(message.Name, message.Data)
 			globalEventMessageCounter += 1
 		end
-		if globalEventMessageCounter >= NetGlobalEvent:GetMessageLimit() then
+		if globalEventMessageCounter >= MessagingEvent:GetMessageLimit() then
 			warn("[rbx-net] Too many messages are being sent, any further messages will be queued!")
 		end
 	end
@@ -68,40 +68,34 @@ end
 	* @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
 ]]
 do
-	NetGlobalEvent = setmetatable({}, {
+	MessagingEvent = setmetatable({}, {
 		__tostring = function()
-			return "NetGlobalEvent"
+			return "MessagingEvent"
 		end,
 	})
-	NetGlobalEvent.__index = NetGlobalEvent
-	function NetGlobalEvent.new(...)
-		local self = setmetatable({}, NetGlobalEvent)
+	MessagingEvent.__index = MessagingEvent
+	function MessagingEvent.new(...)
+		local self = setmetatable({}, MessagingEvent)
 		self:constructor(...)
 		return self
 	end
-	function NetGlobalEvent:constructor(name)
+	function MessagingEvent:constructor(name)
 		self.name = name
 	end
-	function NetGlobalEvent:GetMessageLimit()
+	function MessagingEvent:GetMessageLimit()
 		return 150 + 60 * #Players:GetPlayers()
 	end
-	function NetGlobalEvent:GetSubscriptionLimit()
+	function MessagingEvent:GetSubscriptionLimit()
 		return 5 + 2 * #Players:GetPlayers()
 	end
-	function NetGlobalEvent:SendToServer(jobId, message)
-		self:SendToAllServers({
-			jobId = jobId,
-			message = message,
-		})
-	end
-	function NetGlobalEvent:SendToAllServers(message)
-		local limit = NetGlobalEvent:GetMessageLimit()
+	function MessagingEvent:sendToAllServersOrQueue(data)
+		local limit = MessagingEvent:GetMessageLimit()
 		if globalEventMessageCounter >= limit then
 			warn("[rbx-net] Exceeded message limit of " .. tostring(limit) .. ", adding to queue...")
 			local _1 = globalMessageQueue
 			local _2 = {
 				Name = self.name,
-				Data = message,
+				Data = data,
 			}
 			-- ▼ Array.push ▼
 			_1[#_1 + 1] = _2
@@ -109,11 +103,20 @@ do
 		else
 			globalEventMessageCounter += 1
 			-- Since this yields
-			MessagingService:PublishAsync(self.name, message)
+			MessagingService:PublishAsync(self.name, data)
 		end
 	end
-	function NetGlobalEvent:Connect(handler)
-		local limit = NetGlobalEvent:GetSubscriptionLimit()
+	function MessagingEvent:SendToServer(jobId, message)
+		self:sendToAllServersOrQueue({
+			jobId = jobId,
+			message = message,
+		})
+	end
+	function MessagingEvent:SendToAllServers(message)
+		self:sendToAllServersOrQueue(message)
+	end
+	function MessagingEvent:Connect(handler)
+		local limit = MessagingEvent:GetSubscriptionLimit()
 		if globalSubscriptionCounter >= limit then
 			error("[rbx-net] Exceeded Subscription limit of " .. tostring(limit) .. "!")
 		end
@@ -140,5 +143,5 @@ _1[#_1 + 1] = _2
 -- ▲ Array.push ▲
 return {
 	isSubscriptionMessage = isSubscriptionMessage,
-	default = NetGlobalEvent,
+	default = MessagingEvent,
 }

@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local ClientAsyncFunction = TS.import(script, script.Parent.Parent, "client", "ClientAsyncFunction").default
 local ClientEvent = TS.import(script, script.Parent.Parent, "client", "ClientEvent").default
@@ -16,11 +16,14 @@ do
 		self:constructor(...)
 		return self
 	end
-	function ClientDefinitionBuilder:constructor(decl)
-		self.decl = decl
+	function ClientDefinitionBuilder:constructor(declarations)
+		self.declarations = declarations
 	end
 	function ClientDefinitionBuilder:Get(k)
-		local item = self.decl[k]
+		local item = self.declarations[k]
+		local _0 = item and item.Type
+		local _1 = "'" .. k .. "' is not defined in this definition."
+		assert(_0, _1)
 		if item.Type == "Function" then
 			return ClientFunction.new(k)
 		elseif item.Type == "AsyncFunction" then
@@ -30,9 +33,13 @@ do
 		end
 		error("Invalid Type")
 	end
-	function ClientDefinitionBuilder:ConnectEvent(name, fn)
+	function ClientDefinitionBuilder:OnEvent(name, fn)
 		local result = self:Get(name)
 		result:Connect(fn)
+	end
+	function ClientDefinitionBuilder:OnFunction(name, fn)
+		local result = self:Get(name)
+		result:SetCallback(fn)
 	end
 end
 return {

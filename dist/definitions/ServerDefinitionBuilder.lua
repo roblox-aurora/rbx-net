@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local ServerAsyncFunction = TS.import(script, script.Parent.Parent, "server", "ServerAsyncFunction").default
 local ServerEvent = TS.import(script, script.Parent.Parent, "server", "ServerEvent").default
@@ -16,15 +16,18 @@ do
 		self:constructor(...)
 		return self
 	end
-	function ServerDefinitionBuilder:constructor(decl)
-		self.decl = decl
+	function ServerDefinitionBuilder:constructor(declarations)
+		self.declarations = declarations
 	end
-	function ServerDefinitionBuilder:ConnectEvent(name, fn)
+	function ServerDefinitionBuilder:OnEvent(name, fn)
 		local result = self:Create(name)
 		result:Connect(fn)
 	end
 	function ServerDefinitionBuilder:Create(k)
-		local item = self.decl[k]
+		local item = self.declarations[k]
+		local _0 = item and item.Type
+		local _1 = "'" .. k .. "' is not defined in this definition."
+		assert(_0, _1)
 		if item.Type == "Function" then
 			if item.ServerMiddleware then
 				return ServerFunction.new(k, item.ServerMiddleware)
@@ -45,6 +48,10 @@ do
 			end
 		end
 		error("Invalid Type")
+	end
+	function ServerDefinitionBuilder:OnFunction(name, fn)
+		local result = self:Create(name)
+		result:SetCallback(fn)
 	end
 end
 return {

@@ -1,7 +1,7 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
-local _0 = TS.import(script, script.Parent, "GlobalEvent")
-local NetGlobalEvent = _0.default
+local _0 = TS.import(script, script.Parent.Parent, "messaging", "MessagingEvent")
+local MessagingEvent = _0.default
 local isSubscriptionMessage = _0.isSubscriptionMessage
 local _1 = TS.import(script, script.Parent.Parent, "internal")
 local getGlobalRemote = _1.getGlobalRemote
@@ -21,33 +21,33 @@ end
 	*
 	* Similar to a ServerEvent, but works across all servers.
 ]]
-local CrossServerEvent
+local ServerMessagingEvent
 do
-	CrossServerEvent = setmetatable({}, {
+	ServerMessagingEvent = setmetatable({}, {
 		__tostring = function()
-			return "CrossServerEvent"
+			return "ServerMessagingEvent"
 		end,
 	})
-	CrossServerEvent.__index = CrossServerEvent
-	function CrossServerEvent.new(...)
-		local self = setmetatable({}, CrossServerEvent)
+	ServerMessagingEvent.__index = ServerMessagingEvent
+	function ServerMessagingEvent.new(...)
+		local self = setmetatable({}, ServerMessagingEvent)
 		self:constructor(...)
 		return self
 	end
-	function CrossServerEvent:constructor(name)
+	function ServerMessagingEvent:constructor(name)
 		self.instance = ServerEvent.new(getGlobalRemote(name))
-		self.event = NetGlobalEvent.new(name)
+		self.event = MessagingEvent.new(name)
 		local _2 = not IS_CLIENT
 		assert(_2, "Cannot create a Net.GlobalServerEvent on the Client!")
 		self.eventHandler = self.event:Connect(function(message)
 			if isTargetedSubscriptionMessage(message) then
 				self:recievedMessage(message.Data)
 			else
-				warn("[rbx-net] Recieved malformed message for GlobalServerEvent: " .. name)
+				warn("[rbx-net] Recieved malformed message for ServerGameEvent: " .. name)
 			end
 		end)
 	end
-	function CrossServerEvent:getPlayersMatchingId(matching)
+	function ServerMessagingEvent:getPlayersMatchingId(matching)
 		local _2 = matching
 		if type(_2) == "number" then
 			return Players:GetPlayerByUserId(matching)
@@ -66,7 +66,7 @@ do
 			return players
 		end
 	end
-	function CrossServerEvent:recievedMessage(message)
+	function ServerMessagingEvent:recievedMessage(message)
 		if message.TargetIds then
 			local players = self:getPlayersMatchingId(message.TargetIds)
 			if players then
@@ -81,10 +81,10 @@ do
 			self.instance:SendToAllPlayers(unpack(message.InnerData))
 		end
 	end
-	function CrossServerEvent:Disconnect()
+	function ServerMessagingEvent:Disconnect()
 		self.eventHandler:Disconnect()
 	end
-	function CrossServerEvent:SendToAllServers(...)
+	function ServerMessagingEvent:SendToAllServers(...)
 		local args = { ... }
 		local _2 = self.event
 		local _3 = {}
@@ -97,7 +97,7 @@ do
 		_3[_4] = _5
 		_2:SendToAllServers(_3)
 	end
-	function CrossServerEvent:SendToServer(jobId, ...)
+	function ServerMessagingEvent:SendToServer(jobId, ...)
 		local args = { ... }
 		local _2 = self.event
 		local _3 = {}
@@ -110,7 +110,7 @@ do
 		_3[_4] = _5
 		_2:SendToServer(jobId, _3)
 	end
-	function CrossServerEvent:SendToPlayer(userId, ...)
+	function ServerMessagingEvent:SendToPlayer(userId, ...)
 		local args = { ... }
 		local player = Players:GetPlayerByUserId(userId)
 		-- If the player exists in this instance, just send it straight to them.
@@ -130,7 +130,7 @@ do
 			_2:SendToAllServers(_3)
 		end
 	end
-	function CrossServerEvent:SendToPlayers(userIds, ...)
+	function ServerMessagingEvent:SendToPlayers(userIds, ...)
 		local args = { ... }
 		-- Check to see if any of these users are in this server first, and handle accordingly.
 		for _, targetId in ipairs(userIds) do
@@ -158,5 +158,5 @@ do
 	end
 end
 return {
-	default = CrossServerEvent,
+	default = ServerMessagingEvent,
 }

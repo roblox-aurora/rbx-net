@@ -1,10 +1,10 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.TS.RuntimeLib)
 local NetServerContext = TS.import(script, script, "server")
 local NetClientContext = TS.import(script, script, "client")
 local NetDefinitions = TS.import(script, script, "definitions").default
 local NetMiddlewares = TS.import(script, script, "middleware").NetMiddlewares
-local NetSerialization = TS.import(script, script, "serializer")
+local NetSerialization = TS.import(script, script, "serialization")
 local BUILD_TYPE = "Luau"
 --[[
 	*
@@ -37,7 +37,7 @@ do
 		*
 		* The version of RbxNet
 	]]
-	local VERSION = "2.0.0-rc.1" .. " (" .. ("production" == "development" and "DEV " .. BUILD_TYPE or BUILD_TYPE) .. ")"
+	local VERSION = "2.0.0" .. " (" .. ("production" == "development" and "DEV " .. BUILD_TYPE or BUILD_TYPE) .. ")"
 	_0.VERSION = VERSION
 	--[[
 		*

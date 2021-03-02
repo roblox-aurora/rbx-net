@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.15
+-- Compiled with roblox-ts v1.0.0-beta.16
 local TS = require(script.Parent.TS.RuntimeLib)
 local HttpService = game:GetService("HttpService")
 local runService = game:GetService("RunService")
@@ -54,7 +54,8 @@ local function errorft(message, vars)
 		end
 		return _2
 	end
-	message = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
+	local _2 = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
+	message = _2[1]
 	error(message, 2)
 end
 local function format(message, vars)
@@ -68,7 +69,8 @@ local function format(message, vars)
 		end
 		return _2
 	end
-	message = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
+	local _2 = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
+	message = _2[1]
 	return message
 end
 -- * @internal
