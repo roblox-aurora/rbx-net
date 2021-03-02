@@ -32,6 +32,24 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
+	 * Waits for the specified remote
+	 * @param k The remote id
+	 */
+	async WaitFor<K extends keyof T & string>(k: K): Promise<InferClientRemote<T[K]>> {
+		const item = this.declarations[k];
+		assert(item && item.Type, `'${k}' is not defined in this definition.`);
+		if (item.Type === "Function") {
+			return ClientFunction.Wait(k) as Promise<InferClientRemote<T[K]>>;
+		} else if (item.Type === "Event") {
+			return ClientEvent.Wait(k) as Promise<InferClientRemote<T[K]>>;
+		} else if (item.Type === "AsyncFunction") {
+			return ClientAsyncFunction.Wait(k) as Promise<InferClientRemote<T[K]>>;
+		}
+
+		throw `Invalid Type`;
+	}
+
+	/**
 	 * Create a receive-only event for the client.
 	 *
 	 * @internal
