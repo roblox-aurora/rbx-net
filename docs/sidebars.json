@@ -25,6 +25,7 @@
 			"items": [
 				"middleware/ratelimit",
 				"middleware/typecheck",
+				"middleware/logging",
 				"middleware/custom"
 			]
 		},

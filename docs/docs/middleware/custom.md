@@ -1,6 +1,6 @@
 ---
 id: custom
 title: Writing custom middleware
-sidebar_label: Writing your own Middleware*
+sidebar_label: Write your own
 slug: /middleware/custom
 ---
