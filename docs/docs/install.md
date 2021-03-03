@@ -8,7 +8,7 @@ The TypeScript version of RbxNet requires knowledge and usage of [roblox-ts](htt
 RbxNet is available on NPM. To install it to your roblox-ts project, type the following in command line/terminal
 
 ```bash
-npm install @rbxts/net@beta
+npm install @rbxts/net
 ```
 Once you have the module installed, you can then use it in code by importing it as such:
 ```ts
