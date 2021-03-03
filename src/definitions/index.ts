@@ -8,6 +8,7 @@ import {
 	EventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
+	DeclarationGroup,
 } from "./Types";
 import { oneOf } from "../internal/validator";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
@@ -37,6 +38,16 @@ namespace NetDefinitions {
 			Server: new ServerDefinitionBuilder<T>(declarations),
 			Client: new ClientDefinitionBuilder<T>(declarations),
 		});
+	}
+
+	/**
+	 * @internal
+	 */
+	export function Group<T extends RemoteDeclarations>(declarations: T) {
+		return {
+			Type: "Group",
+			Definitions: declarations,
+		} as DeclarationGroup<T>;
 	}
 
 	/**

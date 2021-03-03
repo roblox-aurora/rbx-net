@@ -27,9 +27,11 @@ Net.Server.CreateListener(
 	},
 );
 
-Remotes.Server.ConnectEvent("TestDefinition", (message: string) => {
+Remotes.Server.OnEvent("TestDefinition", (message: string) => {
 	print("Server Recieved", message);
 });
+
+Remotes.Server.GetGroup("SubGroup").Create("TestFun3");
 
 new Net.Server.Event("test");
 

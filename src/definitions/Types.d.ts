@@ -42,11 +42,21 @@ export type DeclarationType<T extends DefinitionsCreateResult<any>> = T extends 
 	? D
 	: never;
 
+export type InferGroupDeclaration<T> = T extends DeclarationGroupLike ? T["Definitions"] : {};
+
 export type DeclarationsOf<
 	T extends RemoteDeclarations,
 	U extends EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike
 > = {
 	[K in ExtractKeys<T, U>]: T[K];
+};
+
+export type FilterGroups<T extends RemoteDeclarations> = {
+	[K in ExtractKeys<T, DeclarationGroupLike>]: T[K];
+};
+
+export type FilterDeclarations<T extends RemoteDeclarations> = {
+	[K in ExtractKeys<T, EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike>]: T[K];
 };
 
 export interface AsyncFunctionDeclarationLike {
@@ -92,8 +102,23 @@ export interface EventDeclaration<ServerArgs extends readonly unknown[], ClientA
 	ClientArguments: Checks<ClientArgs>;
 }
 
+export interface DeclarationGroupLike {
+	Type: "Group";
+	Definitions: RemoteDeclarations;
+
+	// Just to get it to stop complaining
+	ServerMiddleware?: never;
+}
+
+export interface DeclarationGroup<T extends RemoteDeclarations> extends DeclarationGroupLike {
+	Type: "Group";
+	Definitions: T;
+
+	// Just to get it to stop complaining
+	ServerMiddleware?: never;
+}
 export type DeclarationLike = FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
-export type RemoteDeclarations = Record<string, DeclarationLike>;
+export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationGroupLike>;
 
 ////////////////////////////////
 // * Checks
