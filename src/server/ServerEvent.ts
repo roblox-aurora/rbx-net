@@ -20,6 +20,7 @@ export default class ServerEvent<
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
 	}
 
+	/** @internal */
 	public GetInstance() {
 		return this.instance;
 	}

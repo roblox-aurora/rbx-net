@@ -23,6 +23,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(declarations: T) {
 		declarationMap.set(this, declarations);
 	}
+
 	/**
 	 * Create a receive-only event for the server.
 	 *

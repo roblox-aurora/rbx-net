@@ -27,6 +27,7 @@ class ServerAsyncFunction<
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
 
+	/** @internal */
 	public GetInstance() {
 		return this.instance;
 	}

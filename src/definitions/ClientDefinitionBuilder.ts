@@ -15,6 +15,7 @@ import {
 	RemoteDeclarations,
 } from "./Types";
 
+// Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
