@@ -3,12 +3,13 @@
  *
  * I will admit, this is a lot of type spaghetti. It makes the definitions work good though. :D
  */
+import { interface } from "@rbxts/t";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
-import ClientEvent from "../client/ClientEvent";
+import ClientEvent, { ClientListenerEvent, ClientSenderEvent } from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import { MiddlewareOverload } from "../middleware";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
-import ServerEvent from "../server/ServerEvent";
+import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
@@ -46,7 +47,12 @@ export type InferGroupDeclaration<T> = T extends DeclarationGroupLike ? T["Defin
 
 export type DeclarationsOf<
 	T extends RemoteDeclarations,
-	U extends EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike
+	U extends
+		| EventDeclarationLike
+		| FunctionDeclarationLike
+		| AsyncFunctionDeclarationLike
+		| ServerEventDeclaration<any>
+		| ClientEventDeclaration<any>
 > = {
 	[K in ExtractKeys<T, U>]: T[K];
 };
@@ -102,6 +108,17 @@ export interface EventDeclaration<ServerArgs extends readonly unknown[], ClientA
 	ClientArguments: Checks<ClientArgs>;
 }
 
+export interface ClientEventDeclaration<ClientArgs extends readonly unknown[]> extends EventDeclarationLike {
+	ServerMiddleware: [];
+	ClientArguments: Checks<ClientArgs>;
+	readonly _nominal_Client: unique symbol;
+}
+
+export interface ServerEventDeclaration<ServerArgs extends readonly unknown[]> extends EventDeclarationLike {
+	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
+	readonly _nominal_Server: unique symbol;
+}
+
 export interface DeclarationGroupLike {
 	Type: "Group";
 	Definitions: RemoteDeclarations;
@@ -137,8 +154,9 @@ type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
 // * Inference Magic
 ///////////////////////////////
 
-export type InferServerConnect<T> = T extends EventDeclaration<infer A, any> ? (...args: A) => void : never;
-export type InferClientConnect<T> = T extends EventDeclaration<any, infer A> ? (...args: A) => void : never;
+export type InferServerConnect<T> = T extends ClientEventDeclaration<infer A> ? (...args: A) => void : never;
+export type InferClientConnect<T> = T extends ServerEventDeclaration<infer A> ? (...args: A) => void : never;
+
 export type InferClientCallback<T> = T extends AsyncFunctionDeclaration<any, any, infer A, infer R>
 	? (...args: A) => R
 	: never;
@@ -204,6 +222,10 @@ export type InferClientRemote<T> = T extends FunctionDeclarationLike
 	? InferClientFunction<T>
 	: T extends AsyncFunctionDeclarationLike
 	? InferClientAsyncFunction<T>
+	: T extends ClientEventDeclaration<infer A>
+	? ClientSenderEvent<A>
+	: T extends ServerEventDeclaration<infer A>
+	? ClientListenerEvent<A>
 	: T extends EventDeclarationLike
 	? InferClientEvent<T>
 	: never;
@@ -211,6 +233,10 @@ export type InferServerRemote<T> = T extends FunctionDeclarationLike
 	? InferServerFunction<T>
 	: T extends AsyncFunctionDeclarationLike
 	? InferServerAsyncFunction<T>
+	: T extends ClientEventDeclaration<infer A>
+	? ServerListenerEvent<A>
+	: T extends ServerEventDeclaration<infer A>
+	? ServerSenderEvent<A>
 	: T extends EventDeclarationLike
 	? InferServerEvent<T>
 	: never;

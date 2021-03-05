@@ -31,7 +31,8 @@ Remotes.Server.OnEvent("TestDefinition", (message: string) => {
 	print("Server Recieved", message);
 });
 
-Remotes.Server.GetGroup("SubGroup").Create("TestFun3");
+const test = Remotes.Server.Group("SubGroup");
+print("SubGroup", test);
 
 new Net.Server.Event("test");
 

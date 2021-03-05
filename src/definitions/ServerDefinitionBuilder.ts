@@ -1,8 +1,10 @@
+import { $dbg, $nameof, $print } from "rbxts-transform-debug";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import {
 	AsyncFunctionDeclarationLike,
+	ClientEventDeclaration,
 	DeclarationGroup,
 	DeclarationGroupLike,
 	DeclarationsOf,
@@ -14,6 +16,7 @@ import {
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
+	ServerEventDeclaration,
 } from "./Types";
 
 // Keep the declarations fully isolated
@@ -22,12 +25,20 @@ const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(declarations: T) {
 		declarationMap.set(this, declarations);
+		$dbg(declarations, (value, source) => {
+			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
+			for (const [name, va] of pairs(value)) {
+				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
+			}
+		});
+	}
+
+	public toString() {
+		return `[${$nameof(ServerDefinitionBuilder)}]`;
 	}
 
 	/**
 	 * Create a receive-only event for the server.
-	 *
-	 * @internal
 	 *
 	 * @param name The name
 	 * @param fn The callback
@@ -37,21 +48,30 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.CreateServer(name).Connect(fn)
 	 * ```
 	 */
-	OnEvent<K extends keyof DeclarationsOf<FilterDeclarations<T>, EventDeclarationLike> & string>(
+	OnEvent<K extends keyof DeclarationsOf<FilterDeclarations<T>, ClientEventDeclaration<any>> & string>(
 		name: K,
-		fn: InferServerConnect<Extract<T[K], EventDeclarationLike>>,
+		fn: InferServerConnect<Extract<T[K], ClientEventDeclaration<any>>>,
 	) {
-		const result = this.Create(name) as InferServerRemote<EventDeclarationLike>;
+		const result = this.Create(name) as InferServerRemote<ClientEventDeclaration<any>>;
 		result.Connect(fn);
 	}
 
 	/**
+	 * Gets the specified group as a definition builder
 	 * @internal
-	 * @param k
+	 * @param key The name of the group
+	 *
+	 * ```ts
+	 * const FeatureA = Remotes.Server.Group("FeatureA");
+	 * const FeatureAEvent = FeatureA.Create("FeatureAEvent");
+	 * ```
+	 *
 	 */
-	GetGroup<K extends keyof FilterGroups<T> & string>(key: K) {
+	// TODO
+	Group<K extends keyof FilterGroups<T> & string>(key: K) {
 		const group = declarationMap.get(this)![key] as DeclarationGroupLike;
 		assert(group.Type === "Group");
+		$print(`Fetch Group`, key);
 		return new ServerDefinitionBuilder(group.Definitions as InferGroupDeclaration<T[K]>);
 	}
 

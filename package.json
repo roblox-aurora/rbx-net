@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/net",
-  "version": "2.1.0-beta.0",
+  "version": "2.1.0-beta.1",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -13,7 +13,8 @@
     "build:rbxmx": "npm run build:luau && rojo build luau/build.project.json -o luau.net.rbxmx",
     "build:example": "cross-env NODE_ENV=development rbxtsc-dev --type=game -p ./example -i ./include",
     "watch:example": "cross-env NODE_ENV=development TYPE=TestTS rbxtsc-dev -w --type=game -p ./example -i ./include",
-    "serve:example": "rojo serve ./example/default.project.json --port 34567"
+    "serve:example": "rojo serve ./example/default.project.json --port 34567",
+    "dev:example": "concurrently npm:watch:example npm:serve:example"
   },
   "repository": {
     "type": "git",
@@ -37,13 +38,14 @@
     "@rbxts/types": "^1.0.435",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
+    "concurrently": "^6.0.0",
     "cross-env": "^7.0.3",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.2.0",
     "eslint-plugin-roblox-ts": "0.0.24",
     "prettier": "^2.2.1",
-    "rbxts-transform-debug": "^0.1.0",
+    "rbxts-transform-debug": "^0.4.0",
     "rbxts-transform-env": "^0.3.0",
     "typescript": "^4.1.2"
   },

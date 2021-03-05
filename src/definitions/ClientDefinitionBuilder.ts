@@ -1,3 +1,4 @@
+import { $nameof } from "rbxts-transform-debug";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
@@ -13,6 +14,7 @@ import {
 	InferClientRemote,
 	InferGroupDeclaration,
 	RemoteDeclarations,
+	ServerEventDeclaration,
 } from "./Types";
 
 // Keep the declarations fully isolated
@@ -22,6 +24,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(declarations: T) {
 		declarationMap.set(this, declarations);
 	}
+
+	public toString() {
+		return `[${$nameof(ClientDefinitionBuilder)}]`;
+	}
+
 	/**
 	 * Gets a client remote from a declaration
 	 */
@@ -43,7 +50,8 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * @internal
 	 * @param k
 	 */
-	GetGroup<K extends keyof FilterGroups<T> & string>(key: K) {
+	// TODO
+	Group<K extends keyof FilterGroups<T> & string>(key: K) {
 		const group = declarationMap.get(this)![key] as DeclarationGroupLike;
 		assert(group.Type === "Group");
 		return new ClientDefinitionBuilder(group.Definitions as InferGroupDeclaration<T[K]>);
@@ -70,8 +78,6 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	/**
 	 * Create a receive-only event for the client.
 	 *
-	 * @internal
-	 *
 	 * @param name The name
 	 * @param fn The callback
 	 *
@@ -80,11 +86,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.GetClient(name).Connect(fn)
 	 * ```
 	 */
-	OnEvent<K extends keyof DeclarationsOf<T, EventDeclarationLike> & string>(
+	OnEvent<K extends keyof DeclarationsOf<T, ServerEventDeclaration<unknown[]>> & string>(
 		name: K,
-		fn: InferClientConnect<Extract<T[K], EventDeclarationLike>>,
+		fn: InferClientConnect<Extract<T[K], ServerEventDeclaration<unknown[]>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<EventDeclarationLike>;
+		const result = this.Get(name) as InferClientRemote<ServerEventDeclaration<any>>;
 		result.Connect(fn);
 	}
 

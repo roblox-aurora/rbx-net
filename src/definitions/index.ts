@@ -9,12 +9,15 @@ import {
 	RemoteDeclarations,
 	DefinitionsCreateResult,
 	DeclarationGroup,
+	ServerEventDeclaration,
+	ClientEventDeclaration,
+	EventDeclarationLike,
 } from "./Types";
 import { oneOf } from "../internal/validator";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 
-const declarationType = oneOf("Event", "Function", "AsyncFunction");
+const declarationType = oneOf("Event", "Function", "AsyncFunction", "Group");
 
 namespace NetDefinitions {
 	/**
@@ -41,8 +44,10 @@ namespace NetDefinitions {
 	}
 
 	/**
+	 * Like `Create` but used to group remotes, which can be retrieved with the corresponding `Group(key)` method.
 	 * @internal
 	 */
+	// TODO
 	export function Group<T extends RemoteDeclarations>(declarations: T) {
 		return {
 			Type: "Group",
@@ -89,14 +94,44 @@ namespace NetDefinitions {
 
 	/**
 	 * Creates a definition for an event
+	 *
+	 *
+	 * ### If the event is fired by the client to the server, use `ClientEvent`.
+	 * ### If the event is fired by the server to the client, use `ServerEvent`.
+	 *
+	 * @deprecated This is now deprecated in favour of `*To*Event`
+	 *
 	 */
 	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
 		mw?: MiddlewareOverload<any>,
-	): EventDeclaration<ServerArgs, ClientArgs> {
+	): EventDeclaration<ServerArgs, ClientArgs>;
+	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
+		mw?: MiddlewareOverload<any>,
+	) {
 		return {
 			Type: "Event",
 			ServerMiddleware: mw,
-		} as EventDeclaration<ServerArgs, ClientArgs>;
+		};
+	}
+
+	/**
+	 * An event triggered by the server, which clients can listen to
+	 */
+	export function ServerEvent<ServerArgs extends unknown[] = unknown[]>() {
+		return {
+			Type: "Event",
+		} as ServerEventDeclaration<ServerArgs>;
+	}
+
+	/**
+	 * An event triggered by client(s), which the server can listen to
+	 * @param mw
+	 */
+	export function ClientEvent<ClientArgs extends unknown[] = unknown[]>(mw?: MiddlewareOverload<ClientArgs>) {
+		return {
+			Type: "Event",
+			ServerMiddleware: mw,
+		} as ClientEventDeclaration<ClientArgs>;
 	}
 }
 
