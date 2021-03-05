@@ -99,7 +99,7 @@ namespace NetDefinitions {
 	 * ### If the event is fired by the client to the server, use `ClientEvent`.
 	 * ### If the event is fired by the server to the client, use `ServerEvent`.
 	 *
-	 * @deprecated This is now deprecated in favour of `*To*Event`
+	 * @deprecated This is now deprecated in favour of `ServerEvent` and `ClientEvent`.
 	 *
 	 */
 	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
