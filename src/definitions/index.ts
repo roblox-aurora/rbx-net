@@ -5,7 +5,7 @@ import {
 	AsyncFunctionDeclarationLike,
 	FunctionDeclaration,
 	FunctionDeclarationLike,
-	EventDeclaration,
+	LegacyEventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
 	DeclarationGroup,
@@ -104,7 +104,7 @@ namespace NetDefinitions {
 	 */
 	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
 		mw?: MiddlewareOverload<any>,
-	): EventDeclaration<ServerArgs, ClientArgs>;
+	): LegacyEventDeclaration<ServerArgs, ClientArgs>;
 	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
 		mw?: MiddlewareOverload<any>,
 	) {
@@ -125,7 +125,7 @@ namespace NetDefinitions {
 
 	/**
 	 * An event triggered by client(s), which the server can listen to
-	 * @param mw
+	 * @param mw The middleware of this event.
 	 */
 	export function ClientEvent<ClientArgs extends unknown[] = unknown[]>(mw?: MiddlewareOverload<ClientArgs>) {
 		return {

@@ -29,7 +29,7 @@ export default class ClientAsyncFunction<
 		ServerReturnType = unknown
 	>(name: string) {
 		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async (resolve) => {
-			await waitForRemote("AsyncRemoteFunction", name, 10);
+			await waitForRemote("AsyncRemoteFunction", name, 60);
 			resolve(new ClientAsyncFunction(name));
 		});
 	}

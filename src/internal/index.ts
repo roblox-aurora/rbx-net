@@ -111,7 +111,7 @@ export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: 
 		if (result) {
 			resolve(result);
 		} else {
-			reject("Unable to find remote object");
+			reject(`Timed out while waiting for ${remoteType} '${name}' after ${timeout} seconds.`);
 		}
 	});
 }

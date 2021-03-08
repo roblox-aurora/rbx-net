@@ -38,7 +38,7 @@ class ClientEvent<
 		CallArguments extends ReadonlyArray<unknown> = Array<unknown>
 	>(name: string) {
 		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async (resolve) => {
-			await waitForRemote("RemoteEvent", name, 10);
+			await waitForRemote("RemoteEvent", name, 60);
 			resolve(new ClientEvent(name));
 		});
 	}

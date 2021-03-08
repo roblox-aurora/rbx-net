@@ -102,7 +102,8 @@ export interface EventDeclarationLike {
 	ClientArguments?: ReadonlyArray<CheckLike>;
 }
 
-export interface EventDeclaration<ServerArgs extends readonly unknown[], ClientArgs extends readonly unknown[]>
+/** @deprecated */
+export interface LegacyEventDeclaration<ServerArgs extends readonly unknown[], ClientArgs extends readonly unknown[]>
 	extends EventDeclarationLike {
 	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
 	ClientArguments: Checks<ClientArgs>;
