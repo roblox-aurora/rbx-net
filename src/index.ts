@@ -24,7 +24,6 @@ namespace Net {
 	export const Server = NetServerContext;
 
 	/**
-	 * @experimental
 	 * Experimental definition builder for Net
 	 */
 	export const Definitions = NetDefinitions;
