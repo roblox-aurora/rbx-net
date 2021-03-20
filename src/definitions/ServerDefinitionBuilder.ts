@@ -30,7 +30,7 @@ const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private globalMiddleware?: NetGlobalMiddleware[]) {
+	public constructor(declarations: T, private globalMiddleware?: NetGlobalMiddleware[], private namespace = "") {
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
 			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
@@ -89,13 +89,19 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		const group = declarationMap.get(this)![key] as DeclarationGroupLike;
 		assert(group.Type === "Group");
 		$print(`Fetch Group`, key);
-		return new ServerDefinitionBuilder(group.Definitions as InferGroupDeclaration<T[K]>, this.globalMiddleware);
+		return new ServerDefinitionBuilder(
+			group.Definitions as InferGroupDeclaration<T[K]>,
+			this.globalMiddleware,
+			[this.namespace, key].join(":"),
+		);
 	}
 
 	/**
 	 * Creates a server remote from a declaration
 	 */
 	Create<K extends keyof FilterDeclarations<T> & string>(k: K): InferServerRemote<T[K]> {
+		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
+
 		const item = declarationMap.get(this)![k];
 		assert(item && item.Type, `'${k}' is not defined in this definition.`);
 		if (item.Type === "Function") {
@@ -103,6 +109,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 			// This should make certain use cases cheaper
 			if (remoteFunctionCache.has(k)) {
+				$print(`Fetch cached copy of ${k}`);
 				return remoteFunctionCache.get(k)! as InferServerRemote<T[K]>;
 			} else {
 				if (item.ServerMiddleware) {
@@ -120,6 +127,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 			// This should make certain use cases cheaper
 			if (remoteAsyncFunctionCache.has(k)) {
+				$print(`Fetch cached copy of ${k}`);
 				return remoteAsyncFunctionCache.get(k)! as InferServerRemote<T[K]>;
 			} else {
 				if (item.ServerMiddleware) {
@@ -137,6 +145,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 			// This should make certain use cases cheaper
 			if (remoteEventCache.has(k)) {
+				$print(`Fetch cached copy of ${k}`);
 				return remoteEventCache.get(k)! as InferServerRemote<T[K]>;
 			} else {
 				if (item.ServerMiddleware) {
