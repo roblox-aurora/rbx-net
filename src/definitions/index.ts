@@ -8,7 +8,7 @@ import {
 	LegacyEventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
-	DeclarationGroup,
+	GroupDeclaration,
 	ServerToClientEventDeclaration,
 	ClientToServerEventDeclaration,
 	BidirectionalEventDeclaration,
@@ -56,7 +56,7 @@ namespace NetDefinitions {
 		return {
 			Type: "Group",
 			Definitions: declarations,
-		} as DeclarationGroup<T>;
+		} as GroupDeclaration<T>;
 	}
 
 	/**
