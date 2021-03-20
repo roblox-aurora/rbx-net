@@ -239,7 +239,7 @@ namespace NetDefinitions {
 		return {
 			Type: "Event",
 			ServerMiddleware: mw,
-		};
+		} as LegacyEventDeclaration<ServerArgs, ClientArgs>;
 	}
 
 	/**

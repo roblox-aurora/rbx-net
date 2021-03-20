@@ -13,6 +13,7 @@ const {
 	Group,
 	Event,
 	Function,
+	AsyncFunction,
 	ServerAsyncFunction,
 	ServerToClientEvent,
 	ClientToServerEvent,
@@ -26,6 +27,11 @@ const Remotes = Create(
 		}),
 		TestingEvents: Group({
 			PrintMessage: ClientToServerEvent<[message: string]>(),
+		}),
+		Legacy: Group({
+			LegacyEvent: Event<[message: string], [message2: number]>(),
+			LegacyFunction: Function<(server: number) => string>(),
+			LegacyAsyncFunction: AsyncFunction<(server: number) => string, (client: number) => string>(),
 		}),
 	},
 	[

@@ -8,3 +8,7 @@ const testEvents = Remotes.Server.Group("TestingEvents");
 
 testFunctions.OnFunction("CallServerAndAddNumbers", (_, a, b) => a + b);
 testEvents.OnEvent("PrintMessage", print);
+const testLegacy = Remotes.Server.Group("Legacy").Create("LegacyFunction");
+const testLegacy2 = Remotes.Client.Group("Legacy").Get("LegacyFunction");
+
+testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);

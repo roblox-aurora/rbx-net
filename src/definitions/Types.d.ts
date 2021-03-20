@@ -14,21 +14,48 @@ import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 
-export interface FunctionDeclarationLike {
+interface FunctionDeclarationLike {
 	/**
 	 * @deprecated
-	 * @internal Do not use, used to force using the creators
 	 */
-	readonly _nominal_FunctionDeclaration: unique symbol;
+	readonly _nominal_FunctionDeclarationLike: unique symbol;
 
-	Type: "Function";
-	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
-	ServerReturns?: CheckLike;
+	/** @internal */
+	readonly Type: "Function";
+	/** @internal */
+	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 }
+
+interface EventDeclarationLike {
+	/**
+	 * @deprecated
+	 */
+	readonly _nominal_EventDeclarationLike: unique symbol;
+
+	/** @internal */
+	readonly Type: "Event";
+
+	/** @internal */
+	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+}
+
+interface AsyncFunctionDeclarationLike {
+	/**
+	 * @deprecated
+	 */
+	readonly _nominal_AsyncFunctionDeclarationLike: unique symbol;
+
+	/** @internal */
+	readonly Type: "AsyncFunction";
+
+	/** @internal */
+	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+}
+
 export interface FunctionDeclaration<T extends readonly unknown[], R extends unknown = undefined>
 	extends FunctionDeclarationLike {
-	ServerMiddleware: [...mw: MiddlewareOverload<T>];
-	ServerReturns: Check<R>;
+	/** @deprecated */
+	readonly _nominal_FunctionDeclaration: unique symbol;
 }
 
 /**
@@ -38,10 +65,6 @@ export interface DefinitionsCreateResult<T extends RemoteDeclarations> {
 	readonly Server: ServerDefinitionBuilder<T>;
 	readonly Client: ClientDefinitionBuilder<T>;
 }
-
-export type DeclarationType<T extends DefinitionsCreateResult<any>> = T extends DefinitionsCreateResult<infer D>
-	? D
-	: never;
 
 export type InferGroupDeclaration<T> = T extends DeclarationGroupLike ? T["Definitions"] : {};
 
@@ -68,126 +91,98 @@ export type FilterDeclarations<T extends RemoteDeclarations> = {
 	[K in ExtractKeys<T, EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike>]: T[K];
 };
 
-export interface AsyncFunctionDeclarationLike {
-	/**
-	 * @deprecated
-	 * @internal Do not use, used to force using the creators
-	 */
-	readonly _nominal_AsyncFunctionDeclaration: unique symbol;
-	Type: "AsyncFunction";
-	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
-	ServerReturns?: CheckLike;
-	ClientArguments?: ReadonlyArray<CheckLike>;
-	ClientReturns?: CheckLike;
-}
-
 /**
  * @deprecated
  */
 export interface LegacyAsyncFunctionDeclaration<
-	ServerArgs extends readonly unknown[],
-	ServerReturn extends unknown,
-	ClientArgs extends readonly unknown[],
-	ClientReturn extends unknown
+	_ServerArgs extends readonly unknown[],
+	_ServerReturn extends unknown,
+	_ClientArgs extends readonly unknown[],
+	_ClientReturn extends unknown
 > extends AsyncFunctionDeclarationLike {
-	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
-	ServerReturns: Check<ServerReturn>;
-	ClientReturns: Check<ClientReturn>;
-	ClientArguments: Checks<ClientArgs>;
+	/** @deprecated */
+	readonly _nominal_LegacyAsyncFunctionDeclaration: unique symbol;
 }
 
-export interface AsyncClientFunctionDeclaration<ClientArgs extends readonly unknown[], ClientReturn>
+/**
+ * A declaration for an async client function
+ */
+export interface AsyncClientFunctionDeclaration<_ClientArgs extends readonly unknown[], _ClientReturn>
 	extends AsyncFunctionDeclarationLike {
 	/**
 	 * @deprecated
-	 * @internal Do not use, used to force using the creators
 	 */
 	readonly _nominal_AsyncClientFunction: unique symbol;
-	ClientReturns: Check<ClientReturn>;
-	ClientArguments: Checks<ClientArgs>;
 }
 
-export interface AsyncServerFunctionDeclaration<ServerArgs extends readonly unknown[], ServerReturn>
+/**
+ * A declaration for an async server function
+ */
+export interface AsyncServerFunctionDeclaration<_ServerArgs extends readonly unknown[], _ServerReturn>
 	extends AsyncFunctionDeclarationLike {
 	/**
 	 * @deprecated
-	 * @internal Do not use, used to force using the creators
 	 */
 	readonly _nominal_AsyncServerFunction: unique symbol;
-
-	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
-	ServerReturns: Check<ServerReturn>;
-}
-
-export interface EventDeclarationLike {
-	/**
-	 * @deprecated
-	 * @internal Do not use, used to force using the creators
-	 */
-	readonly _nominal_EventDeclaration: unique symbol;
-
-	Type: "Event";
-	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
-	ClientArguments?: ReadonlyArray<CheckLike>;
 }
 
 /** @deprecated */
-export interface LegacyEventDeclaration<ServerArgs extends readonly unknown[], ClientArgs extends readonly unknown[]>
+export interface LegacyEventDeclaration<_ServerArgs extends readonly unknown[], _ClientArgs extends readonly unknown[]>
 	extends EventDeclarationLike {
-	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
-	ClientArguments: Checks<ClientArgs>;
+	/** @deprecated */
+	readonly _nominal_LegacyEventDeclaration: unique symbol;
 }
 
-export interface ClientToServerEventDeclaration<ClientArgs extends readonly unknown[]> extends EventDeclarationLike {
-	ServerMiddleware: [];
-	ClientArguments: Checks<ClientArgs>;
+/**
+ * A declaration for a client -> server event
+ */
+export interface ClientToServerEventDeclaration<_ClientArgs extends readonly unknown[]> extends EventDeclarationLike {
+	/** @deprecated */
 	readonly _nominal_ClientToServerEvent: unique symbol;
 }
 
-export interface ServerToClientEventDeclaration<ServerArgs extends readonly unknown[]> extends EventDeclarationLike {
-	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
+/**
+ * A declaration for a server -> client event
+ */
+export interface ServerToClientEventDeclaration<_ServerArgs extends readonly unknown[]> extends EventDeclarationLike {
+	/** @deprecated */
 	readonly _nominal_ServerToClientEvent: unique symbol;
 }
 
+/**
+ * A declaration for a Bidirectional event
+ */
 export interface BidirectionalEventDeclaration<
-	ServerArgs extends readonly unknown[],
-	ClientArgs extends readonly unknown[]
+	_ServerArgs extends readonly unknown[],
+	_ClientArgs extends readonly unknown[]
 > extends EventDeclarationLike {
-	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
-	ClientArguments: Checks<ClientArgs>;
+	/** @deprecated */
 	readonly _nominal_Bidirectional: unique symbol;
 }
 
-export interface DeclarationGroupLike {
-	Type: "Group";
-	Definitions: RemoteDeclarations;
-
-	// Just to get it to stop complaining
-	ServerMiddleware?: never;
+interface DeclarationGroupLike {
+	/** @deprecated */
+	readonly _nominal_DeclarationGroupLike: unique symbol;
+	/** @internal */
+	readonly Type: "Group";
+	/** @internal */
+	readonly Definitions: RemoteDeclarations;
 }
 
-export interface DeclarationGroup<T extends RemoteDeclarations> extends DeclarationGroupLike {
-	Type: "Group";
-	Definitions: T;
+/**
+ * A declaration group
+ */
+export interface GroupDeclaration<T extends RemoteDeclarations> extends DeclarationGroupLike {
+	/** @deprecated */
+	readonly _nominal_DeclarationGroup: unique symbol;
 
-	// Just to get it to stop complaining
-	ServerMiddleware?: never;
+	/** @internal */
+	readonly Type: "Group";
+	/** @internal */
+	readonly Definitions: T;
 }
 export type DeclarationLike = FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
 export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationGroupLike>;
-
-////////////////////////////////
-// * Checks
-///////////////////////////////
-
-export type CheckLike = (value: unknown) => boolean;
-export type Check<T> = (value: unknown) => value is T;
-export type Checks<Tuple extends readonly [...unknown[]]> = { [Index in keyof Tuple]: Check<Tuple[Index]> };
-export type CheckMap<T> = { [P in keyof T]: Check<T[P]> };
-
-type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
-	[Index in keyof Tuple]: InferCheck<Tuple[Index]>;
-};
 
 ////////////////////////////////
 // * Inference Magic
@@ -215,103 +210,46 @@ export type InferServerCallback<T> = T extends LegacyAsyncFunctionDeclaration<in
 	? (player: Player, ...args: A) => R
 	: never;
 
-type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
-
-type InferArgs<T extends readonly CheckLike[] | CheckLike | undefined> = T extends readonly [...CheckLike[]]
-	? CheckTupleToInferedValues<T>
-	: T extends CheckLike
-	? InferCheck<T>
-	: unknown[];
-
-// TODO: Remove
 /**
- * @deprecated
+ * This infers the client remote type based on the given value
  */
-type InferServerEvent<T extends EventDeclarationLike> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ServerEvent<A, InferArgs<T["ClientArguments"]>>
-	: ServerEvent<unknown[], InferArgs<T["ClientArguments"]>>;
-
-// TODO: Remove
-/**
- * @deprecated
- */
-type InferClientEvent<T extends EventDeclarationLike> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ClientEvent<InferArgs<T["ClientArguments"]>, A>
-	: ClientEvent<InferArgs<T["ClientArguments"]>, unknown[]>;
-
-type InferClientFunction<T extends FunctionDeclarationLike> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ClientFunction<A, InferArgs<T["ServerReturns"]>>
-	: ClientFunction<unknown[], InferArgs<T["ServerReturns"]>>;
-
-/** @deprecated */
-type InferClientAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ClientAsyncFunction<
-			InferArgs<T["ClientArguments"]>,
-			A,
-			InferArgs<T["ServerReturns"]>,
-			InferArgs<T["ClientReturns"]>
-	  >
-	: ClientAsyncFunction<InferArgs<T["ClientArguments"]>, unknown[], InferArgs<T["ServerReturns"]>>;
-
-type InferServerFunction<T extends FunctionDeclarationLike> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ServerFunction<A, InferArgs<T["ServerReturns"]>>
-	: ServerFunction<unknown[], InferArgs<T["ServerReturns"]>>;
-
-/** @deprecated */
-type InferServerAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["ServerMiddleware"] extends [
-	...mw: MiddlewareOverload<infer A>
-]
-	? ServerAsyncFunction<
-			A,
-			InferArgs<T["ClientArguments"]>,
-			InferArgs<T["ClientReturns"]>,
-			InferArgs<T["ServerReturns"]>
-	  >
-	: ServerAsyncFunction<unknown[], InferArgs<T["ClientArguments"]>, InferArgs<T["ClientReturns"]>>;
-
-export type InferClientRemote<T> = T extends FunctionDeclarationLike
-	? InferClientFunction<T>
-	: T extends AsyncClientFunctionDeclaration<infer A, infer R>
+export type InferClientRemote<T> = T extends AsyncClientFunctionDeclaration<infer A, infer R>
 	? ClientAsyncCallback<A, R>
 	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
 	? ClientAsyncCaller<A, R>
-	: T extends AsyncFunctionDeclarationLike
-	? InferClientAsyncFunction<T>
 	: T extends ClientToServerEventDeclaration<infer A>
 	? ClientSenderEvent<A>
 	: T extends ServerToClientEventDeclaration<infer A>
 	? ClientListenerEvent<A>
 	: T extends BidirectionalEventDeclaration<infer S, infer C>
 	? ClientEvent<S, C>
-	: T extends EventDeclarationLike
-	? InferClientEvent<T>
+	: T extends LegacyEventDeclaration<infer SA, infer CA>
+	? ClientEvent<CA, SA>
+	: T extends LegacyAsyncFunctionDeclaration<infer SA, infer SR, infer CA, infer CR>
+	? ClientAsyncFunction<CA, SA, CR, SR>
+	: T extends FunctionDeclaration<infer SA, infer SR>
+	? ClientFunction<SA, SR>
 	: never;
-export type InferServerRemote<T> = T extends FunctionDeclarationLike
-	? InferServerFunction<T>
-	: T extends AsyncClientFunctionDeclaration<infer A, infer R>
+
+/**
+ * This infers the server remote type based on the given value
+ */
+export type InferServerRemote<T> = T extends AsyncClientFunctionDeclaration<infer A, infer R>
 	? ServerAsyncCaller<A, R>
 	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
 	? ServerAsyncCallback<A, R>
-	: T extends AsyncFunctionDeclarationLike
-	? InferServerAsyncFunction<T>
 	: T extends ClientToServerEventDeclaration<infer A>
 	? ServerListenerEvent<A>
 	: T extends ServerToClientEventDeclaration<infer A>
 	? ServerSenderEvent<A>
 	: T extends BidirectionalEventDeclaration<infer S, infer C>
 	? ServerEvent<S, C>
-	: T extends EventDeclarationLike
-	? InferServerEvent<T>
+	: T extends LegacyEventDeclaration<infer SA, infer CA>
+	? ServerEvent<SA, CA>
+	: T extends LegacyAsyncFunctionDeclaration<infer SA, infer SR, infer CA, infer CR>
+	? ServerAsyncFunction<SA, CA, SR, CR>
+	: T extends FunctionDeclaration<infer SA, infer SR>
+	? ServerFunction<SA, SR>
 	: never;
 
 /////////////////////////////////////////
