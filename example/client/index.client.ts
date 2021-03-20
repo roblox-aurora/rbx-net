@@ -2,6 +2,8 @@ import Net from "@rbxts/net";
 import Remotes from "./definitions";
 
 const testFunctions = Remotes.Client.Group("TestingFunctions");
+const testEvents = Remotes.Client.Group("TestingEvents");
+
 const add = testFunctions.Get("CallServerAndAddNumbers");
 
 add.CallServerAsync(10, 10).then((result) => {
@@ -11,3 +13,5 @@ add.CallServerAsync(10, 10).then((result) => {
 		error("RESULT IS WRONG");
 	}
 });
+
+testEvents.Get("PrintMessage").SendToServer("Hello, World!");

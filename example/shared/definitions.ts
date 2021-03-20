@@ -20,10 +20,13 @@ const {
 
 const Remotes = Create(
 	{
+		TestStandaloneEvent: ServerToClientEvent<[]>(),
 		TestingFunctions: Group({
 			CallServerAndAddNumbers: ServerAsyncFunction<(a: number, b: number) => number>(),
 		}),
-		TestingEvents: Group({}),
+		TestingEvents: Group({
+			PrintMessage: ClientToServerEvent<[message: string]>(),
+		}),
 	},
 	[
 		Net.Definitions.GlobalReadonlyMiddleware((remote, data, player) => {

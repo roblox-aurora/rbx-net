@@ -194,9 +194,9 @@ type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
 ///////////////////////////////
 
 export type InferServerConnect<T> = T extends ClientToServerEventDeclaration<infer A>
-	? (...args: A) => void
+	? (player: Player, ...args: A) => void
 	: T extends BidirectionalEventDeclaration<infer S, infer _>
-	? (...args: S) => void
+	? (player: Player, ...args: S) => void
 	: never;
 export type InferClientConnect<T> = T extends ServerToClientEventDeclaration<infer A>
 	? (...args: A) => void
@@ -210,9 +210,9 @@ export type InferClientCallback<T> = T extends LegacyAsyncFunctionDeclaration<an
 	? (...args: A) => R
 	: never;
 export type InferServerCallback<T> = T extends LegacyAsyncFunctionDeclaration<infer A, infer R, any, any>
-	? (...args: A) => R
+	? (player: Player, ...args: A) => R
 	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
-	? (...args: A) => R
+	? (player: Player, ...args: A) => R
 	: never;
 
 type InferCheck<T> = T extends (value: unknown) => value is infer A ? A : unknown;
