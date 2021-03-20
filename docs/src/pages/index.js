@@ -86,26 +86,26 @@ const Remotes = Net.Definitions.Create({
     MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>()
 });
 export default Remotes;`;
-const EXAMPLE_CODE_CLIENT_TS = `import Remotes from "shared/remotes.ts";
-const PrintMessage = Remotes.GetClient("PrintMessage")
-const MakeHello = Remotes.GetClient("MakeHello")
+const EXAMPLE_CODE_CLIENT_TS = `import Remotes from "shared/remotes";
+const PrintMessage = Remotes.Client.Get("PrintMessage")
+const MakeHello = Remotes.Client.Get("MakeHello")
 
 // should print "Hello there!" on the server
 PrintMessage.SendToServer("Hello there!");
-MakeHello.CallServerAsync("Roblox").then(result => {
-    print(result); // Should print Hello, Roblox! on the client
+MakeHello.CallServerAsync("Roblox").then((message: string) => {
+    print(message); // Should print Hello, Roblox! on the client
 });`;
-const EXAMPLE_CODE_SERVER_TS = `import Remotes from "shared/remotes.ts";
-const PrintMessage = Remotes.CreateServer("PrintMessage")
-const MakeHello = Remotes.CreateServer("MakeHello")
+const EXAMPLE_CODE_SERVER_TS = `import Remotes from "shared/remotes";
+const PrintMessage = Remotes.Server.Create("PrintMessage")
+const MakeHello = Remotes.Server.Create("MakeHello")
 
-PrintMessage.Connect((message) => {
+PrintMessage.Connect((player: Player, message: string) => {
     // Will print the message given to it
     print(message);
 });
 // This will take the input string
 // e.g. 'Roblox' and turn it into 'Hello, Roblox!', and send it back to the client
-MakeHello.SetCallback((message) => \`Hello, \${message}!\`);`;
+MakeHello.SetCallback((player: Player, message: string) => \`Hello, \${message}!\`);`;
 const EXAMPLE_CODE_LUA = `local Net = require(game:GetService("ReplicatedStorage").Net)
 local TestIdRemote = Net.Server.Event.new("TestId")
 TestIdRemote:Connect(function()
