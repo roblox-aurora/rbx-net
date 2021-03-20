@@ -22,10 +22,10 @@ export type NetMiddleware<
 	event: NetManagedInstance,
 ) => (sender: Player, ...args: PreviousCallArguments) => void;
 
-export type NetGlobalMiddleware<CallArguments extends ReadonlyArray<unknown> = Array<unknown>> = (
-	next: (player: Readonly<Player>, ...args: Readonly<CallArguments>) => void,
+export type NetGlobalMiddleware = (
+	next: (player: Readonly<Player>, ...args: readonly unknown[]) => void,
 	event: Readonly<NetManagedInstance>,
-) => (sender: Readonly<Player>, ...args: Readonly<CallArguments>) => void;
+) => (sender: Readonly<Player>, ...args: readonly unknown[]) => void;
 
 export namespace NetMiddlewares {
 	export const RateLimit = createRateLimiter;

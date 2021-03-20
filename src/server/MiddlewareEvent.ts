@@ -1,10 +1,18 @@
 import { $ifEnv } from "rbxts-transform-env";
-import { NetMiddleware, NextCaller } from "../middleware";
+import { NetGlobalMiddleware, NetMiddleware, NextCaller } from "../middleware";
 
+/** @internal */
+export type MutableMiddlewareList = Array<NetMiddleware<Array<unknown>>>;
 export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
 abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 	abstract GetInstance(): RemoteEvent;
+
+	/** @internal */
+	public _use(middleware: NetGlobalMiddleware) {
+		(this.middlewares as MutableMiddlewareList).push(middleware);
+	}
+
 	protected _processMiddleware<A extends ReadonlyArray<unknown>, R = void>(
 		callback: (player: Player, ...args: A) => R,
 	) {

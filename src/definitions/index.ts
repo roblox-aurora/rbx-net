@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MiddlewareOverload } from "../middleware";
+import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
 import {
 	LegacyAsyncFunctionDeclaration,
 	AsyncFunctionDeclarationLike,
@@ -39,10 +39,10 @@ namespace NetDefinitions {
 	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T) {
+	export function Create<T extends RemoteDeclarations>(declarations: T, globalMiddleware?: NetGlobalMiddleware[]) {
 		validateDeclarations(declarations);
 		return identity<DefinitionsCreateResult<T>>({
-			Server: new ServerDefinitionBuilder<T>(declarations),
+			Server: new ServerDefinitionBuilder<T>(declarations, globalMiddleware),
 			Client: new ClientDefinitionBuilder<T>(declarations),
 		});
 	}
@@ -145,6 +145,22 @@ namespace NetDefinitions {
 			Type: "Event",
 			ServerMiddleware: mw,
 		} as ClientToServerEventDeclaration<ClientArgs>;
+	}
+
+	export interface ReadonlyGlobalMiddleware {}
+	export interface ReadonlyGlobalMiddlewareArgs {
+		(remoteName: string, remoteData: readonly unknown[], callingPlayer?: Player): void;
+	}
+
+	/**
+	 * Creates a global readonly middleware
+	 */
+	export function GlobalReadonlyMiddleware(middleware: ReadonlyGlobalMiddlewareArgs) {
+		const ret: NetGlobalMiddleware = (next, event) => (sender, ...args) => {
+			middleware(event.GetInstance().Name, args, sender);
+			next(sender, ...args);
+		};
+		return ret;
 	}
 
 	/**

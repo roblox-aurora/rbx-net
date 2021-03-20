@@ -1,4 +1,4 @@
-import { NetMiddleware } from "../middleware";
+import { NetGlobalMiddleware, NetMiddleware } from "../middleware";
 import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";

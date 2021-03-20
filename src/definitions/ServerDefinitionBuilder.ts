@@ -1,4 +1,6 @@
+import { NetGlobalMiddleware } from "middleware";
 import { $dbg, $nameof, $print } from "rbxts-transform-debug";
+import MiddlewareEvent from "server/MiddlewareEvent";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
@@ -23,9 +25,12 @@ import {
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
+const remoteEventCache = new Map<string, ServerEvent>();
+const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
+const remoteFunctionCache = new Map<string, ServerFunction>();
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T) {
+	public constructor(declarations: T, private globalMiddleware?: NetGlobalMiddleware[]) {
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
 			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
@@ -84,7 +89,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		const group = declarationMap.get(this)![key] as DeclarationGroupLike;
 		assert(group.Type === "Group");
 		$print(`Fetch Group`, key);
-		return new ServerDefinitionBuilder(group.Definitions as InferGroupDeclaration<T[K]>);
+		return new ServerDefinitionBuilder(group.Definitions as InferGroupDeclaration<T[K]>, this.globalMiddleware);
 	}
 
 	/**
@@ -94,23 +99,55 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		const item = declarationMap.get(this)![k];
 		assert(item && item.Type, `'${k}' is not defined in this definition.`);
 		if (item.Type === "Function") {
-			if (item.ServerMiddleware) {
-				return new ServerFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
+			let func: ServerFunction;
+
+			// This should make certain use cases cheaper
+			if (remoteFunctionCache.has(k)) {
+				return remoteFunctionCache.get(k)! as InferServerRemote<T[K]>;
 			} else {
-				return new ServerFunction(k) as InferServerRemote<T[K]>;
+				if (item.ServerMiddleware) {
+					func = new ServerFunction(k, item.ServerMiddleware);
+				} else {
+					func = new ServerFunction(k);
+				}
+				remoteFunctionCache.set(k, func);
 			}
+
+			this.globalMiddleware?.forEach((mw) => func._use(mw));
+			return func as InferServerRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
-			if (item.ServerMiddleware) {
-				return new ServerAsyncFunction(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
+			let asyncFunction: ServerAsyncFunction;
+
+			// This should make certain use cases cheaper
+			if (remoteAsyncFunctionCache.has(k)) {
+				return remoteAsyncFunctionCache.get(k)! as InferServerRemote<T[K]>;
 			} else {
-				return new ServerAsyncFunction(k) as InferServerRemote<T[K]>;
+				if (item.ServerMiddleware) {
+					asyncFunction = new ServerAsyncFunction(k, item.ServerMiddleware);
+				} else {
+					asyncFunction = new ServerAsyncFunction(k);
+				}
+				remoteAsyncFunctionCache.set(k, asyncFunction);
 			}
+
+			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
+			return asyncFunction as InferServerRemote<T[K]>;
 		} else if (item.Type === "Event") {
-			if (item.ServerMiddleware) {
-				return new ServerEvent(k, item.ServerMiddleware) as InferServerRemote<T[K]>;
+			let event: ServerEvent;
+
+			// This should make certain use cases cheaper
+			if (remoteEventCache.has(k)) {
+				return remoteEventCache.get(k)! as InferServerRemote<T[K]>;
 			} else {
-				return new ServerEvent(k) as InferServerRemote<T[K]>;
+				if (item.ServerMiddleware) {
+					event = new ServerEvent(k, item.ServerMiddleware);
+				} else {
+					event = new ServerEvent(k);
+				}
 			}
+
+			this.globalMiddleware?.forEach((mw) => event._use(mw));
+			return event as InferServerRemote<T[K]>;
 		}
 
 		throw `Invalid Type`;
