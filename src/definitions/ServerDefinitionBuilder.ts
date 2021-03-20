@@ -1,26 +1,21 @@
 import { NetGlobalMiddleware } from "../middleware";
 import { $dbg, $nameof, $print } from "rbxts-transform-debug";
-import MiddlewareEvent from "../server/MiddlewareEvent";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import {
-	AsyncFunctionDeclarationLike,
 	AsyncServerFunctionDeclaration,
 	BidirectionalEventDeclaration,
 	ClientToServerEventDeclaration,
-	DeclarationGroup,
-	DeclarationGroupLike,
 	DeclarationsOf,
-	EventDeclarationLike,
 	FilterDeclarations,
 	FilterGroups,
+	GroupDeclaration,
 	InferGroupDeclaration,
 	InferServerCallback,
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
-	ServerToClientEventDeclaration,
 } from "./Types";
 
 // Keep the declarations fully isolated
@@ -86,7 +81,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 */
 	// TODO
 	Group<K extends keyof FilterGroups<T> & string>(key: K) {
-		const group = declarationMap.get(this)![key] as DeclarationGroupLike;
+		const group = declarationMap.get(this)![key] as GroupDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Group");
 		$print(`Fetch Group`, key);
 		return new ServerDefinitionBuilder(

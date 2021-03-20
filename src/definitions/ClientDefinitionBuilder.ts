@@ -4,12 +4,9 @@ import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import {
 	AsyncClientFunctionDeclaration,
-	AsyncFunctionDeclarationLike,
-	DeclarationGroupLike,
-	DeclarationLike,
 	DeclarationsOf,
-	EventDeclarationLike,
 	FilterGroups,
+	GroupDeclaration,
 	InferClientCallback,
 	InferClientConnect,
 	InferClientRemote,
@@ -54,7 +51,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 */
 	// TODO
 	Group<K extends keyof FilterGroups<T> & string>(key: K) {
-		const group = declarationMap.get(this)![key] as DeclarationGroupLike;
+		const group = declarationMap.get(this)![key] as GroupDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Group");
 		return new ClientDefinitionBuilder(
 			group.Definitions as InferGroupDeclaration<T[K]>,
