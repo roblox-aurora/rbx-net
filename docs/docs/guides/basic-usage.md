@@ -33,13 +33,13 @@ export { Remotes };
 import { Remotes } from "shared/remotes";
 
 // listen to messages
-const PrintMessage = Remotes.CreateServer("PrintMessage");
+const PrintMessage = Remotes.Server.Create("PrintMessage");
 PrintMessage.Connect((player, message, other) => {
   print(`Server recieved message: ${message} from player: ${player} ${other}`);
 });
 
 // listen and respond to messages
-const MakeHello = Remotes.CreateServer("MakeHello");
+const MakeHello = Remotes.Server.Create("MakeHello");
 MakeHello.SetCallback((player, message) => {
   print(`Server got an async message from ${player} containing the message ${message}`);
   return `Hello, ${player}! We got your message: ${message}`;
@@ -50,11 +50,11 @@ MakeHello.SetCallback((player, message) => {
 import { Remotes } from "shared/remotes";
 
 // send a message to the server
-const PrintMessage = Remotes.GetClient("PrintMessage");
+const PrintMessage = Remotes.Client.Get("PrintMessage");
 PrintMessage.SendToServer("Hello there!", "other");
 
 // send a message to the server, while listening for a response
-const MakeHello = Remotes.GetClient("MakeHello");
+const MakeHello = Remotes.Client.Get("MakeHello");
 MakeHello.CallServerAsync("Net is cool right??").then((result) => {
   print(`Client got a response to the async message from server: ${result}`);
 });
