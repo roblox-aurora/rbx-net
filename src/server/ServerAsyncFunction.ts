@@ -13,15 +13,25 @@ function isEventArgs(value: unknown[]): value is AsyncEventArgs {
 	return typeIs(eventId, "string") && typeIs(data, "table");
 }
 
+export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
+	SetCallback<R extends CallbackReturnType>(callback: (player: Player, ...args: CallbackArgs) => R): void;
+}
+
+export interface ServerAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
+	CallPlayerAsync(player: Player, ...args: CallArgs): Promise<CallReturnType>;
+}
+
 /**
  * An asynchronous function for two way communication between the client and server
  */
 class ServerAsyncFunction<
-	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	CallReturnType = unknown,
-	CallbackReturnType = unknown
-> extends MiddlewareEvent {
+		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallReturnType = unknown,
+		CallbackReturnType = unknown
+	>
+	extends MiddlewareEvent
+	implements ServerAsyncCallback<CallbackArgs, CallbackReturnType>, ServerAsyncCaller<CallArgs, CallReturnType> {
 	private instance: RemoteEvent<Callback>;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;

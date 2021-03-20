@@ -3,6 +3,14 @@ import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote } from "../i
 
 const HttpService = game.GetService("HttpService");
 
+export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
+	SetCallback<R extends CallbackReturnType>(callback: (...args: CallbackArgs) => R): void;
+}
+
+export interface ClientAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
+	CallServerAsync(...args: CallArgs): Promise<CallReturnType>;
+}
+
 /**
  * An event that behaves like a function
  * @rbxts client
@@ -12,7 +20,7 @@ export default class ClientAsyncFunction<
 	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	CallReturnType = unknown,
 	CallbackReturnType = unknown
-> {
+> implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
 	private instance: RemoteEvent;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;

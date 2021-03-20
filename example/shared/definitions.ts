@@ -7,27 +7,38 @@ import t from "@rbxts/t";
 // 	Name: true,
 // });
 
-const { Create, Group, Event, Function, AsyncFunction, ServerEvent, ClientEvent } = Net.Definitions;
+const { Create, Group, Event, Function, AsyncFunction, ServerToClientEvent, ClientToServerEvent } = Net.Definitions;
 
 const Remotes = Create({
 	TestDefinition: Event<[message: string]>([Net.Middleware.Logging(), Net.Middleware.TypeChecking(t.string)]),
 	TestFun: Function(),
 	TestFun2: AsyncFunction<(message: string) => boolean>(),
+	TestEvent: ServerToClientEvent(),
 	SubGroup: Group({
 		TestFun3: Function(),
 		AnotherGroup: Group({
 			TestFun4: Function(),
 		}),
 	}),
-	Test: Net.Definitions.ServerEvent<[test: string]>(),
-	Test2: Net.Definitions.ClientEvent<[test: string]>(),
+	Test: Net.Definitions.ServerToClientEvent(),
+	Test2: Net.Definitions.ClientToServerEvent<[test: string]>(),
+	Test3: Net.Definitions.ClientToServerEvent([
+		Net.Middleware.TypeChecking((value: unknown): value is string => true),
+	]),
+	Test4: Net.Definitions.BidirectionalEvent(),
+	Test5: Net.Definitions.CallServerAsyncFunction<(arg: string) => number>(), // ?
+	Test6: Net.Definitions.CallClientAsyncFunction<(arg: string) => number>(),
 });
 
-Remotes.Server.Create("Test").SendToPlayer;
-Remotes.Server.Create("Test2").Connect;
-Remotes.Client.Get("Test").Connect;
-Remotes.Client.Get("Test2").SendToServer;
+// Remotes.Server.Create("TestEvent").Connect(())
 
-Remotes.Server.Create("TestDefinition").Connect();
+// Remotes.Server.Create("Test4").Connect(())
+Remotes.Server.OnEvent("Test4", () => {});
+Remotes.Server.Create("Test4").Connect((player, arg) => {});
+Remotes.Server.OnFunction("Test5", () => {});
+Remotes.Client.OnFunction("Test6", () => {});
+
+const five = Remotes.Server.Create("Test6");
+const fiveC = Remotes.Client.Get("Test6");
 
 export default Remotes;

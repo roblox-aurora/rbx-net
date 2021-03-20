@@ -3,6 +3,7 @@ import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import {
+	AsyncClientFunctionDeclaration,
 	AsyncFunctionDeclarationLike,
 	DeclarationGroupLike,
 	DeclarationLike,
@@ -14,7 +15,7 @@ import {
 	InferClientRemote,
 	InferGroupDeclaration,
 	RemoteDeclarations,
-	ServerEventDeclaration,
+	ServerToClientEventDeclaration,
 } from "./Types";
 
 // Keep the declarations fully isolated
@@ -86,20 +87,20 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.GetClient(name).Connect(fn)
 	 * ```
 	 */
-	OnEvent<K extends keyof DeclarationsOf<T, ServerEventDeclaration<unknown[]>> & string>(
+	OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
 		name: K,
-		fn: InferClientConnect<Extract<T[K], ServerEventDeclaration<unknown[]>>>,
+		fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<ServerEventDeclaration<any>>;
+		const result = this.Get(name) as InferClientRemote<ServerToClientEventDeclaration<any>>;
 		result.Connect(fn);
 	}
 
 	/** @internal */
-	OnFunction<K extends keyof DeclarationsOf<T, AsyncFunctionDeclarationLike> & string>(
+	OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
 		name: K,
-		fn: InferClientCallback<Extract<T[K], AsyncFunctionDeclarationLike>>,
+		fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<AsyncFunctionDeclarationLike>;
+		const result = this.Get(name) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
 }

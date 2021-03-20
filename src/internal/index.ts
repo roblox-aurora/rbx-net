@@ -83,17 +83,27 @@ export function errorft(message: string, vars: { [name: string]: unknown }): nev
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
-		return vars[token] || token;
+		return vars[token] ?? token;
 	});
 
 	error(message, 2);
+}
+
+const traceSet = new Set<string>();
+export function warnOnce(message: string) {
+	const trace = debug.traceback();
+	if (traceSet.has(trace)) {
+		return;
+	}
+	traceSet.add(trace);
+	warn(message);
 }
 
 export function format(message: string, vars: { [name: string]: unknown }) {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
-		return vars[token] || token;
+		return vars[token] ?? token;
 	});
 	return message;
 }

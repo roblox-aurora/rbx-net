@@ -4,7 +4,9 @@ import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import {
 	AsyncFunctionDeclarationLike,
-	ClientEventDeclaration,
+	AsyncServerFunctionDeclaration,
+	BidirectionalEventDeclaration,
+	ClientToServerEventDeclaration,
 	DeclarationGroup,
 	DeclarationGroupLike,
 	DeclarationsOf,
@@ -16,7 +18,7 @@ import {
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
-	ServerEventDeclaration,
+	ServerToClientEventDeclaration,
 } from "./Types";
 
 // Keep the declarations fully isolated
@@ -48,11 +50,21 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.CreateServer(name).Connect(fn)
 	 * ```
 	 */
-	OnEvent<K extends keyof DeclarationsOf<FilterDeclarations<T>, ClientEventDeclaration<any>> & string>(
+	OnEvent<
+		K extends keyof DeclarationsOf<
+			FilterDeclarations<T>,
+			ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
+		> &
+			string
+	>(
 		name: K,
-		fn: InferServerConnect<Extract<T[K], ClientEventDeclaration<any>>>,
+		fn: InferServerConnect<
+			Extract<T[K], ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>>
+		>,
 	) {
-		const result = this.Create(name) as InferServerRemote<ClientEventDeclaration<any>>;
+		const result = this.Create(name) as InferServerRemote<
+			ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
+		>;
 		result.Connect(fn);
 	}
 
@@ -105,11 +117,10 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/** @internal */
-	OnFunction<K extends keyof DeclarationsOf<FilterDeclarations<T>, AsyncFunctionDeclarationLike> & string>(
-		name: K,
-		fn: InferServerCallback<Extract<T[K], AsyncFunctionDeclarationLike>>,
-	) {
-		const result = this.Create(name) as InferServerRemote<AsyncFunctionDeclarationLike>;
+	OnFunction<
+		K extends keyof DeclarationsOf<FilterDeclarations<T>, AsyncServerFunctionDeclaration<any, any>> & string
+	>(name: K, fn: InferServerCallback<Extract<T[K], AsyncServerFunctionDeclaration<any, any>>>) {
+		const result = this.Create(name) as InferServerRemote<AsyncServerFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
 }

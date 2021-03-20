@@ -4,11 +4,11 @@
  * I will admit, this is a lot of type spaghetti. It makes the definitions work good though. :D
  */
 import { interface } from "@rbxts/t";
-import ClientAsyncFunction from "../client/ClientAsyncFunction";
+import ClientAsyncFunction, { ClientAsyncCallback, ClientAsyncCaller } from "../client/ClientAsyncFunction";
 import ClientEvent, { ClientListenerEvent, ClientSenderEvent } from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import { MiddlewareOverload } from "../middleware";
-import ServerAsyncFunction from "../server/ServerAsyncFunction";
+import ServerAsyncFunction, { ServerAsyncCallback, ServerAsyncCaller } from "../server/ServerAsyncFunction";
 import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
@@ -51,8 +51,11 @@ export type DeclarationsOf<
 		| EventDeclarationLike
 		| FunctionDeclarationLike
 		| AsyncFunctionDeclarationLike
-		| ServerEventDeclaration<any>
-		| ClientEventDeclaration<any>
+		| AsyncClientFunctionDeclaration<any, any>
+		| AsyncServerFunctionDeclaration<any, any>
+		| ServerToClientEventDeclaration<any>
+		| ClientToServerEventDeclaration<any>
+		| BidirectionalEventDeclaration<any, any>
 > = {
 	[K in ExtractKeys<T, U>]: T[K];
 };
@@ -71,14 +74,17 @@ export interface AsyncFunctionDeclarationLike {
 	 * @internal Do not use, used to force using the creators
 	 */
 	readonly _nominal_AsyncFunctionDeclaration: unique symbol;
-
 	Type: "AsyncFunction";
 	ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 	ServerReturns?: CheckLike;
 	ClientArguments?: ReadonlyArray<CheckLike>;
 	ClientReturns?: CheckLike;
 }
-export interface AsyncFunctionDeclaration<
+
+/**
+ * @deprecated
+ */
+export interface LegacyAsyncFunctionDeclaration<
 	ServerArgs extends readonly unknown[],
 	ServerReturn extends unknown,
 	ClientArgs extends readonly unknown[],
@@ -88,6 +94,29 @@ export interface AsyncFunctionDeclaration<
 	ServerReturns: Check<ServerReturn>;
 	ClientReturns: Check<ClientReturn>;
 	ClientArguments: Checks<ClientArgs>;
+}
+
+export interface AsyncClientFunctionDeclaration<ClientArgs extends readonly unknown[], ClientReturn>
+	extends AsyncFunctionDeclarationLike {
+	/**
+	 * @deprecated
+	 * @internal Do not use, used to force using the creators
+	 */
+	readonly _nominal_AsyncClientFunction: unique symbol;
+	ClientReturns: Check<ClientReturn>;
+	ClientArguments: Checks<ClientArgs>;
+}
+
+export interface AsyncServerFunctionDeclaration<ServerArgs extends readonly unknown[], ServerReturn>
+	extends AsyncFunctionDeclarationLike {
+	/**
+	 * @deprecated
+	 * @internal Do not use, used to force using the creators
+	 */
+	readonly _nominal_AsyncServerFunction: unique symbol;
+
+	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
+	ServerReturns: Check<ServerReturn>;
 }
 
 export interface EventDeclarationLike {
@@ -109,15 +138,24 @@ export interface LegacyEventDeclaration<ServerArgs extends readonly unknown[], C
 	ClientArguments: Checks<ClientArgs>;
 }
 
-export interface ClientEventDeclaration<ClientArgs extends readonly unknown[]> extends EventDeclarationLike {
+export interface ClientToServerEventDeclaration<ClientArgs extends readonly unknown[]> extends EventDeclarationLike {
 	ServerMiddleware: [];
 	ClientArguments: Checks<ClientArgs>;
-	readonly _nominal_Client: unique symbol;
+	readonly _nominal_ClientToServerEvent: unique symbol;
 }
 
-export interface ServerEventDeclaration<ServerArgs extends readonly unknown[]> extends EventDeclarationLike {
+export interface ServerToClientEventDeclaration<ServerArgs extends readonly unknown[]> extends EventDeclarationLike {
 	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
-	readonly _nominal_Server: unique symbol;
+	readonly _nominal_ServerToClientEvent: unique symbol;
+}
+
+export interface BidirectionalEventDeclaration<
+	ServerArgs extends readonly unknown[],
+	ClientArgs extends readonly unknown[]
+> extends EventDeclarationLike {
+	ServerMiddleware: [...mw: MiddlewareOverload<ServerArgs>];
+	ClientArguments: Checks<ClientArgs>;
+	readonly _nominal_Bidirectional: unique symbol;
 }
 
 export interface DeclarationGroupLike {
@@ -155,13 +193,25 @@ type CheckTupleToInferedValues<Tuple extends readonly [...defined[]]> = {
 // * Inference Magic
 ///////////////////////////////
 
-export type InferServerConnect<T> = T extends ClientEventDeclaration<infer A> ? (...args: A) => void : never;
-export type InferClientConnect<T> = T extends ServerEventDeclaration<infer A> ? (...args: A) => void : never;
+export type InferServerConnect<T> = T extends ClientToServerEventDeclaration<infer A>
+	? (...args: A) => void
+	: T extends BidirectionalEventDeclaration<infer S, infer _>
+	? (...args: S) => void
+	: never;
+export type InferClientConnect<T> = T extends ServerToClientEventDeclaration<infer A>
+	? (...args: A) => void
+	: T extends BidirectionalEventDeclaration<infer _, infer C>
+	? (...args: C) => void
+	: never;
 
-export type InferClientCallback<T> = T extends AsyncFunctionDeclaration<any, any, infer A, infer R>
+export type InferClientCallback<T> = T extends LegacyAsyncFunctionDeclaration<any, any, infer A, infer R>
+	? (...args: A) => R
+	: T extends AsyncClientFunctionDeclaration<infer A, infer R>
 	? (...args: A) => R
 	: never;
-export type InferServerCallback<T> = T extends AsyncFunctionDeclaration<infer A, infer R, any, any>
+export type InferServerCallback<T> = T extends LegacyAsyncFunctionDeclaration<infer A, infer R, any, any>
+	? (...args: A) => R
+	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
 	? (...args: A) => R
 	: never;
 
@@ -173,12 +223,20 @@ type InferArgs<T extends readonly CheckLike[] | CheckLike | undefined> = T exten
 	? InferCheck<T>
 	: unknown[];
 
+// TODO: Remove
+/**
+ * @deprecated
+ */
 type InferServerEvent<T extends EventDeclarationLike> = T["ServerMiddleware"] extends [
 	...mw: MiddlewareOverload<infer A>
 ]
 	? ServerEvent<A, InferArgs<T["ClientArguments"]>>
 	: ServerEvent<unknown[], InferArgs<T["ClientArguments"]>>;
 
+// TODO: Remove
+/**
+ * @deprecated
+ */
 type InferClientEvent<T extends EventDeclarationLike> = T["ServerMiddleware"] extends [
 	...mw: MiddlewareOverload<infer A>
 ]
@@ -191,6 +249,7 @@ type InferClientFunction<T extends FunctionDeclarationLike> = T["ServerMiddlewar
 	? ClientFunction<A, InferArgs<T["ServerReturns"]>>
 	: ClientFunction<unknown[], InferArgs<T["ServerReturns"]>>;
 
+/** @deprecated */
 type InferClientAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["ServerMiddleware"] extends [
 	...mw: MiddlewareOverload<infer A>
 ]
@@ -208,6 +267,7 @@ type InferServerFunction<T extends FunctionDeclarationLike> = T["ServerMiddlewar
 	? ServerFunction<A, InferArgs<T["ServerReturns"]>>
 	: ServerFunction<unknown[], InferArgs<T["ServerReturns"]>>;
 
+/** @deprecated */
 type InferServerAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["ServerMiddleware"] extends [
 	...mw: MiddlewareOverload<infer A>
 ]
@@ -221,23 +281,35 @@ type InferServerAsyncFunction<T extends AsyncFunctionDeclarationLike> = T["Serve
 
 export type InferClientRemote<T> = T extends FunctionDeclarationLike
 	? InferClientFunction<T>
+	: T extends AsyncClientFunctionDeclaration<infer A, infer R>
+	? ClientAsyncCallback<A, R>
+	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
+	? ClientAsyncCaller<A, R>
 	: T extends AsyncFunctionDeclarationLike
 	? InferClientAsyncFunction<T>
-	: T extends ClientEventDeclaration<infer A>
+	: T extends ClientToServerEventDeclaration<infer A>
 	? ClientSenderEvent<A>
-	: T extends ServerEventDeclaration<infer A>
+	: T extends ServerToClientEventDeclaration<infer A>
 	? ClientListenerEvent<A>
+	: T extends BidirectionalEventDeclaration<infer S, infer C>
+	? ClientEvent<S, C>
 	: T extends EventDeclarationLike
 	? InferClientEvent<T>
 	: never;
 export type InferServerRemote<T> = T extends FunctionDeclarationLike
 	? InferServerFunction<T>
+	: T extends AsyncClientFunctionDeclaration<infer A, infer R>
+	? ServerAsyncCaller<A, R>
+	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
+	? ServerAsyncCallback<A, R>
 	: T extends AsyncFunctionDeclarationLike
 	? InferServerAsyncFunction<T>
-	: T extends ClientEventDeclaration<infer A>
+	: T extends ClientToServerEventDeclaration<infer A>
 	? ServerListenerEvent<A>
-	: T extends ServerEventDeclaration<infer A>
+	: T extends ServerToClientEventDeclaration<infer A>
 	? ServerSenderEvent<A>
+	: T extends BidirectionalEventDeclaration<infer S, infer C>
+	? ServerEvent<S, C>
 	: T extends EventDeclarationLike
 	? InferServerEvent<T>
 	: never;
