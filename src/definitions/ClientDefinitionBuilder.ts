@@ -34,9 +34,8 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Gets a client remote from a declaration
 	 */
 	Get<K extends keyof T & string>(k: K): InferClientRemote<T[K]> {
-		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
-
 		const item = declarationMap.get(this)![k];
+		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
 		assert(item && item.Type, `'${k}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			return new ClientFunction(k) as InferClientRemote<T[K]>;
@@ -59,7 +58,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(group.Type === "Group");
 		return new ClientDefinitionBuilder(
 			group.Definitions as InferGroupDeclaration<T[K]>,
-			[this.namespace, key].join(":"),
+			this.namespace !== "" ? [this.namespace, key].join(":") : key,
 		);
 	}
 

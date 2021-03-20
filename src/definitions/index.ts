@@ -66,7 +66,7 @@ namespace NetDefinitions {
 	 * ... (asynchronously) ...
 	 * `Server` [`Responds to Call`] -> `Client` [`Recieves Response`]
 	 */
-	export function CallServerAsyncFunction<
+	export function ServerAsyncFunction<
 		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
 	>(mw?: MiddlewareOverload<Parameters<ServerFunction>>) {
 		return {
@@ -82,7 +82,7 @@ namespace NetDefinitions {
 	 * ... (asynchronously) ...
 	 * `Client` [`Responds to Call`] -> `Server` [`Recieves Response`]
 	 */
-	export function CallClientAsyncFunction<
+	export function ClientAsyncFunction<
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
 	>() {
 		return {
@@ -95,7 +95,7 @@ namespace NetDefinitions {
 	 *
 	 * (Synchronous) `Client` [`Calls`, `Recieves Response`] <- (yields for response) -> `Server` [`Recieves Call`, `Responds`]
 	 */
-	export function CallServerFunction<ServerFunction extends (...args: any[]) => any>(
+	export function ServerFunction<ServerFunction extends (...args: any[]) => any>(
 		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
 	) {
 		return {
@@ -158,7 +158,7 @@ namespace NetDefinitions {
 	export function GlobalReadonlyMiddleware(middleware: ReadonlyGlobalMiddlewareArgs) {
 		const ret: NetGlobalMiddleware = (next, event) => (sender, ...args) => {
 			middleware(event.GetInstance().Name, args, sender);
-			next(sender, ...args);
+			return next(sender, ...args);
 		};
 		return ret;
 	}
@@ -201,9 +201,9 @@ namespace NetDefinitions {
 	export function Function(mw?: MiddlewareOverload<any>): FunctionDeclarationLike {
 		warnOnce(
 			`[rbx-net] Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
-				CallServerAsyncFunction,
+				ServerAsyncFunction,
 			)}' or '${$nameof(
-				CallClientAsyncFunction,
+				ClientAsyncFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);
 		return {
@@ -264,9 +264,9 @@ namespace NetDefinitions {
 	export function AsyncFunction(mw?: MiddlewareOverload<any>): AsyncFunctionDeclarationLike {
 		warnOnce(
 			`[rbx-net] Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(
-				CallServerAsyncFunction,
+				ServerAsyncFunction,
 			)}' or '${$nameof(
-				CallClientAsyncFunction,
+				ClientAsyncFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);
 		return {

@@ -23,7 +23,7 @@ import Net from "@rbxts/net";
 
 const Remotes = Net.Definitions.Create({
   PrintMessage: Net.Definitions.ClientToServerEvent<[message: string, other: string]>(),
-  MakeHello: Net.Definitions.CallServerAsyncFunction<(message: string) => string>(),
+  MakeHello: Net.Definitions.ServerAsyncFunction<(message: string) => string>(),
 });
 
 export { Remotes };
@@ -70,7 +70,7 @@ local Net = require(ReplicatedStorage.Net)
 
 local Remotes = Net.Definitions.Create({
   PrintMessage = Net.Definitions.ClientToServerEvent(),
-  MakeHello = Net.Definitions.CallServerAsyncFunction(),
+  MakeHello = Net.Definitions.ServerAsyncFunction(),
 })
 
 return Remotes

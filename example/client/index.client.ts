@@ -1,21 +1,13 @@
 import Net from "@rbxts/net";
-import t from "@rbxts/t";
 import Remotes from "./definitions";
-import { createTypeChecker } from "./middleware";
 
-Net.Client.SetConfiguration("EnableDebugMessages", true);
+const testFunctions = Remotes.Client.Group("TestingFunctions");
+const add = testFunctions.Get("CallServerAndAddNumbers");
 
-const say = new Net.Client.Event("Say");
-say.SendToServer("Hello, World!");
-say.SendToServer("Should throw");
-
-Net.Client.GetAsyncFunctionAsync("TestAsync").then((event) => {
-	event.CallServerAsync("Hello there").then((result) => print("result 1", result));
-	event
-		.CallServerAsync("Hello there... again?")
-		.then((result) => print(result))
-		.catch((err) => warn("failed: " + tostring(err)));
+add.CallServerAsync(10, 10).then((result) => {
+	if (result === 20) {
+		print("RESULT IS 20");
+	} else {
+		error("RESULT IS WRONG");
+	}
 });
-
-const remote = Remotes.Client.Get("TestDefinition");
-remote.SendToServer("Hello there!! :D");

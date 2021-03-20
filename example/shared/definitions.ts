@@ -1,5 +1,6 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
+import { $print } from "rbxts-transform-debug";
 
 // type $GuidTree<K extends string, T> = { readonly [P in keyof T]: `guid@${K}:${P & string}` };
 // declare function $guids<K extends string, T extends Record<string, true>>(namespace: K, values: T): $GuidTree<K, T>;
@@ -7,32 +8,26 @@ import t from "@rbxts/t";
 // 	Name: true,
 // });
 
-const { Create, Group, Event, Function, AsyncFunction, ServerToClientEvent, ClientToServerEvent } = Net.Definitions;
+const {
+	Create,
+	Group,
+	Event,
+	Function,
+	ServerAsyncFunction,
+	ServerToClientEvent,
+	ClientToServerEvent,
+} = Net.Definitions;
 
 const Remotes = Create(
 	{
-		TestDefinition: Event<[message: string]>([Net.Middleware.Logging(), Net.Middleware.TypeChecking(t.string)]),
-		TestFun: Function(),
-		TestFun2: AsyncFunction<(message: string) => boolean>(),
-		TestEvent: ServerToClientEvent(),
-		SubGroup: Group({
-			TestFun3: Function(),
-			AnotherGroup: Group({
-				TestFun4: Function(),
-			}),
+		TestingFunctions: Group({
+			CallServerAndAddNumbers: ServerAsyncFunction<(a: number, b: number) => number>(),
 		}),
-		Test: Net.Definitions.ServerToClientEvent(),
-		Test2: Net.Definitions.ClientToServerEvent<[test: string]>(),
-		Test3: Net.Definitions.ClientToServerEvent([
-			Net.Middleware.TypeChecking((value: unknown): value is string => true),
-		]),
-		Test4: Net.Definitions.BidirectionalEvent(),
-		Test5: Net.Definitions.CallServerAsyncFunction<(arg: string) => number>(), // ?
-		Test6: Net.Definitions.CallClientAsyncFunction<(arg: string) => number>(),
+		TestingEvents: Group({}),
 	},
 	[
 		Net.Definitions.GlobalReadonlyMiddleware((remote, data, player) => {
-			print("call from", player, "via", remote, ...data);
+			$print("call from", player, "via", remote, ...data);
 		}),
 	],
 );

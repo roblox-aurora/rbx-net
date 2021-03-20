@@ -1,6 +1,6 @@
-import { NetGlobalMiddleware } from "middleware";
+import { NetGlobalMiddleware } from "../middleware";
 import { $dbg, $nameof, $print } from "rbxts-transform-debug";
-import MiddlewareEvent from "server/MiddlewareEvent";
+import MiddlewareEvent from "../server/MiddlewareEvent";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
@@ -92,7 +92,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		return new ServerDefinitionBuilder(
 			group.Definitions as InferGroupDeclaration<T[K]>,
 			this.globalMiddleware,
-			[this.namespace, key].join(":"),
+			this.namespace !== "" ? [this.namespace, key].join(":") : key,
 		);
 	}
 
@@ -100,9 +100,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Creates a server remote from a declaration
 	 */
 	Create<K extends keyof FilterDeclarations<T> & string>(k: K): InferServerRemote<T[K]> {
-		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
-
 		const item = declarationMap.get(this)![k];
+		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
 		assert(item && item.Type, `'${k}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			let func: ServerFunction;
