@@ -98,16 +98,16 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.json"),
-          lastVersion: "current",
+          lastVersion: "2.0.x",
           versions: {
             current: {
               label: require("../package.json").version,
-              path: "2.0"
+              path: "2.1"
             },
-            "1.3.0": {
-              label: "1.3.0-beta.6.2",
-              path: "1.3.x",
-            },
+            "2.0.x": {
+              label: "2.0.0",
+              path: "2.0",
+            }
           },
           // Please change this to your repo.
           editUrl: "https://github.com/roblox-aurora/rbx-net/edit/main/docs/",

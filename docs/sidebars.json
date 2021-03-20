@@ -11,10 +11,15 @@
 		},
 		{
 			"type": "category",
-			"label": "Guides",
+			"label": "Definitions Guide",
 			"items": [
-				"guides/basics",
-				"guides/definitions",
+				"guides/definitions"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Other Guides",
+			"items": [
 				"guides/uuid",
 				"guides/custom-player-objects"
 			]

@@ -7,20 +7,16 @@ slug: /api/definitions
 
 This namespace is for the Definitions feature.
 
-### Definitions.Create(definitions)
+### Create(definitions)
 ```ts
-function Create<T extends RemoteDeclarations>(
-    remotes: T,
-    globalMiddleware?: Net.GlobalMiddleware
-): DefinitionBuilders<T>
+function Create<T extends RemoteDeclarations>(remotes: T): DefinitionBuilders<T>
 ```
 
 
 Function
 - Parameters
     - `remotes` An object of remote definitions. See [definitions](../definitions#definitions-oh-my) for usage.
-    - `globalMiddleware` (optional) A collection of _global middleware_ to apply to all remotes in this definition
-- Returns a [DefinitionsCreateResult](#definitionscreateresultt)
+- Returns a [DefinitionBuilders](#definitionbuilderst)
 
 Example
 ```ts title="shared/remotes.ts"
@@ -32,22 +28,12 @@ const MyDefinitions = Net.Definitions.Create({
 
 
 
-### Definitions.CallServerFunction&lt;Server&gt;(...)
+### Function&lt;Server&gt;(...)
 Definition function for creating a `FunctionDefinition`
-<!-- ### Event&lt;ServerArgs, ClientArgs&gt;(...)
-Definition function for creating an `EventDefinition` -->
-### Definitions.ServerToClientEvent&lt;ServerArgs&gt;(...)
-Definition function for creating an `ServerEventDeclaration`
-### Definitions.ClientToServerEvent&lt;ClientArgs&gt;(...)
-Definition function for creating an `ClientEventDeclaration`
-### Definitions.BidirectionalEvent&lt;ServerArgs, ClientArgs&gt;(...)
-Definition function for creating an `BidirectionalEventDeclaration`
-### Definitions.CallServerAsyncFunction&lt;Server&gt;(...)
-Definition function for creating an `ServerAsyncFunctionDefinition`
-### Definitions.CallClientAsyncFunction&lt;Client&gt;(...)
-Definition function for creating an `ClientAsyncFunctionDefinition`
-### Definitions.Group(definitions)
-Creates a group of definitions (returns `DeclarationGroup`)
+### Event&lt;ServerArgs, ClientArgs&gt;(...)
+Definition function for creating an `EventDefinition`
+### AsyncFunction&lt;Server, Client&gt;(...)
+Definition function for creating an `AsyncDefinition`
 
 ## Net.Middleware
 This namespace contains built-in middleware for RbxNet.
@@ -56,7 +42,7 @@ This namespace contains built-in middleware for RbxNet.
 ### RuntimeTypeCheck(...typeCheckers)
 
 ## DefinitionsCreateResult&lt;T&gt;
-Contains the definition builders for a given definition (returned using [`Create`](definitions#definitionscreatedefinitions) in Net.Definitions)
+Contains the definition builders for a given definition (returned using [`Create`](definitions#createdefinitions) in Net.Definitions)
 
 ```ts
 interface DefinitionsCreateResult<T extends RemoteDeclarations> {
@@ -105,7 +91,7 @@ Contains all the definition builders for server-side events and functions.
 ```ts
 class ServerDefinitionBuilder<T extends RemoteDeclaration> {
     Create(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
-    OnEvent(name: string, callback: Callback): void;
+    ConnectEvent(name: string, callback: Callback): void;
 }
 ```
 
@@ -126,7 +112,7 @@ Contains all the definition builders for server-side events and functions.
 ```ts
 class ClientDefinitionBuilder<T extends RemoteDeclaration> {
     Get(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
-    OnEvent(name: string, callback: Callback): void;
+    ConnectEvent(name: string, callback: Callback): void;
 }
 ```
 ### Get(name)

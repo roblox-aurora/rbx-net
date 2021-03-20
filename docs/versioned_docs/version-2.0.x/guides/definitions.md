@@ -8,9 +8,13 @@ import Code, { DEFAULT_VALUE, GROUP, TABS } from '@site/src/components/Code'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+:::caution
+The `Definitions` API is still very experimental, and subject to change.
+:::
+
 When designing your networking objects, it may become cumbersome to keep references to all your remotes all over the place.
 
-## The legacy way
+## The standard way
 
 You may define a remote on the server, as such:
 
@@ -83,8 +87,8 @@ One of the new cool features of v2.0 is the [Net.Definitions](api/definitions) n
 import Net from "@rbxts/net";
 
 const Remotes = Net.Definitions.Create({
-  PrintMessage: Net.Definitions.ClientToServerEvent<[message: string, other: string]>(),
-  MakeHello: Net.Definitions.CallServerAsyncFunction<(message: string) => string>(),
+  PrintMessage: Net.Definitions.Event<[message: string, other: string]>(),
+  MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>(),
 });
 
 export { Remotes };
@@ -129,8 +133,8 @@ MakeHello.CallServerAsync("Net is cool right??").then((result) => {
 local Net = require(ReplicatedStorage.Net)
 
 local Remotes = Net.Definitions.Create({
-  PrintMessage = Net.Definitions.ClientToServerEvent(),
-  MakeHello = Net.Definitions.CallServerAsyncFunction(),
+  PrintMessage = Net.Definitions.Event(),
+  MakeHello = Net.Definitions.AsyncFunction(),
 })
 
 return Remotes
