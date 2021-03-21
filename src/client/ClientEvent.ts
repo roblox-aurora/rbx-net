@@ -4,6 +4,10 @@ import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
  * Interface for client listening events
  */
 export interface ClientListenerEvent<CallArguments extends ReadonlyArray<unknown>> {
+	/**
+	 * Connects a callback function to this event, in which if any events are recieved by the server will be called.
+	 * @param callback The callback function
+	 */
 	Connect(callback: (...args: CallArguments) => void): RBXScriptConnection;
 }
 
@@ -12,7 +16,7 @@ export interface ClientListenerEvent<CallArguments extends ReadonlyArray<unknown
  */
 export interface ClientSenderEvent<CallArguments extends ReadonlyArray<unknown>> {
 	/**
-	 * Sends the specified arguments to the server
+	 * Sends an event to the server with the specified arguments
 	 * @param args The arguments
 	 */
 	SendToServer(...args: CallArguments): void;

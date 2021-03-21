@@ -23,6 +23,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		declarationMap.set(this, declarations);
 	}
 
+	/** @internal */
 	public toString() {
 		return `[${$nameof(ClientDefinitionBuilder)}]`;
 	}
@@ -80,14 +81,14 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
-	 * Create a receive-only event for the client.
+	 * Connects a callback function to this event, in which if any events are recieved by the server will be called.
 	 *
 	 * @param name The name
 	 * @param fn The callback
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.GetClient(name).Connect(fn)
+	 * Declaration.Client.Get(name).Connect(fn)
 	 * ```
 	 */
 	OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
@@ -98,7 +99,19 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		result.Connect(fn);
 	}
 
-	/** @internal */
+	/**
+	 * Sets the callback that will be invoked when the server calls this function.
+	 *
+	 * The returned result will be returned to the server. If the callback is a Promise, it will only return a value if the promise is resolved.
+	 *
+	 * @param name The name
+	 * @param fn The callback
+	 *
+	 * Shortcut for:
+	 * ```ts
+	 * Declaration.Client.Get(name).SetCallback(fn)
+	 * ```
+	 */
 	OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
 		name: K,
 		fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>,

@@ -35,19 +35,20 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		});
 	}
 
+	/** @internal */
 	public toString() {
 		return `[${$nameof(ServerDefinitionBuilder)}]`;
 	}
 
 	/**
-	 * Create a receive-only event for the server.
+	 * Connects a callback function to this event, in which if any events are recieved by the client will be called.
 	 *
 	 * @param name The name
 	 * @param fn The callback
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.CreateServer(name).Connect(fn)
+	 * Declaration.Server.Create(name).Connect(fn)
 	 * ```
 	 */
 	OnEvent<
@@ -79,7 +80,6 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 *
 	 */
-	// TODO
 	Group<K extends keyof FilterGroups<T> & string>(key: K) {
 		const group = declarationMap.get(this)![key] as GroupDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Group");
@@ -156,7 +156,19 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		throw `Invalid Type`;
 	}
 
-	/** @internal */
+	/**
+	 * Sets the callback that will be invoked when the client calls this function.
+	 *
+	 * The returned result will be returned to the client. If the callback is a Promise, it will only return a value if the promise is resolved.
+	 *
+	 * @param name The name
+	 * @param fn The callback
+	 *
+	 * Shortcut for:
+	 * ```ts
+	 * Declaration.Server.Create(name).SetCallback(fn)
+	 * ```
+	 */
 	OnFunction<
 		K extends keyof DeclarationsOf<FilterDeclarations<T>, AsyncServerFunctionDeclaration<any, any>> & string
 	>(name: K, fn: InferServerCallback<Extract<T[K], AsyncServerFunctionDeclaration<any, any>>>) {
