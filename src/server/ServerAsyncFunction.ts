@@ -14,12 +14,35 @@ function isEventArgs(value: unknown[]): value is AsyncEventArgs {
 }
 
 export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
+	/**
+	 * Sets the callback that will be invoked when the client calls this function.
+	 *
+	 * The returned result will be returned to the client. If the callback is a Promise, it will only return a value if the promise is resolved.
+	 *
+	 * @param callback The callback
+	 */
 	SetCallback<R extends CallbackReturnType>(callback: (player: Player, ...args: CallbackArgs) => R): void;
 	SetCallback<R extends Promise<CallbackReturnType>>(callback: (player: Player, ...args: CallbackArgs) => R): void;
 }
 
 export interface ServerAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
+	/**
+	 * Calls the specified player with the given arguments, and returns the result as a promise.
+	 * @param player The player to call
+	 * @param args The arguments
+	 */
 	CallPlayerAsync(player: Player, ...args: CallArgs): Promise<CallReturnType>;
+
+	/**
+	 * Sets the call timeout for this caller. If the timeout is reached, the promise from the calling function will reject.
+	 * @param timeout The timeout (in seconds)
+	 */
+	SetCallTimeout(timeout: number): void;
+
+	/**
+	 * Gets the call timeout (in seconds) that this remote will wait before rejecting if no response is recieved
+	 */
+	GetCallTimeout(): number;
 }
 
 /**
@@ -49,6 +72,15 @@ class ServerAsyncFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
+	}
+
+	public SetCallTimeout(timeout: number) {
+		assert(timeout > 0, "timeout must be a positive number");
+		this.timeout = timeout;
+	}
+
+	public GetCallTimeout() {
+		return this.timeout;
 	}
 
 	/**
