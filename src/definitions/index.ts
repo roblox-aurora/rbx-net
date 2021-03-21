@@ -2,9 +2,7 @@
 import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
 import {
 	LegacyAsyncFunctionDeclaration,
-	AsyncFunctionDeclarationLike,
 	FunctionDeclaration,
-	FunctionDeclarationLike,
 	LegacyEventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
@@ -14,14 +12,12 @@ import {
 	BidirectionalEventDeclaration,
 	AsyncServerFunctionDeclaration,
 	AsyncClientFunctionDeclaration,
+	DeclarationTypeCheck,
 } from "./Types";
-import { oneOf } from "../internal/validator";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { warnOnce } from "../internal";
 import { $nameof } from "rbxts-transform-debug";
-
-const declarationType = oneOf("Event", "Function", "AsyncFunction", "Group");
 
 namespace NetDefinitions {
 	/**
@@ -30,7 +26,7 @@ namespace NetDefinitions {
 	 */
 	function validateDeclarations(declarations: RemoteDeclarations) {
 		for (const [, declaration] of pairs(declarations)) {
-			assert(declarationType.check(declaration.Type), declarationType.errorMessage);
+			assert(DeclarationTypeCheck.check(declaration.Type), DeclarationTypeCheck.errorMessage);
 		}
 	}
 
@@ -48,8 +44,19 @@ namespace NetDefinitions {
 	}
 
 	/**
-	 * Like `Create` but used to group remotes, which can be retrieved with the corresponding `Group(key)` method.
-	 * @internal
+	 * Defines a group of remote definitions, which can be retrieved via `Group(groupName)`
+	 *
+	 * E.g.
+	 * ```ts
+	 * const Remotes = Net.Definitions.Create({
+	 * 		ExampleGroup: Net.Definitions.Group({
+	 * 			ExampleGroupRemote: Net.Definitions.ServerToClientEvent<[message: string]>(),
+	 * 		}),
+	 * });
+	 * const ExampleGroupRemote = Remotes.Server.Group("ExampleGroup").Create("ExampleGroupRemote");
+	 * ```
+	 *
+	 * This is useful for categorizing remotes by feature.
 	 */
 	// TODO
 	export function Group<T extends RemoteDeclarations>(declarations: T) {
@@ -147,22 +154,6 @@ namespace NetDefinitions {
 		} as ClientToServerEventDeclaration<ClientArgs>;
 	}
 
-	export interface ReadonlyGlobalMiddleware {}
-	export interface ReadonlyGlobalMiddlewareArgs {
-		(remoteName: string, remoteData: readonly unknown[], callingPlayer?: Player): void;
-	}
-
-	/**
-	 * Creates a global readonly middleware
-	 */
-	export function GlobalReadonlyMiddleware(middleware: ReadonlyGlobalMiddlewareArgs) {
-		const ret: NetGlobalMiddleware = (next, event) => (sender, ...args) => {
-			middleware(event.GetInstance().Name, args, sender);
-			return next(sender, ...args);
-		};
-		return ret;
-	}
-
 	/**
 	 * Defines a remote event that can be fired both from the client and server
 	 *
@@ -198,7 +189,9 @@ namespace NetDefinitions {
 	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
 		mw?: MiddlewareOverload<ServerArgs>,
 	): FunctionDeclaration<ServerArgs, ServerReturns>;
-	export function Function(mw?: MiddlewareOverload<any>): FunctionDeclarationLike {
+	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
+		mw?: MiddlewareOverload<any>,
+	) {
 		warnOnce(
 			`[rbx-net] Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
 				ServerAsyncFunction,
@@ -209,7 +202,7 @@ namespace NetDefinitions {
 		return {
 			Type: "Function",
 			ServerMiddleware: mw,
-		} as FunctionDeclarationLike;
+		} as FunctionDeclaration<ServerArgs, ServerReturns>;
 	}
 
 	/**
@@ -250,18 +243,11 @@ namespace NetDefinitions {
 	 *
 	 * @deprecated This will be removed in future - please redesign your definitions
 	 */
+
 	export function AsyncFunction<
 		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined,
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
-	>(
-		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
-	): LegacyAsyncFunctionDeclaration<
-		Parameters<ServerFunction>,
-		ReturnType<ServerFunction>,
-		Parameters<ClientFunction>,
-		ReturnType<ClientFunction>
-	>;
-	export function AsyncFunction(mw?: MiddlewareOverload<any>): AsyncFunctionDeclarationLike {
+	>(mw?: MiddlewareOverload<any>) {
 		warnOnce(
 			`[rbx-net] Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(
 				ServerAsyncFunction,
@@ -272,7 +258,12 @@ namespace NetDefinitions {
 		return {
 			Type: "AsyncFunction",
 			ServerMiddleware: mw,
-		} as AsyncFunctionDeclarationLike;
+		} as LegacyAsyncFunctionDeclaration<
+			Parameters<ServerFunction>,
+			ReturnType<ServerFunction>,
+			Parameters<ClientFunction>,
+			ReturnType<ClientFunction>
+		>;
 	}
 }
 

@@ -27,10 +27,24 @@ export type NetGlobalMiddleware = (
 	event: Readonly<NetManagedInstance>,
 ) => (sender: Readonly<Player>, ...args: readonly unknown[]) => void;
 
+export interface ReadonlyGlobalMiddlewareArgs {
+	(remoteName: string, remoteData: readonly unknown[], callingPlayer?: Player): void;
+}
+
 export namespace NetMiddlewares {
 	export const RateLimit = createRateLimiter;
 	export const Logging = createLoggerMiddleware;
 	export const TypeChecking = createTypeChecker;
+
+	/**
+	 * Creates a global read-only middleware for use in `Net.Definitions` global middleware.
+	 */
+	export function Global(middleware: ReadonlyGlobalMiddlewareArgs) {
+		return identity<NetGlobalMiddleware>((next, event) => (sender, ...args) => {
+			middleware(event.GetInstance().Name, args, sender);
+			return next(sender, ...args);
+		});
+	}
 }
 
 export { createRateLimiter, createTypeChecker };

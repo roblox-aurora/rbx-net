@@ -35,7 +35,7 @@ const Remotes = Create(
 		}),
 	},
 	[
-		Net.Definitions.GlobalReadonlyMiddleware((remote, data, player) => {
+		Net.Middleware.Global((remote, data, player) => {
 			$print("call from", player, "via", remote, ...data);
 		}),
 	],

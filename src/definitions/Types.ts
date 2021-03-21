@@ -3,7 +3,7 @@
  *
  * I will admit, this is a lot of type spaghetti. It makes the definitions work good though. :D
  */
-import { interface } from "@rbxts/t";
+import { oneOf } from "../internal/validator";
 import ClientAsyncFunction, { ClientAsyncCallback, ClientAsyncCaller } from "../client/ClientAsyncFunction";
 import ClientEvent, { ClientListenerEvent, ClientSenderEvent } from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
@@ -258,3 +258,10 @@ export type InferServerRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 
 export type ClientBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferClientRemote<T[P]> };
 export type ServerBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferServerRemote<T[P]> };
+
+export const DeclarationTypeCheck = oneOf<DeclarationLike["Type"] | DeclarationGroupLike["Type"]>(
+	"Event",
+	"Function",
+	"AsyncFunction",
+	"Group",
+);
