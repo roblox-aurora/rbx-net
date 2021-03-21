@@ -5,6 +5,7 @@ const HttpService = game.GetService("HttpService");
 
 export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
 	SetCallback<R extends CallbackReturnType>(callback: (...args: CallbackArgs) => R): void;
+	SetCallback<R extends Promise<CallbackReturnType>>(callback: (...args: CallbackArgs) => R): void;
 }
 
 export interface ClientAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {

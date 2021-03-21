@@ -15,6 +15,7 @@ function isEventArgs(value: unknown[]): value is AsyncEventArgs {
 
 export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
 	SetCallback<R extends CallbackReturnType>(callback: (player: Player, ...args: CallbackArgs) => R): void;
+	SetCallback<R extends Promise<CallbackReturnType>>(callback: (player: Player, ...args: CallbackArgs) => R): void;
 }
 
 export interface ServerAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
