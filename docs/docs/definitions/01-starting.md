@@ -26,7 +26,7 @@ Given the above knowledge, we can then apply that to our remote definition scrip
 
 - AsyncFunction
     - **`Net.Definitions.ServerAsyncFunction`** - Defines an async function which exists on the server, and can be called by clients. The returned result will be recieved on the client as a promise.
-    <!-- - **`Net.Definitions.ClientAsyncFunction`** - Defines an async function which exists on the client, and can be called by the server. The returned result will be recieved on the server as a promise.  -->
+    - **`Net.Definitions.ClientAsyncFunction`** - Defines an async function which exists on the client, and can be called by the server. The returned result will be recieved on the server as a promise. 
 - Function
     - **`Net.Definitions.ServerFunction`** - Defines a synchronous function which exists on the server, and can be called by clients
 

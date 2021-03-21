@@ -87,7 +87,6 @@ namespace NetDefinitions {
 	 * `Server` [`Calls`] -> `Client` [`Recieves Call`]
 	 * ... (asynchronously) ...
 	 * `Client` [`Responds to Call`] -> `Server` [`Recieves Response`]
-	 * @internal This might be removed anyway, I'm contemplating it.
 	 */
 	export function ClientAsyncFunction<
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
