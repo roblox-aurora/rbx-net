@@ -32,7 +32,7 @@ const MyDefinitions = Net.Definitions.Create({
 
 
 
-### Definitions.CallServerFunction&lt;Server&gt;(...)
+### Definitions.ServerFunction&lt;Server&gt;(...)
 Definition function for creating a `FunctionDefinition`
 <!-- ### Event&lt;ServerArgs, ClientArgs&gt;(...)
 Definition function for creating an `EventDefinition` -->
@@ -42,18 +42,10 @@ Definition function for creating an `ServerEventDeclaration`
 Definition function for creating an `ClientEventDeclaration`
 ### Definitions.BidirectionalEvent&lt;ServerArgs, ClientArgs&gt;(...)
 Definition function for creating an `BidirectionalEventDeclaration`
-### Definitions.CallServerAsyncFunction&lt;Server&gt;(...)
+### Definitions.ServerAsyncFunction&lt;Server&gt;(...)
 Definition function for creating an `ServerAsyncFunctionDefinition`
-### Definitions.CallClientAsyncFunction&lt;Client&gt;(...)
-Definition function for creating an `ClientAsyncFunctionDefinition`
-### Definitions.Group(definitions)
-Creates a group of definitions (returns `DeclarationGroup`)
-
-## Net.Middleware
-This namespace contains built-in middleware for RbxNet.
-
-### RateLimit(limit)
-### RuntimeTypeCheck(...typeCheckers)
+### Definitions.Namespace(definitions)
+Creates a group of definitions (returns `DeclarationNamespace`)
 
 ## DefinitionsCreateResult&lt;T&gt;
 Contains the definition builders for a given definition (returned using [`Create`](definitions#definitionscreatedefinitions) in Net.Definitions)
@@ -70,42 +62,15 @@ A [ServerDefinitionBuilder](definitions#serverdefinitionbuildert) object.
 ### Client
 A [ClientDefinitionBuilder](definitions#clientdefinitionbuildert) object.
 
-<!-- 
-#### Example Usage
-
-The definitions should be placed in a shared file:
-
-```ts title="shared/remotes.ts"
-import Net from "@rbxts/net";
-const MyDefinitions = Net.Definitions.Create({
-    TestRemote: Net.Definitions.AsyncFunction<(name: string) => boolean>()
-});
-```
-
-
-### GetClient(name)
-Gets the specified remote definition and gets the client version of the event/function/asyncfunction
-
-```ts title="client/example.client.ts"
-import MyDefinitions from "shared/remotes.ts";
-const TestRemote = MyDefinitions.GetClient("TestRemote");
-```
-
-### CreateServer(name)
-Creates the specified remote definition on the server
-
-```ts title="server/example.server.ts"
-import MyDefinitions from "shared/remotes.ts";
-const TestRemote = MyDefinitions.CreateServer("TestRemote");
-``` -->
-
 ## ServerDefinitionBuilder&lt;T&gt;
 Contains all the definition builders for server-side events and functions.
 
 ```ts
 class ServerDefinitionBuilder<T extends RemoteDeclaration> {
     Create(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
+    GetNamespace<K extends string>(name: K): SeverDefinitionBuilder<T[K]>;
     OnEvent(name: string, callback: Callback): void;
+    OnFunction(name: string, callback: Callback): void;
 }
 ```
 
@@ -118,14 +83,20 @@ import { Server as ServerRemotes } from "shared/remotes.ts";
 const TestRemote = ServerRemotes.Create("TestRemote");
 ```
 
-### ConnectEvent(name, callback)
+### OnFunction(name, callback)
+Similar to `Create` but only works on events, and is pretty much a shortcut for `Create(name).SetCallback(callback)`
+### OnEvent(name, callback)
 Similar to `Create` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
+### GetNamespace(name)
+Gets a child namespace under this namespace
+
 ## ClientDefinitionBuilder&lt;T&gt;
 Contains all the definition builders for server-side events and functions.
 
 ```ts
 class ClientDefinitionBuilder<T extends RemoteDeclaration> {
     Get(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
+    GetNamespace<K extends string>(name: K): ClientDefinitionBuilder<T[K]>;
     OnEvent(name: string, callback: Callback): void;
 }
 ```
@@ -139,5 +110,8 @@ import { Client as ClientRemotes } from "shared/remotes.ts";
 const TestRemote = ClientRemotes.Get("TestRemote");
 ```
 
-### ConnectEvent(name, callback)
+### OnEvent(name, callback)
 Similar to `Get` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
+
+### GetNamespace(name)
+Gets a child namespace under this namespace
