@@ -6,6 +6,8 @@ export type MutableMiddlewareList = Array<NetMiddleware<Array<unknown>>>;
 export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
 abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
+
+	/** @internal */
 	abstract GetInstance(): RemoteEvent;
 
 	/** @internal */
