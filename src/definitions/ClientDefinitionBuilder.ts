@@ -6,7 +6,7 @@ import {
 	AsyncClientFunctionDeclaration,
 	DeclarationsOf,
 	FilterGroups,
-	GroupDeclaration,
+	NamespaceDeclaration,
 	InferClientCallback,
 	InferClientConnect,
 	InferClientRemote,
@@ -31,32 +31,31 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	/**
 	 * Gets a client remote from a declaration
 	 */
-	Get<K extends keyof T & string>(k: K): InferClientRemote<T[K]> {
-		const item = declarationMap.get(this)![k];
-		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
-		assert(item && item.Type, `'${k}' is not defined in this definition.`);
+	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
+		const item = declarationMap.get(this)![remoteId];
+		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
-			return new ClientFunction(k) as InferClientRemote<T[K]>;
+			return new ClientFunction(remoteId) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
-			return new ClientAsyncFunction(k) as InferClientRemote<T[K]>;
+			return new ClientAsyncFunction(remoteId) as InferClientRemote<T[K]>;
 		} else if (item.Type === "Event") {
-			return new ClientEvent(k) as InferClientRemote<T[K]>;
+			return new ClientEvent(remoteId) as InferClientRemote<T[K]>;
 		}
 
 		throw `Invalid Type`;
 	}
 
 	/**
-	 * @internal
-	 * @param k
+	 * Gets the specified remote declaration group (or sub group) in which namespaced remotes can be accessed
+	 * @param groupName The group name
 	 */
-	// TODO
-	Group<K extends keyof FilterGroups<T> & string>(key: K) {
-		const group = declarationMap.get(this)![key] as GroupDeclaration<RemoteDeclarations>;
-		assert(group.Type === "Group");
+	GetNamespace<K extends keyof FilterGroups<T> & string>(groupName: K) {
+		const group = declarationMap.get(this)![groupName] as NamespaceDeclaration<RemoteDeclarations>;
+		assert(group.Type === "Namespace");
 		return new ClientDefinitionBuilder(
 			group.Definitions as InferGroupDeclaration<T[K]>,
-			this.namespace !== "" ? [this.namespace, key].join(":") : key,
+			this.namespace !== "" ? [this.namespace, groupName].join(":") : groupName,
 		);
 	}
 

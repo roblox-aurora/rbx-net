@@ -1,5 +1,5 @@
 module.exports = {
-  title: "Roblox Networking",
+  title: "RbxNet",
   tagline: "Advanced multi-language networking library for Roblox.",
   url: "https://docs.vorlias.com/rbx-net",
   baseUrl: "/rbx-net/",
@@ -19,7 +19,7 @@ module.exports = {
       additionalLanguages: ["typescript", "lua", "powershell", "toml"],
     },
     navbar: {
-      title: "Roblox Networking",
+      title: "RbxNet",
       logo: {
         alt: "RbxNet Logo",
         src: "img/net2.svg",

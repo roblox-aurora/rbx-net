@@ -6,7 +6,7 @@ import {
 	LegacyEventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
-	GroupDeclaration,
+	NamespaceDeclaration,
 	ServerToClientEventDeclaration,
 	ClientToServerEventDeclaration,
 	BidirectionalEventDeclaration,
@@ -44,26 +44,25 @@ namespace NetDefinitions {
 	}
 
 	/**
-	 * Defines a group of remote definitions, which can be retrieved via `Group(groupName)`
+	 * Defines a namespace of remote definitions, which can be retrieved via `GetNamespace(namespaceId)`
 	 *
 	 * E.g.
 	 * ```ts
 	 * const Remotes = Net.Definitions.Create({
-	 * 		ExampleGroup: Net.Definitions.Group({
+	 * 		ExampleGroup: Net.Definitions.Namespace({
 	 * 			ExampleGroupRemote: Net.Definitions.ServerToClientEvent<[message: string]>(),
 	 * 		}),
 	 * });
-	 * const ExampleGroupRemote = Remotes.Server.Group("ExampleGroup").Create("ExampleGroupRemote");
+	 * const ExampleGroupRemote = Remotes.Server.GetNamespace("ExampleGroup").Create("ExampleGroupRemote");
 	 * ```
 	 *
 	 * This is useful for categorizing remotes by feature.
 	 */
-	// TODO
-	export function Group<T extends RemoteDeclarations>(declarations: T) {
+	export function Namespace<T extends RemoteDeclarations>(declarations: T) {
 		return {
-			Type: "Group",
+			Type: "Namespace",
 			Definitions: declarations,
-		} as GroupDeclaration<T>;
+		} as NamespaceDeclaration<T>;
 	}
 
 	/**
@@ -88,6 +87,7 @@ namespace NetDefinitions {
 	 * `Server` [`Calls`] -> `Client` [`Recieves Call`]
 	 * ... (asynchronously) ...
 	 * `Client` [`Responds to Call`] -> `Server` [`Recieves Response`]
+	 * @internal This might be removed anyway, I'm contemplating it.
 	 */
 	export function ClientAsyncFunction<
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
@@ -194,9 +194,7 @@ namespace NetDefinitions {
 	) {
 		warnOnce(
 			`[rbx-net] Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
-				ServerAsyncFunction,
-			)}' or '${$nameof(
-				ClientAsyncFunction,
+				ServerFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);
 		return {
@@ -251,8 +249,6 @@ namespace NetDefinitions {
 		warnOnce(
 			`[rbx-net] Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(
 				ServerAsyncFunction,
-			)}' or '${$nameof(
-				ClientAsyncFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);
 		return {

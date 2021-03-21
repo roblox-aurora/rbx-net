@@ -17,7 +17,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
     />
 </div>
 <div align="center">
-	<h1>Roblox Networking Library v2</h1>
+	<h1>Roblox Networking (RbxNet) v2.0</h1>
     	<a href="https://www.npmjs.com/package/@rbxts/net">
 	</a>
 </div>

@@ -10,7 +10,7 @@ import { $print } from "rbxts-transform-debug";
 
 const {
 	Create,
-	Group,
+	Namespace,
 	Event,
 	Function,
 	AsyncFunction,
@@ -22,13 +22,13 @@ const {
 const Remotes = Create(
 	{
 		TestStandaloneEvent: ServerToClientEvent<[]>(),
-		TestingFunctions: Group({
+		TestingFunctions: Namespace({
 			CallServerAndAddNumbers: ServerAsyncFunction<(a: number, b: number) => number>(),
 		}),
-		TestingEvents: Group({
+		TestingEvents: Namespace({
 			PrintMessage: ClientToServerEvent<[message: string]>(),
 		}),
-		Legacy: Group({
+		Legacy: Namespace({
 			LegacyEvent: Event<[message: string], [message2: number]>(),
 			LegacyFunction: Function<(server: number) => string>(),
 			LegacyAsyncFunction: AsyncFunction<(server: number) => string, (client: number) => string>(),

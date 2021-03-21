@@ -10,7 +10,7 @@ import {
 	DeclarationsOf,
 	FilterDeclarations,
 	FilterGroups,
-	GroupDeclaration,
+	NamespaceDeclaration,
 	InferGroupDeclaration,
 	InferServerCallback,
 	InferServerConnect,
@@ -80,9 +80,9 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 *
 	 */
-	Group<K extends keyof FilterGroups<T> & string>(key: K) {
-		const group = declarationMap.get(this)![key] as GroupDeclaration<RemoteDeclarations>;
-		assert(group.Type === "Group");
+	GetNamespace<K extends keyof FilterGroups<T> & string>(key: K) {
+		const group = declarationMap.get(this)![key] as NamespaceDeclaration<RemoteDeclarations>;
+		assert(group.Type === "Namespace");
 		$print(`Fetch Group`, key);
 		return new ServerDefinitionBuilder(
 			group.Definitions as InferGroupDeclaration<T[K]>,

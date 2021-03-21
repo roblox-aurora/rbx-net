@@ -13,12 +13,14 @@
 			"type": "category",
 			"label": "Definitions Guide",
 			"items": [
-				"guides/definitions"
+				"definitions/overview",
+				"definitions/starting",
+				"definitions/implementing"
 			]
 		},
 		{
 			"type": "category",
-			"label": "Other Guides",
+			"label": "Advanced Guides",
 			"items": [
 				"guides/uuid",
 				"guides/custom-player-objects"

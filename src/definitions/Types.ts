@@ -66,7 +66,7 @@ export interface DefinitionsCreateResult<T extends RemoteDeclarations> {
 	readonly Client: ClientDefinitionBuilder<T>;
 }
 
-export type InferGroupDeclaration<T> = T extends DeclarationGroupLike ? T["Definitions"] : {};
+export type InferGroupDeclaration<T> = T extends DeclarationNamespaceLike ? T["Definitions"] : {};
 
 export type DeclarationsOf<
 	T extends RemoteDeclarations,
@@ -84,7 +84,7 @@ export type DeclarationsOf<
 };
 
 export type FilterGroups<T extends RemoteDeclarations> = {
-	[K in ExtractKeys<T, DeclarationGroupLike>]: T[K];
+	[K in ExtractKeys<T, DeclarationNamespaceLike>]: T[K];
 };
 
 export type FilterDeclarations<T extends RemoteDeclarations> = {
@@ -160,11 +160,11 @@ export interface BidirectionalEventDeclaration<
 	readonly _nominal_Bidirectional: unique symbol;
 }
 
-interface DeclarationGroupLike {
+interface DeclarationNamespaceLike {
 	/** @deprecated */
 	readonly _nominal_DeclarationGroupLike: unique symbol;
 	/** @internal */
-	readonly Type: "Group";
+	readonly Type: "Namespace";
 	/** @internal */
 	readonly Definitions: RemoteDeclarations;
 }
@@ -172,17 +172,17 @@ interface DeclarationGroupLike {
 /**
  * A declaration group
  */
-export interface GroupDeclaration<T extends RemoteDeclarations> extends DeclarationGroupLike {
+export interface NamespaceDeclaration<T extends RemoteDeclarations> extends DeclarationNamespaceLike {
 	/** @deprecated */
 	readonly _nominal_DeclarationGroup: unique symbol;
 
 	/** @internal */
-	readonly Type: "Group";
+	readonly Type: "Namespace";
 	/** @internal */
 	readonly Definitions: T;
 }
 export type DeclarationLike = FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
-export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationGroupLike>;
+export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationNamespaceLike>;
 
 ////////////////////////////////
 // * Inference Magic
@@ -259,9 +259,9 @@ export type InferServerRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 export type ClientBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferClientRemote<T[P]> };
 export type ServerBuildResult<T extends RemoteDeclarations> = { [P in keyof T]: InferServerRemote<T[P]> };
 
-export const DeclarationTypeCheck = oneOf<DeclarationLike["Type"] | DeclarationGroupLike["Type"]>(
+export const DeclarationTypeCheck = oneOf<DeclarationLike["Type"] | DeclarationNamespaceLike["Type"]>(
 	"Event",
 	"Function",
 	"AsyncFunction",
-	"Group",
+	"Namespace",
 );
