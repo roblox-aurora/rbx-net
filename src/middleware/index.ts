@@ -31,7 +31,7 @@ export interface ReadonlyGlobalMiddlewareArgs {
 	(remoteName: string, remoteData: readonly unknown[], callingPlayer?: Player): void;
 }
 
-export namespace NetMiddlewares {
+export namespace NetMiddleware {
 	export const RateLimit = createRateLimiter;
 	export const Logging = createLoggerMiddleware;
 	export const TypeChecking = createTypeChecker;

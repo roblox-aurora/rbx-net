@@ -15,7 +15,8 @@
 			"items": [
 				"definitions/overview",
 				"definitions/starting",
-				"definitions/implementing"
+				"definitions/implementing",
+				"definitions/namespacing"
 			]
 		},
 		{

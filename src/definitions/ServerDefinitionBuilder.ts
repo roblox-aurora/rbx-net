@@ -85,7 +85,6 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 	/**
 	 * Gets the specified group as a definition builder
-	 * @internal
 	 * @param groupId The name of the group
 	 *
 	 * ```ts

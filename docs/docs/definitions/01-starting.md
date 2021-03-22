@@ -10,7 +10,7 @@ import TabItem from '@theme/TabItem';
 
 In RbxNet, there are three categories of remote objects:
 
-- **Event** - This is analogous to a `RemoteEvent`. This is what is used if you want to send an event (like an action) to the server or a player
+- **Event** - This is analogous to a `RemoteEvent`. This is what is used if you want to send an event (like an action) to the server or a player.
 - **AsyncFunction** - This is _like_ a `RemoteFunction`, but uses `RemoteEvent` internally. The difference with this and `Function` is that `AsyncFunction` _will_ handle time outs and runs completely asynchronously. (meaning it wont yield code) If there is no response from the reciever, it will reject.
 - **Function** - This is analogous to a `RemoteFunction`. However unlike a regular `RemoteFunction` this does not allow you to call a client. This is for security reasons discussed [here](https://github.com/roblox-aurora/rbx-net/issues/13)
 

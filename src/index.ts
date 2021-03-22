@@ -1,13 +1,32 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import NetDefinitions from "./definitions";
-import { NetMiddleware, NetMiddlewares } from "./middleware";
+import { NetMiddleware } from "./middleware";
 import { $env, $ifEnv } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
-import { IS_SERVER } from "./internal";
 import NetSerialization from "./serialization";
 
 const BUILD_TYPE = $env("TYPE", "TS");
+
+// Types for Net
+namespace Net {
+	/**
+	 * Middleware function type for Net
+	 */
+	export type Middleware = NetMiddleware;
+
+	/**
+	 * An object that contains a `Serialize` method.
+	 * @internal Still in development
+	 */
+	export type Serializable<T> = Serialization.Serializable<T>;
+
+	/**
+	 * A serialized representation of the object
+	 * @internal Still in development
+	 */
+	export type Serialized<T> = Serialization.Serialized<T>;
+}
 
 /**
  * Networking Library for Roblox
@@ -15,16 +34,17 @@ const BUILD_TYPE = $env("TYPE", "TS");
  */
 namespace Net {
 	/**
-	 * All Net functions and classes relating to the client
+	 * Legacy client API for Net
 	 */
 	export const Client = NetClientContext;
+
 	/**
-	 * All Net functions and classes relating to the server
+	 * Legacy server API for Net
 	 */
 	export const Server = NetServerContext;
 
 	/**
-	 * Experimental definition builder for Net
+	 * The definitions API for Net
 	 */
 	export const Definitions = NetDefinitions;
 
@@ -40,29 +60,13 @@ namespace Net {
 	/**
 	 * Built-in middlewares
 	 */
-	export const Middleware = NetMiddlewares;
-	/**
-	 * Middleware function type for Net
-	 */
-	export type Middleware = NetMiddleware;
+	export const Middleware = NetMiddleware;
 
 	/**
 	 * Network serialization namespace
 	 * @internal Still in development
 	 */
 	export const Serialization = NetSerialization;
-
-	/**
-	 * An object that contains a `Serialize` method.
-	 * @internal Still in development
-	 */
-	export type Serializable<T> = Serialization.Serializable<T>;
-
-	/**
-	 * A serialized representation of the object
-	 * @internal Still in development
-	 */
-	export type Serialized<T> = Serialization.Serialized<T>;
 }
 
 $ifEnv("NODE_ENV", "development", () => {
