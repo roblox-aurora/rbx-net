@@ -55,12 +55,14 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Gets the specified remote declaration group (or sub group) in which namespaced remotes can be accessed
 	 * @param groupName The group name
 	 */
-	GetNamespace<K extends keyof FilterGroups<T> & string>(groupName: K) {
+	GetNamespace<K extends keyof FilterGroups<T> & string>(
+		groupName: K,
+	): ClientDefinitionBuilder<InferDefinition<T[K]>> {
 		const group = declarationMap.get(this)![groupName] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Namespace");
 		return group.Definitions._buildClientDefinition(
 			this.namespace !== "" ? [this.namespace, groupName].join(":") : groupName,
-		) as ClientDefinitionBuilder<InferDefinition<T[K]>>;
+		);
 	}
 
 	/**

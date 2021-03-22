@@ -94,14 +94,16 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 *
 	 */
-	public GetNamespace<K extends keyof FilterGroups<T> & string>(groupId: K) {
+	public GetNamespace<K extends keyof FilterGroups<T> & string>(
+		groupId: K,
+	): ServerDefinitionBuilder<InferDefinition<T[K]>> {
 		const group = declarationMap.get(this)![groupId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Namespace");
 		$print(`Fetch Group`, groupId);
 		return group.Definitions._buildServerDefinition(
 			this.globalMiddleware,
 			this.namespace !== "" ? [this.namespace, groupId].join(":") : groupId,
-		) as ServerDefinitionBuilder<InferDefinition<T[K]>>;
+		);
 	}
 
 	/**
