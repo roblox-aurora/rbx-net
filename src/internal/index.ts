@@ -49,6 +49,7 @@ export const enum TagId {
 	Async = "NetManagedAsyncFunction",
 	LegacyFunction = "NetManagedLegacyFunction",
 	Event = "NetManagedEvent",
+	DefinitionManaged = "NetDefinitionManaged",
 }
 
 /** @internal */
@@ -96,7 +97,7 @@ export function warnOnce(message: string) {
 		return;
 	}
 	traceSet.add(trace);
-	warn(message);
+	warn(`[rbx-net] ${message}`);
 }
 
 export function format(message: string, vars: { [name: string]: unknown }) {
@@ -155,6 +156,11 @@ export function getRemoteOrThrow<K extends keyof RemoteTypes>(remoteType: K, nam
 export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] {
 	const existing = findRemote(remoteType, name);
 	if (existing) {
+		if (collectionService.HasTag(existing, TagId.DefinitionManaged)) {
+			warnOnce(
+				`Fetching ${remoteType} '${name}', which is a DefinitionsManaged instance from a non-definitions context. This is considered unsafe.`,
+			);
+		}
 		return existing;
 	} else {
 		if (!IS_SERVER) {

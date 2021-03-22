@@ -28,6 +28,9 @@ export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], Ca
 export interface ServerAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
 	/**
 	 * Calls the specified player with the given arguments, and returns the result as a promise.
+	 *
+	 * ### NOTE: Any values returned from the client should be verified! ensure the result you're given is correct!
+	 *
 	 * @param player The player to call
 	 * @param args The arguments
 	 */
@@ -37,7 +40,7 @@ export interface ServerAsyncCaller<CallArgs extends readonly unknown[], CallRetu
 	 * Sets the call timeout for this caller. If the timeout is reached, the promise from the calling function will reject.
 	 * @param timeout The timeout (in seconds)
 	 */
-	SetCallTimeout(timeout: number): void;
+	SetCallTimeout(timeout: number): this;
 
 	/**
 	 * Gets the call timeout (in seconds) that this remote will wait before rejecting if no response is recieved
@@ -77,6 +80,7 @@ class ServerAsyncFunction<
 	public SetCallTimeout(timeout: number) {
 		assert(timeout > 0, "timeout must be a positive number");
 		this.timeout = timeout;
+		return this;
 	}
 
 	public GetCallTimeout() {

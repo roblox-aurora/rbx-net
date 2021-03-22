@@ -18,6 +18,7 @@ import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { warnOnce } from "../internal";
 import { $nameof } from "rbxts-transform-debug";
+import { NamespaceBuilder } from "./NamespaceBuilder";
 
 namespace NetDefinitions {
 	/**
@@ -61,7 +62,7 @@ namespace NetDefinitions {
 	export function Namespace<T extends RemoteDeclarations>(declarations: T) {
 		return {
 			Type: "Namespace",
-			Definitions: declarations,
+			Definitions: new NamespaceBuilder(declarations),
 		} as NamespaceDeclaration<T>;
 	}
 
@@ -192,7 +193,7 @@ namespace NetDefinitions {
 		mw?: MiddlewareOverload<any>,
 	) {
 		warnOnce(
-			`[rbx-net] Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
+			`Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
 				ServerFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);
@@ -220,7 +221,7 @@ namespace NetDefinitions {
 		mw?: MiddlewareOverload<any>,
 	) {
 		warnOnce(
-			`[rbx-net] Definition '${$nameof(Event)}' is deprecated, use '${$nameof(ServerToClientEvent)}', '${$nameof(
+			`Definition '${$nameof(Event)}' is deprecated, use '${$nameof(ServerToClientEvent)}', '${$nameof(
 				ClientToServerEvent,
 			)}' or '${$nameof(
 				BidirectionalEvent,
@@ -246,7 +247,7 @@ namespace NetDefinitions {
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
 	>(mw?: MiddlewareOverload<any>) {
 		warnOnce(
-			`[rbx-net] Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(
+			`Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(
 				ServerAsyncFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);

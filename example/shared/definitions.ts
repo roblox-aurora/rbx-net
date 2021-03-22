@@ -21,7 +21,8 @@ const {
 
 const Remotes = Create(
 	{
-		TestStandaloneEvent: ServerToClientEvent<[]>(),
+		TestStandaloneEvent: ServerToClientEvent<[message2: string]>(),
+		TestStandaloneClientEvent: ClientToServerEvent<[message: string]>(),
 		TestingFunctions: Namespace({
 			CallServerAndAddNumbers: ServerAsyncFunction<(a: number, b: number) => number>(),
 		}),

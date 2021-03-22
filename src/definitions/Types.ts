@@ -13,8 +13,9 @@ import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/S
 import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
+import { NamespaceBuilder } from "./NamespaceBuilder";
 
-interface FunctionDeclarationLike {
+export interface FunctionDeclarationLike {
 	/**
 	 * @deprecated
 	 */
@@ -26,7 +27,7 @@ interface FunctionDeclarationLike {
 	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 }
 
-interface EventDeclarationLike {
+export interface EventDeclarationLike {
 	/**
 	 * @deprecated
 	 */
@@ -39,7 +40,7 @@ interface EventDeclarationLike {
 	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
 }
 
-interface AsyncFunctionDeclarationLike {
+export interface AsyncFunctionDeclarationLike {
 	/**
 	 * @deprecated
 	 */
@@ -160,13 +161,13 @@ export interface BidirectionalEventDeclaration<
 	readonly _nominal_Bidirectional: unique symbol;
 }
 
-interface DeclarationNamespaceLike {
+export interface DeclarationNamespaceLike {
 	/** @deprecated */
 	readonly _nominal_DeclarationGroupLike: unique symbol;
 	/** @internal */
 	readonly Type: "Namespace";
 	/** @internal */
-	readonly Definitions: RemoteDeclarations;
+	readonly Definitions: NamespaceBuilder<RemoteDeclarations>;
 }
 
 /**
@@ -179,7 +180,7 @@ export interface NamespaceDeclaration<T extends RemoteDeclarations> extends Decl
 	/** @internal */
 	readonly Type: "Namespace";
 	/** @internal */
-	readonly Definitions: T;
+	readonly Definitions: NamespaceBuilder<T>;
 }
 export type DeclarationLike = FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
 export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationNamespaceLike>;

@@ -2,6 +2,7 @@ import { $nameof } from "rbxts-transform-debug";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
+import { InferDefinition, ToClientBuilder } from "./NamespaceBuilder";
 import {
 	AsyncClientFunctionDeclaration,
 	DeclarationsOf,
@@ -29,7 +30,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
-	 * Gets a client remote from a declaration
+	 * Gets the specified client remote instance `remoteId` based on the definition and returns it.
+	 *
+	 * @throws If the equivalent `Create(remoteId)` has not been called on the server, this will throw an error.
+	 *
+	 * @param remoteId The id of the remote
 	 */
 	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
@@ -53,27 +58,26 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	GetNamespace<K extends keyof FilterGroups<T> & string>(groupName: K) {
 		const group = declarationMap.get(this)![groupName] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Namespace");
-		return new ClientDefinitionBuilder(
-			group.Definitions as InferGroupDeclaration<T[K]>,
+		return group.Definitions._buildClientDefinition(
 			this.namespace !== "" ? [this.namespace, groupName].join(":") : groupName,
-		);
+		) as ClientDefinitionBuilder<InferDefinition<T[K]>>;
 	}
 
 	/**
 	 * Waits for the specified remote
-	 * @param k The remote id
+	 * @param remoteId The remote id
 	 */
-	async WaitFor<K extends keyof T & string>(k: K): Promise<InferClientRemote<T[K]>> {
-		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
+	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
+		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
 
-		const item = declarationMap.get(this)![k];
-		assert(item && item.Type, `'${k}' is not defined in this definition.`);
+		const item = declarationMap.get(this)![remoteId];
+		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
-			return ClientFunction.Wait(k) as Promise<InferClientRemote<T[K]>>;
+			return ClientFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "Event") {
-			return ClientEvent.Wait(k) as Promise<InferClientRemote<T[K]>>;
+			return ClientEvent.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "AsyncFunction") {
-			return ClientAsyncFunction.Wait(k) as Promise<InferClientRemote<T[K]>>;
+			return ClientAsyncFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		}
 
 		throw `Invalid Type`;

@@ -16,7 +16,32 @@ import {
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
+	DeclarationLike,
 } from "./Types";
+import { TagId } from "../internal";
+import { InferDefinition } from "./NamespaceBuilder";
+const CollectionService = game.GetService("CollectionService");
+
+// Tidy up all the types here.
+type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
+	FilterDeclarations<T>,
+	ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
+> &
+	string;
+
+type ServerEventConnectFunction<T extends RemoteDeclarations, K extends keyof T> = InferServerConnect<
+	Extract<T[K], ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>>
+>;
+
+type ServerFunctionDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
+	FilterDeclarations<T>,
+	AsyncServerFunctionDeclaration<any, any>
+> &
+	string;
+
+type ServerFunctionCallbackFunction<T extends RemoteDeclarations, K extends keyof T> = InferServerCallback<
+	Extract<T[K], AsyncServerFunctionDeclaration<any, any>>
+>;
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
@@ -51,18 +76,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.Server.Create(name).Connect(fn)
 	 * ```
 	 */
-	OnEvent<
-		K extends keyof DeclarationsOf<
-			FilterDeclarations<T>,
-			ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
-		> &
-			string
-	>(
-		name: K,
-		fn: InferServerConnect<
-			Extract<T[K], ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>>
-		>,
-	) {
+	public OnEvent<K extends ServerEventDeclarationKeys<T>>(name: K, fn: ServerEventConnectFunction<T, K>) {
 		const result = this.Create(name) as InferServerRemote<
 			ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
 		>;
@@ -72,7 +86,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	/**
 	 * Gets the specified group as a definition builder
 	 * @internal
-	 * @param key The name of the group
+	 * @param groupId The name of the group
 	 *
 	 * ```ts
 	 * const FeatureA = Remotes.Server.Group("FeatureA");
@@ -80,38 +94,43 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 *
 	 */
-	GetNamespace<K extends keyof FilterGroups<T> & string>(key: K) {
-		const group = declarationMap.get(this)![key] as NamespaceDeclaration<RemoteDeclarations>;
+	public GetNamespace<K extends keyof FilterGroups<T> & string>(groupId: K) {
+		const group = declarationMap.get(this)![groupId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Namespace");
-		$print(`Fetch Group`, key);
-		return new ServerDefinitionBuilder(
-			group.Definitions as InferGroupDeclaration<T[K]>,
+		$print(`Fetch Group`, groupId);
+		return group.Definitions._buildServerDefinition(
 			this.globalMiddleware,
-			this.namespace !== "" ? [this.namespace, key].join(":") : key,
-		);
+			this.namespace !== "" ? [this.namespace, groupId].join(":") : groupId,
+		) as ServerDefinitionBuilder<InferDefinition<T[K]>>;
 	}
 
 	/**
-	 * Creates a server remote from a declaration
+	 * Creates or retrieves the specified server remote instance `remoteId` based on the definition and returns it.
+	 *
+	 * _The created remote will be cached_
+	 *
+	 * @param remoteId the id of the remote
+	 *
 	 */
-	Create<K extends keyof FilterDeclarations<T> & string>(k: K): InferServerRemote<T[K]> {
-		const item = declarationMap.get(this)![k];
-		k = this.namespace !== "" ? ([this.namespace, k].join(":") as K) : k;
-		assert(item && item.Type, `'${k}' is not defined in this definition.`);
+	public Create<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
+		const item = declarationMap.get(this)![remoteId];
+		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			let func: ServerFunction;
 
 			// This should make certain use cases cheaper
-			if (remoteFunctionCache.has(k)) {
-				$print(`Fetch cached copy of ${k}`);
-				return remoteFunctionCache.get(k)! as InferServerRemote<T[K]>;
+			if (remoteFunctionCache.has(remoteId)) {
+				$print(`Fetch cached copy of ${remoteId}`);
+				return remoteFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
 				if (item.ServerMiddleware) {
-					func = new ServerFunction(k, item.ServerMiddleware);
+					func = new ServerFunction(remoteId, item.ServerMiddleware);
 				} else {
-					func = new ServerFunction(k);
+					func = new ServerFunction(remoteId);
 				}
-				remoteFunctionCache.set(k, func);
+				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
+				remoteFunctionCache.set(remoteId, func);
 			}
 
 			this.globalMiddleware?.forEach((mw) => func._use(mw));
@@ -120,16 +139,17 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			let asyncFunction: ServerAsyncFunction;
 
 			// This should make certain use cases cheaper
-			if (remoteAsyncFunctionCache.has(k)) {
-				$print(`Fetch cached copy of ${k}`);
-				return remoteAsyncFunctionCache.get(k)! as InferServerRemote<T[K]>;
+			if (remoteAsyncFunctionCache.has(remoteId)) {
+				$print(`Fetch cached copy of ${remoteId}`);
+				return remoteAsyncFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
 				if (item.ServerMiddleware) {
-					asyncFunction = new ServerAsyncFunction(k, item.ServerMiddleware);
+					asyncFunction = new ServerAsyncFunction(remoteId, item.ServerMiddleware);
 				} else {
-					asyncFunction = new ServerAsyncFunction(k);
+					asyncFunction = new ServerAsyncFunction(remoteId);
 				}
-				remoteAsyncFunctionCache.set(k, asyncFunction);
+				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
+				remoteAsyncFunctionCache.set(remoteId, asyncFunction);
 			}
 
 			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
@@ -138,15 +158,17 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			let event: ServerEvent;
 
 			// This should make certain use cases cheaper
-			if (remoteEventCache.has(k)) {
-				$print(`Fetch cached copy of ${k}`);
-				return remoteEventCache.get(k)! as InferServerRemote<T[K]>;
+			if (remoteEventCache.has(remoteId)) {
+				$print(`Fetch cached copy of ${remoteId}`);
+				return remoteEventCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
 				if (item.ServerMiddleware) {
-					event = new ServerEvent(k, item.ServerMiddleware);
+					event = new ServerEvent(remoteId, item.ServerMiddleware);
 				} else {
-					event = new ServerEvent(k);
+					event = new ServerEvent(remoteId);
 				}
+				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
+				remoteEventCache.set(remoteId, event);
 			}
 
 			this.globalMiddleware?.forEach((mw) => event._use(mw));
@@ -169,9 +191,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.Server.Create(name).SetCallback(fn)
 	 * ```
 	 */
-	OnFunction<
-		K extends keyof DeclarationsOf<FilterDeclarations<T>, AsyncServerFunctionDeclaration<any, any>> & string
-	>(name: K, fn: InferServerCallback<Extract<T[K], AsyncServerFunctionDeclaration<any, any>>>) {
+	public OnFunction<K extends ServerFunctionDeclarationKeys<T>>(name: K, fn: ServerFunctionCallbackFunction<T, K>) {
 		const result = this.Create(name) as InferServerRemote<AsyncServerFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
