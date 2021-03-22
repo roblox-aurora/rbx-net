@@ -1,3 +1,4 @@
+import { $dbg, $print } from "rbxts-transform-debug";
 import { NetGlobalMiddleware } from "../middleware";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
@@ -17,6 +18,12 @@ export type InferDefinition<T> = T extends NamespaceDeclaration<infer R> ? R : n
 export class NamespaceBuilder<N extends RemoteDeclarations> {
 	public constructor(declarations: N) {
 		declarationMap.set(this, declarations);
+		$dbg(declarations, (value, source) => {
+			print(`[${source.file}:${source.lineNumber}]`, "== Namespace Declarations ==");
+			for (const [name, va] of pairs(value)) {
+				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
+			}
+		});
 	}
 
 	/** @internal */
@@ -25,12 +32,14 @@ export class NamespaceBuilder<N extends RemoteDeclarations> {
 		namespace?: string,
 	): ServerDefinitionBuilder<N> {
 		assert(RunService.IsServer());
+		$print("Building server definition", declarationMap.get(this)!);
 		return new ServerDefinitionBuilder<N>(declarationMap.get(this) as N, globalMiddleware, namespace);
 	}
 
 	/** @internal */
 	_buildClientDefinition(namespace?: string): ClientDefinitionBuilder<N> {
 		assert(RunService.IsClient());
+		$print("Building client definition", declarationMap.get(this)!);
 		return new ClientDefinitionBuilder<N>(declarationMap.get(this) as N, namespace);
 	}
 }

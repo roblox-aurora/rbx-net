@@ -247,8 +247,8 @@ namespace NetDefinitions {
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
 	>(mw?: MiddlewareOverload<any>) {
 		warnOnce(
-			`Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(
-				ServerAsyncFunction,
+			`Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(ServerAsyncFunction)}' or '${$nameof(
+				ClientAsyncFunction,
 			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
 		);
 		return {
