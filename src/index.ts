@@ -1,20 +1,19 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import NetDefinitions from "./definitions";
-import { NetMiddleware } from "./middleware";
+import { createTypeChecker, NetMiddleware } from "./middleware";
 import { $env, $ifEnv } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
+import type { $DebugInfo } from "rbxts-transform-debug";
 import NetSerialization from "./serialization";
 
 const BUILD_TYPE = $env("TYPE", "TS");
 
-// Types for Net
+/**
+ * Networking Library for Roblox
+ * @version 2.0
+ */
 namespace Net {
-	/**
-	 * Middleware function type for Net
-	 */
-	export type Middleware = NetMiddleware;
-
 	/**
 	 * An object that contains a `Serialize` method.
 	 * @internal Still in development
@@ -26,13 +25,7 @@ namespace Net {
 	 * @internal Still in development
 	 */
 	export type Serialized<T> = Serialization.Serialized<T>;
-}
 
-/**
- * Networking Library for Roblox
- * @version 2.0
- */
-namespace Net {
 	/**
 	 * Legacy client API for Net
 	 */
@@ -61,6 +54,10 @@ namespace Net {
 	 * Built-in middlewares
 	 */
 	export const Middleware = NetMiddleware;
+	/**
+	 * Middleware function type for Net
+	 */
+	export type Middleware = NetMiddleware;
 
 	/**
 	 * Network serialization namespace
@@ -71,6 +68,29 @@ namespace Net {
 
 $ifEnv("NODE_ENV", "development", () => {
 	$dbg(Net.VERSION);
+
+	const sanity = (value: unknown, debug: $DebugInfo) => {
+		if (value === undefined) {
+			throw `[${debug.file}:${debug.lineNumber}] ${debug.rawText} - FAIL`;
+		} else {
+			print(`[${debug.file}:${debug.lineNumber}] ${debug.rawText} - OK`);
+		}
+	};
+
+	$dbg(Net.Definitions, sanity);
+
+	$dbg(Net.Server, sanity);
+	$dbg(Net.Server.Function, sanity);
+	$dbg("new" in Net.Server.Function);
+	$dbg(Net.Server.Event, sanity);
+	$dbg(Net.Server.AsyncFunction, sanity);
+
+	$dbg(Net.Client, sanity);
+	$dbg(Net.Client.Function, sanity);
+	$dbg(Net.Client.Event, sanity);
+	$dbg(Net.Client.AsyncFunction, sanity);
+
+	$dbg(createTypeChecker, sanity);
 });
 
 export = Net;

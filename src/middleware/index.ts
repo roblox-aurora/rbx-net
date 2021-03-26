@@ -34,6 +34,8 @@ export interface ReadonlyGlobalMiddlewareArgs {
 export namespace NetMiddleware {
 	export const RateLimit = createRateLimiter;
 	export const Logging = createLoggerMiddleware;
+
+	/** The type checking middleware */
 	export const TypeChecking = NetTypeCheckingMiddleware;
 
 	/**
@@ -47,4 +49,5 @@ export namespace NetMiddleware {
 	}
 }
 
-export { createRateLimiter, NetTypeCheckingMiddleware as createTypeChecker };
+const createTypeChecker = NetTypeCheckingMiddleware;
+export { createRateLimiter, createTypeChecker };
