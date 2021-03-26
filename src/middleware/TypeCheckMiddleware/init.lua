@@ -15,7 +15,8 @@ local MiddlewareGlobal = {}
 MiddlewareGlobal.__index = MiddlewareGlobal
 MiddlewareGlobal.defaultErrorHandler = defaultErrorHandler
 
-local function typeCheckMiddleware(checks)
+local function typeCheckMiddleware(...)
+    local checks = {...}
     local MiddlewareInstance = {}
     MiddlewareInstance.__index = MiddlewareInstance;
 
@@ -36,6 +37,10 @@ local function typeCheckMiddleware(checks)
         end
     end
 
+    function MiddlewareInstance.__tostring()
+        return "TypeCheckMiddleware"
+    end
+
     function MiddlewareInstance:WithErrorHandler(fn)
         self.errorHandler = fn
         return self
@@ -53,8 +58,8 @@ function MiddlewareGlobal.__call(_, ...)
     return typeCheckMiddleware(...)
 end
 
-function MiddlewareGlobal:SetDefaultErrorHandler(fn)
-    self.defaultErrorHandler = fn
+function MiddlewareGlobal.SetDefaultErrorHandler(_, fn)
+    MiddlewareGlobal.defaultErrorHandler = fn
 end
 
-return MiddlewareGlobal
+return setmetatable({}, MiddlewareGlobal)
