@@ -1,7 +1,7 @@
 import { NetManagedInstance } from "../internal";
 import createLoggerMiddleware from "./LoggerMiddleware";
 import createRateLimiter from "./RateLimitMiddleware";
-import createTypeChecker from "./TypeCheckMiddleware";
+import NetTypeCheckingMiddleware from "./TypeCheckMiddleware";
 
 export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unknown>) => R;
 
@@ -34,7 +34,7 @@ export interface ReadonlyGlobalMiddlewareArgs {
 export namespace NetMiddleware {
 	export const RateLimit = createRateLimiter;
 	export const Logging = createLoggerMiddleware;
-	export const TypeChecking = createTypeChecker;
+	export const TypeChecking = NetTypeCheckingMiddleware;
 
 	/**
 	 * Creates a global read-only middleware for use in `Net.Definitions` global middleware.
@@ -47,4 +47,4 @@ export namespace NetMiddleware {
 	}
 }
 
-export { createRateLimiter, createTypeChecker };
+export { createRateLimiter, NetTypeCheckingMiddleware as createTypeChecker };

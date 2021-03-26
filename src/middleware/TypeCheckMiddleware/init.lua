@@ -11,10 +11,16 @@ local function defaultErrorHandler(event, args, index)
     end
 end
 
-local function typeCheckMiddleware(options, checks)
-    local errorHandler = options.errorHandler or defaultErrorHandler
-    -- The middleware function
-    return function(next, event)
+local MiddlewareGlobal = {}
+MiddlewareGlobal.__index = MiddlewareGlobal
+MiddlewareGlobal.defaultErrorHandler = defaultErrorHandler
+
+local function typeCheckMiddleware(checks)
+    local MiddlewareInstance = {}
+    MiddlewareInstance.__index = MiddlewareInstance;
+
+    function MiddlewareInstance:next(next, event)
+        local errorHandler = self.errorHandler or MiddlewareGlobal.defaultErrorHandler
         --  what's returned as callbackFn
         return function(player, ...)
             local args = {...}
@@ -29,29 +35,26 @@ local function typeCheckMiddleware(options, checks)
             return next(player, ...)
         end
     end
+
+    function MiddlewareInstance:WithErrorHandler(fn)
+        self.errorHandler = fn
+        return self
+    end
+
+    function MiddlewareInstance:__call(...)
+        return self:next(...)
+    end
+    
+    return setmetatable({}, MiddlewareInstance)
     -- ^ The middleware
 end
 
-local TypeCheckMiddleware = {};
-TypeCheckMiddleware.__index = TypeCheckMiddleware
-
-function TypeCheckMiddleware.__call(_, ...)
-    return typeCheckMiddleware({}, {...})
+function MiddlewareGlobal.__call(_, ...)
+    return typeCheckMiddleware(...)
 end
 
-function TypeCheckMiddleware.new(options)
-    local self = {}
-    self.ErrorHandler = options.ErrorHandler
-    return setmetatable(self, TypeCheckMiddleware)
+function MiddlewareGlobal:SetDefaultErrorHandler(fn)
+    self.defaultErrorHandler = fn
 end
 
-function TypeCheckMiddleware:Check(...)
-    return typeCheckMiddleware(self, {...})
-end
-
-function TypeCheckMiddleware:SetErrorHandler(handler)
-    assert(type(handler) == "function")
-    self.ErrorHandler = handler
-end
-
-return setmetatable({}, TypeCheckMiddleware)
+return MiddlewareGlobal
