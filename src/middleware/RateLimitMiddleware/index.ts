@@ -16,11 +16,11 @@ export interface RateLimitError {
 
 export interface RateLimitOptions {
 	MaxRequestsPerMinute: number;
-	ErrorHandler?: (error: RateLimitError) => void;
+	ErrorHandler?: (rateLimitError: RateLimitError) => void;
 }
 
-export function rateLimitWarningHandler(error: RateLimitError) {
-	warn("[rbx-net]", error.Message);
+export function rateLimitWarningHandler(rateLimitError: RateLimitError) {
+	warn("[rbx-net]", rateLimitError.Message);
 }
 
 /**
