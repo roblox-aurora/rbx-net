@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.TS.RuntimeLib)
 local HttpService = game:GetService("HttpService")
 local runService = game:GetService("RunService")
@@ -18,6 +18,27 @@ end
 local function isLuaTable(value)
 	local _0 = value
 	return type(_0) == "table"
+end
+-- * @internal
+local NetMiddlewareEvent
+do
+	NetMiddlewareEvent = setmetatable({}, {
+		__tostring = function()
+			return "NetMiddlewareEvent"
+		end,
+	})
+	NetMiddlewareEvent.__index = NetMiddlewareEvent
+	function NetMiddlewareEvent.new(...)
+		local self = setmetatable({}, NetMiddlewareEvent)
+		self:constructor(...)
+		return self
+	end
+	function NetMiddlewareEvent:constructor(netInstance)
+		self.netInstance = netInstance
+	end
+	function NetMiddlewareEvent:GetInstance()
+		return self.netInstance:GetInstance()
+	end
 end
 local REMOTES_FOLDER_NAME = "_NetManaged"
 -- * @internal
@@ -49,14 +70,28 @@ local function errorft(message, vars)
 	local _0 = message
 	local _1 = function(token)
 		local _2 = vars[token]
-		if not (_2 ~= 0 and _2 == _2 and _2 ~= "" and _2) then
+		if _2 == nil then
 			_2 = token
 		end
 		return _2
 	end
-	local _2 = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
-	message = _2[1]
+	message = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
 	error(message, 2)
+end
+local traceSet = {}
+local function warnOnce(message)
+	local trace = debug.traceback()
+	local _0 = traceSet
+	local _1 = trace
+	if _0[_1] ~= nil then
+		return nil
+	end
+	local _2 = traceSet
+	local _3 = trace
+	-- ▼ Set.add ▼
+	_2[_3] = true
+	-- ▲ Set.add ▲
+	warn("[rbx-net] " .. message)
 end
 local function format(message, vars)
 	-- eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -64,13 +99,12 @@ local function format(message, vars)
 	local _0 = message
 	local _1 = function(token)
 		local _2 = vars[token]
-		if not (_2 ~= 0 and _2 == _2 and _2 ~= "" and _2) then
+		if _2 == nil then
 			_2 = token
 		end
 		return _2
 	end
-	local _2 = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
-	message = _2[1]
+	message = string.gsub(_0, "{([%w_][%w%d_]*)}", _1)
 	return message
 end
 -- * @internal
@@ -89,7 +123,7 @@ local function waitForRemote(remoteType, name, timeout)
 		if result then
 			resolve(result)
 		else
-			reject("Unable to find remote object")
+			reject("Timed out while waiting for " .. remoteType .. " '" .. name .. "' after " .. tostring(timeout) .. " seconds.")
 		end
 	end)
 end
@@ -156,6 +190,9 @@ end
 local function findOrCreateRemote(remoteType, name)
 	local existing = findRemote(remoteType, name)
 	if existing then
+		if collectionService:HasTag(existing, "NetDefinitionManaged") then
+			warnOnce("Fetching " .. remoteType .. " '" .. name .. "', which is a DefinitionsManaged instance from a non-definitions context. This is considered unsafe.")
+		end
 		return existing
 	else
 		if not IS_SERVER then
@@ -213,6 +250,7 @@ return {
 	isLuaTable = isLuaTable,
 	findOrCreateFolder = findOrCreateFolder,
 	errorft = errorft,
+	warnOnce = warnOnce,
 	format = format,
 	waitForRemote = waitForRemote,
 	findRemote = findRemote,
@@ -223,5 +261,6 @@ return {
 	IS_CLIENT = IS_CLIENT,
 	IS_RUNNING = IS_RUNNING,
 	MAX_CLIENT_WAITFORCHILD_TIMEOUT = MAX_CLIENT_WAITFORCHILD_TIMEOUT,
+	NetMiddlewareEvent = NetMiddlewareEvent,
 	ServerTickFunctions = ServerTickFunctions,
 }

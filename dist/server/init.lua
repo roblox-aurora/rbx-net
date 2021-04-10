@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.TS.RuntimeLib)
 local AsyncFunction = TS.import(script, script, "ServerAsyncFunction").default
 local _0 = TS.import(script, script, "ServerEvent")

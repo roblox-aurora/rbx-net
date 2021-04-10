@@ -1,9 +1,17 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local getRemoteOrThrow = _0.getRemoteOrThrow
 local IS_SERVER = _0.IS_SERVER
 local waitForRemote = _0.waitForRemote
+--[[
+	*
+	* Interface for client listening events
+]]
+--[[
+	*
+	* Interface for client sender events
+]]
 local ClientEvent
 do
 	ClientEvent = setmetatable({}, {
@@ -27,7 +35,7 @@ do
 	end
 	function ClientEvent:Wait(name)
 		return TS.Promise.defer(TS.async(function(resolve)
-			TS.await(waitForRemote("RemoteEvent", name, 10))
+			TS.await(waitForRemote("RemoteEvent", name, 60))
 			resolve(ClientEvent.new(name))
 		end))
 	end

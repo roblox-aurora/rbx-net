@@ -1,10 +1,18 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local findOrCreateRemote = _0.findOrCreateRemote
 local IS_CLIENT = _0.IS_CLIENT
 local IS_RUNNING = _0.IS_RUNNING
 local MiddlewareEvent = TS.import(script, script.Parent, "MiddlewareEvent").default
+--[[
+	*
+	* Interface for server listening events
+]]
+--[[
+	*
+	* Interface for server sender events
+]]
 local ServerEvent
 do
 	local super = MiddlewareEvent
@@ -56,32 +64,34 @@ do
 		end
 		local Players = game:GetService("Players")
 		local _1 = blacklist
-		local _2 = blacklist
 		if typeof(_1) == "Instance" then
-			local _3 = Players:GetPlayers()
-			local _4 = function(p)
+			local _2 = Players:GetPlayers()
+			local _3 = function(p)
 				return p ~= blacklist
 			end
 			-- ▼ ReadonlyArray.filter ▼
-			local _5 = {}
-			local _6 = 0
-			for _7, _8 in ipairs(_3) do
-				if _4(_8, _7 - 1, _3) == true then
-					_6 += 1
-					_5[_6] = _8
+			local _4 = {}
+			local _5 = 0
+			for _6, _7 in ipairs(_2) do
+				if _3(_7, _6 - 1, _2) == true then
+					_5 += 1
+					_4[_5] = _7
 				end
 			end
 			-- ▲ ReadonlyArray.filter ▲
-			local otherPlayers = _5
+			local otherPlayers = _4
 			for _, player in ipairs(otherPlayers) do
 				self.instance:FireClient(player, unpack(args))
 			end
-		elseif type(_2) == "table" then
-			for _, player in ipairs(Players:GetPlayers()) do
-				local _3 = blacklist
-				local _4 = player
-				if (table.find(_3, _4) or 0) - 1 == -1 then
-					self.instance:FireClient(player, unpack(args))
+		else
+			local _2 = blacklist
+			if type(_2) == "table" then
+				for _, player in ipairs(Players:GetPlayers()) do
+					local _3 = blacklist
+					local _4 = player
+					if (table.find(_3, _4) or 0) - 1 == -1 then
+						self.instance:FireClient(player, unpack(args))
+					end
 				end
 			end
 		end

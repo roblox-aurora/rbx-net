@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local format = _0.format
@@ -7,8 +7,8 @@ local ServerTickFunctions = _0.ServerTickFunctions
 local throttler = TS.import(script, script, "throttle")
 local GetConfiguration = TS.import(script, script.Parent.Parent, "configuration").GetConfiguration
 local throttles = {}
-local function rateLimitWarningHandler(error)
-	warn("[rbx-net]", error.Message)
+local function rateLimitWarningHandler(rateLimitError)
+	warn("[rbx-net]", rateLimitError.Message)
 end
 --[[
 	*
@@ -26,7 +26,7 @@ local function createRateLimiter(options)
 		_1 = rateLimitWarningHandler
 	end
 	local errorHandler = _1
-	return function(next, event)
+	return function(processNext, event)
 		local instance = event:GetInstance()
 		local _2 = throttles
 		local _3 = event
@@ -53,7 +53,7 @@ local function createRateLimiter(options)
 				end
 			else
 				throttle:Increment(player)
-				return next(player, unpack(args))
+				return processNext(player, unpack(args))
 			end
 		end
 	end

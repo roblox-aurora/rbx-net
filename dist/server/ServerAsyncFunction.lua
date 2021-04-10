@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "configuration")
 local DebugLog = _0.DebugLog
@@ -55,6 +55,15 @@ do
 	end
 	function ServerAsyncFunction:GetInstance()
 		return self.instance
+	end
+	function ServerAsyncFunction:SetCallTimeout(timeout)
+		local _2 = timeout > 0
+		assert(_2, "timeout must be a positive number")
+		self.timeout = timeout
+		return self
+	end
+	function ServerAsyncFunction:GetCallTimeout()
+		return self.timeout
 	end
 	function ServerAsyncFunction:SetCallback(callback)
 		if self.connector then

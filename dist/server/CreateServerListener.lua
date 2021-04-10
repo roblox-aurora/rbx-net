@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local ServerEventV2 = TS.import(script, script.Parent, "ServerEvent").default
 local function isMiddlewareArgument(args)

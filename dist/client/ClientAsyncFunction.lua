@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "configuration")
 local DebugLog = _0.DebugLog
@@ -35,7 +35,7 @@ do
 	end
 	function ClientAsyncFunction:Wait(name)
 		return TS.Promise.defer(TS.async(function(resolve)
-			TS.await(waitForRemote("AsyncRemoteFunction", name, 10))
+			TS.await(waitForRemote("AsyncRemoteFunction", name, 60))
 			resolve(ClientAsyncFunction.new(name))
 		end))
 	end

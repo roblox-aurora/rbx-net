@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local MiddlewareFunction
 do
@@ -8,6 +8,13 @@ do
 			middlewares = {}
 		end
 		self.middlewares = middlewares
+	end
+	function MiddlewareFunction:_use(middleware)
+		local _0 = (self.middlewares)
+		local _1 = middleware
+		-- ▼ Array.push ▼
+		_0[#_0 + 1] = _1
+		-- ▲ Array.push ▲
 	end
 	function MiddlewareFunction:_processMiddleware(callback)
 		local _0 = self

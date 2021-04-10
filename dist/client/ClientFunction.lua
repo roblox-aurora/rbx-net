@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local getRemoteOrThrow = _0.getRemoteOrThrow
@@ -24,7 +24,7 @@ do
 	end
 	function ClientFunction:Wait(name)
 		return TS.Promise.defer(TS.async(function(resolve)
-			TS.await(waitForRemote("RemoteFunction", name, 10))
+			TS.await(waitForRemote("RemoteFunction", name, 60))
 			resolve(ClientFunction.new(name))
 		end))
 	end

@@ -1,4 +1,4 @@
--- Compiled with roblox-ts v1.0.0-beta.16
+-- Compiled with roblox-ts v1.1.1
 local TS = require(script.Parent.Parent.TS.RuntimeLib)
 local _0 = TS.import(script, script.Parent.Parent, "internal")
 local isLuaTable = _0.isLuaTable
@@ -121,7 +121,11 @@ do
 			error("[rbx-net] Exceeded Subscription limit of " .. tostring(limit) .. "!")
 		end
 		globalSubscriptionCounter += 1
-		return MessagingService:SubscribeAsync(self.name, function(recieved)
+		return MessagingService:SubscribeAsync(self.name, function(data, sent)
+			local recieved = {
+				Data = data,
+				Sent = sent,
+			}
 			local _1 = recieved
 			local Sent = _1.Sent
 			if isJobTargetMessage(recieved) then
