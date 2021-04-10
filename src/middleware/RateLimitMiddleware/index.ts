@@ -34,7 +34,7 @@ export function rateLimitWarningHandler(error: RateLimitError) {
 function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
 	const maxRequestsPerMinute = options.MaxRequestsPerMinute;
 	const errorHandler = options.ErrorHandler ?? rateLimitWarningHandler;
-	return (next, event) => {
+	return (processNext, event) => {
 		const instance = event.GetInstance();
 		let throttle = throttles.get(event)!;
 		if (throttle === undefined) {
@@ -56,7 +56,7 @@ function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
 				});
 			} else {
 				throttle.Increment(player);
-				return next(player, ...args);
+				return processNext(player, ...args);
 			}
 		};
 	};
