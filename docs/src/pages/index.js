@@ -10,7 +10,7 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import Code from "@site/src/components/Code";
 
-const LATEST_URL = "/docs/2.0";
+const LATEST_URL = "/docs/2.1";
 /**
  * @param {string} url URL
  */
@@ -82,8 +82,8 @@ function Feature({ imageUrl, title, description }) {
 
 const EXAMPLE_CODE_TS = `import Net from "@rbxts/net";
 const Remotes = Net.Definitions.Create({
-    PrintMessage: Net.Definitions.Event<[message: string]>(),
-    MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>()
+    PrintMessage: Net.Definitions.ClientToServerEvent<[message: string]>(),
+    MakeHello: Net.Definitions.ServerAsyncFunction<(message: string) => string>()
 });
 export default Remotes;`;
 const EXAMPLE_CODE_CLIENT_TS = `import Remotes from "shared/remotes";
