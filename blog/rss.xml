@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
     <channel>
-        <title>Roblox Networking Blog</title>
+        <title>RbxNet Blog</title>
         <link>https://docs.vorlias.com/rbx-net/blog</link>
-        <description>Roblox Networking Blog</description>
+        <description>RbxNet Blog</description>
         <lastBuildDate>Sun, 12 Jan 2020 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
