@@ -1,7 +1,7 @@
 import { NetManagedInstance } from "../internal";
 import createLoggerMiddleware from "./LoggerMiddleware";
 import createRateLimiter from "./RateLimitMiddleware";
-import createTypeChecker from "./TypeCheckMiddleware";
+import NetTypeCheckingMiddleware from "./TypeCheckMiddleware";
 
 export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unknown>) => R;
 
@@ -22,10 +22,32 @@ export type NetMiddleware<
 	event: NetManagedInstance,
 ) => (sender: Player, ...args: PreviousCallArguments) => void;
 
-export namespace NetMiddlewares {
-	export const RateLimit = createRateLimiter;
-	export const Logging = createLoggerMiddleware;
-	export const TypeChecking = createTypeChecker;
+export type NetGlobalMiddleware = (
+	next: (player: Readonly<Player>, ...args: readonly unknown[]) => void,
+	event: Readonly<NetManagedInstance>,
+) => (sender: Readonly<Player>, ...args: readonly unknown[]) => void;
+
+export interface ReadonlyGlobalMiddlewareArgs {
+	(remoteName: string, remoteData: readonly unknown[], callingPlayer?: Player): void;
 }
 
+export namespace NetMiddleware {
+	export const RateLimit = createRateLimiter;
+	export const Logging = createLoggerMiddleware;
+
+	/** The type checking middleware */
+	export const TypeChecking = NetTypeCheckingMiddleware;
+
+	/**
+	 * Creates a global read-only middleware for use in `Net.Definitions` global middleware.
+	 */
+	export function Global(middleware: ReadonlyGlobalMiddlewareArgs) {
+		return identity<NetGlobalMiddleware>((next, event) => (sender, ...args) => {
+			middleware(event.GetInstance().Name, args, sender);
+			return next(sender, ...args);
+		});
+	}
+}
+
+const createTypeChecker = NetTypeCheckingMiddleware;
 export { createRateLimiter, createTypeChecker };

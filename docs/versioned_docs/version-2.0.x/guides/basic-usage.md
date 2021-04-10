@@ -22,8 +22,8 @@ Three files are needed to get started:
 import Net from "@rbxts/net";
 
 const Remotes = Net.Definitions.Create({
-  PrintMessage: Net.Definitions.ClientToServerEvent<[message: string, other: string]>(),
-  MakeHello: Net.Definitions.ServerAsyncFunction<(message: string) => string>(),
+  PrintMessage: Net.Definitions.Event<[message: string, other: string]>(),
+  MakeHello: Net.Definitions.AsyncFunction<(message: string) => string>(),
 });
 
 export { Remotes };
@@ -69,8 +69,8 @@ MakeHello.CallServerAsync("Net is cool right??").then((result) => {
 local Net = require(ReplicatedStorage.Net)
 
 local Remotes = Net.Definitions.Create({
-  PrintMessage = Net.Definitions.ClientToServerEvent(),
-  MakeHello = Net.Definitions.ServerAsyncFunction(),
+  PrintMessage = Net.Definitions.Event(),
+  MakeHello = Net.Definitions.AsyncFunction(),
 })
 
 return Remotes
@@ -80,13 +80,13 @@ return Remotes
 local Remotes = require(ReplicatedStorage.Common.Remotes)
 
 -- listen to messages
-local PrintMessage = Remotes.Server:Create("PrintMessage")
+local PrintMessage = Remotes:CreateServer("PrintMessage")
 PrintMessage:Connect(function (player, message, other)
   print("Server recieved message", message, "from player:", player, other)
 end)
 
 -- listen and respond to messages
-local MakeHello = Remotes.Server:Create("MakeHello")
+local MakeHello = Remotes:CreateServer("MakeHello")
 MakeHello:SetCallback(function (player, message)
   print("Server got an async message from ", player, "containing the message", message)
   return "Hello, " .. tostring(player) .. " We got your message: " .. message
@@ -97,11 +97,11 @@ end)
 local Remotes = require(ReplicatedStorage.Common.Remotes)
 
 -- send a message to the server
-local PrintMessage = Remotes.Client:Get("PrintMessage");
+local PrintMessage = Remotes:GetClient("PrintMessage");
 PrintMessage:SendToServer("Hello there!", "other");
 
 -- send a message to the server, while listening for a response
-local MakeHello = Remotes.Client:Get("MakeHello");
+local MakeHello = Remotes:GetClient("MakeHello");
 MakeHello:CallServerAsync("Net is cool right??"):andThen(function (result)
   print("Client got a response to the async message from server: ", result)
 end)

@@ -1,10 +1,10 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import NetDefinitions from "./definitions";
-import { NetMiddleware, NetMiddlewares } from "./middleware";
+import { createTypeChecker, NetMiddleware } from "./middleware";
 import { $env, $ifEnv } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
-import { IS_SERVER } from "./internal";
+import type { $DebugInfo } from "rbxts-transform-debug";
 import NetSerialization from "./serialization";
 
 const BUILD_TYPE = $env("TYPE", "TS");
@@ -15,17 +15,29 @@ const BUILD_TYPE = $env("TYPE", "TS");
  */
 namespace Net {
 	/**
-	 * All Net functions and classes relating to the client
+	 * An object that contains a `Serialize` method.
+	 * @internal Still in development
+	 */
+	export type Serializable<T> = Serialization.Serializable<T>;
+
+	/**
+	 * A serialized representation of the object
+	 * @internal Still in development
+	 */
+	export type Serialized<T> = Serialization.Serialized<T>;
+
+	/**
+	 * Legacy client API for Net
 	 */
 	export const Client = NetClientContext;
+
 	/**
-	 * All Net functions and classes relating to the server
+	 * Legacy server API for Net
 	 */
 	export const Server = NetServerContext;
 
 	/**
-	 * @experimental
-	 * Experimental definition builder for Net
+	 * The definitions API for Net
 	 */
 	export const Definitions = NetDefinitions;
 
@@ -41,7 +53,7 @@ namespace Net {
 	/**
 	 * Built-in middlewares
 	 */
-	export const Middleware = NetMiddlewares;
+	export const Middleware = NetMiddleware;
 	/**
 	 * Middleware function type for Net
 	 */
@@ -52,22 +64,33 @@ namespace Net {
 	 * @internal Still in development
 	 */
 	export const Serialization = NetSerialization;
-
-	/**
-	 * An object that contains a `Serialize` method.
-	 * @internal Still in development
-	 */
-	export type Serializable<T> = Serialization.Serializable<T>;
-
-	/**
-	 * A serialized representation of the object
-	 * @internal Still in development
-	 */
-	export type Serialized<T> = Serialization.Serialized<T>;
 }
 
 $ifEnv("NODE_ENV", "development", () => {
 	$dbg(Net.VERSION);
+
+	const sanity = (value: unknown, debug: $DebugInfo) => {
+		if (value === undefined) {
+			throw `[${debug.file}:${debug.lineNumber}] ${debug.rawText} - FAIL`;
+		} else {
+			print(`[${debug.file}:${debug.lineNumber}] ${debug.rawText} - OK`);
+		}
+	};
+
+	$dbg(Net.Definitions, sanity);
+
+	$dbg(Net.Server, sanity);
+	$dbg(Net.Server.Function, sanity);
+	$dbg("new" in Net.Server.Function);
+	$dbg(Net.Server.Event, sanity);
+	$dbg(Net.Server.AsyncFunction, sanity);
+
+	$dbg(Net.Client, sanity);
+	$dbg(Net.Client.Function, sanity);
+	$dbg(Net.Client.Event, sanity);
+	$dbg(Net.Client.AsyncFunction, sanity);
+
+	$dbg(createTypeChecker, sanity);
 });
 
 export = Net;

@@ -1,57 +1,14 @@
 import Net from "@rbxts/net";
 import t from "@rbxts/t";
 import Remotes from "./definitions";
-import { createRateLimiter, createTypeChecker, NetMiddleware } from "./middleware";
-import createLoggerMiddleware from "./middleware/LoggerMiddleware";
 
-Net.Server.SetConfiguration("EnableDebugMessages", true);
+const standalone = Remotes.Server.Create("TestStandaloneEvent");
+const testFunctions = Remotes.Server.GetNamespace("TestingFunctions");
+const testEvents = Remotes.Server.GetNamespace("TestingEvents");
 
-async function wait(time: number) {
-	return Promise.defer<void>((resolve) => {
-		let i = 0;
-		while (i < time) {
-			const [, step] = game.GetService("RunService").Stepped.Wait();
-			i += step;
-		}
-		print("waited " + time + " seconds");
-		resolve();
-	});
-}
+testFunctions.OnFunction("CallServerAndAddNumbers", (_, a, b) => a + b);
+testEvents.OnEvent("PrintMessage", print);
+const testLegacy = Remotes.Server.GetNamespace("Legacy").Create("LegacyFunction");
+const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
 
-Net.Server.CreateListener(
-	"Say",
-	[createLoggerMiddleware(), createRateLimiter({ MaxRequestsPerMinute: 1 }), createTypeChecker(t.string)],
-	async (player, message) => {
-		await wait(1);
-		print(`${player}: ${message}`);
-	},
-);
-
-Remotes.Server.ConnectEvent("TestDefinition", (message: string) => {
-	print("Server Recieved", message);
-});
-
-new Net.Server.Event("test");
-
-const tester = new Net.Server.AsyncFunction("TestAsync", [createTypeChecker(t.string)]);
-tester.SetCallback((player, message) => `Message was: "${message}" from ${player}`);
-
-const [AddNumbers, ServerPrint] = Net.Server.CreateEvents(
-	["AddNumbers", createTypeChecker(t.number, t.number)],
-	"print",
-); // ?
-AddNumbers.Connect((_, a, b) => print(`${a} + ${b} = ${a + b}`));
-ServerPrint.Connect((player, ...args) => print("client", ...args));
-
-function wrap<T extends unknown[]>(fn: (obj: string, ...args: T) => void) {
-	return (player: Player, ...args: T) => {
-		const name = player.GetFullName();
-		fn(name, ...args);
-	};
-}
-
-new Net.Server.Event<[string]>("Test").Connect(
-	wrap((obj, arg1) => {
-		print(obj, arg1);
-	}),
-);
+testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);

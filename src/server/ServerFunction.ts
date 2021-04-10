@@ -15,6 +15,7 @@ export default class ServerFunction<
 		assert(IS_SERVER, "Cannot create a Net.ServerFunction on the Client!");
 	}
 
+	/** @internal */
 	public GetInstance() {
 		return this.instance;
 	}

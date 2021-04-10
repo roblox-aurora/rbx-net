@@ -1,9 +1,15 @@
-import { NetMiddleware, NextCaller } from "../middleware";
-import { MiddlewareList } from "./MiddlewareEvent";
+import { NetGlobalMiddleware, NetMiddleware, NextCaller } from "../middleware";
+import { MiddlewareList, MutableMiddlewareList } from "./MiddlewareEvent";
 
 abstract class MiddlewareFunction {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 	abstract GetInstance(): RemoteFunction;
+
+	/** @internal */
+	public _use(middleware: NetGlobalMiddleware) {
+		(this.middlewares as MutableMiddlewareList).push(middleware);
+	}
+
 	protected _processMiddleware<A extends ReadonlyArray<unknown>, R = void>(
 		callback: (player: Player, ...args: A) => R,
 	) {

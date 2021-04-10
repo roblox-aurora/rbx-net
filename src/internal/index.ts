@@ -1,4 +1,6 @@
 import { $env, $ifEnv } from "rbxts-transform-env";
+import MiddlewareEvent from "../server/MiddlewareEvent";
+import MiddlewareFunction from "../server/MiddlewareFunction";
 
 const HttpService = game.GetService("HttpService");
 const runService = game.GetService("RunService");
@@ -40,6 +42,14 @@ export interface NetManagedInstance {
 	GetInstance(): RemoteEvent | RemoteFunction;
 }
 
+/** @internal */
+export class NetMiddlewareEvent implements NetManagedInstance {
+	constructor(private netInstance: MiddlewareEvent | MiddlewareFunction) {}
+	GetInstance(): RemoteEvent | RemoteFunction {
+		return this.netInstance.GetInstance();
+	}
+}
+
 const REMOTES_FOLDER_NAME = "_NetManaged";
 
 /** @internal */
@@ -49,6 +59,7 @@ export const enum TagId {
 	Async = "NetManagedAsyncFunction",
 	LegacyFunction = "NetManagedLegacyFunction",
 	Event = "NetManagedEvent",
+	DefinitionManaged = "NetDefinitionManaged",
 }
 
 /** @internal */
@@ -83,17 +94,27 @@ export function errorft(message: string, vars: { [name: string]: unknown }): nev
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
-		return vars[token] || token;
+		return vars[token] ?? token;
 	});
 
 	error(message, 2);
+}
+
+const traceSet = new Set<string>();
+export function warnOnce(message: string) {
+	const trace = debug.traceback();
+	if (traceSet.has(trace)) {
+		return;
+	}
+	traceSet.add(trace);
+	warn(`[rbx-net] ${message}`);
 }
 
 export function format(message: string, vars: { [name: string]: unknown }) {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
-		return vars[token] || token;
+		return vars[token] ?? token;
 	});
 	return message;
 }
@@ -111,7 +132,7 @@ export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: 
 		if (result) {
 			resolve(result);
 		} else {
-			reject("Unable to find remote object");
+			reject(`Timed out while waiting for ${remoteType} '${name}' after ${timeout} seconds.`);
 		}
 	});
 }
@@ -145,6 +166,11 @@ export function getRemoteOrThrow<K extends keyof RemoteTypes>(remoteType: K, nam
 export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] {
 	const existing = findRemote(remoteType, name);
 	if (existing) {
+		if (collectionService.HasTag(existing, TagId.DefinitionManaged)) {
+			warnOnce(
+				`Fetching ${remoteType} '${name}', which is a DefinitionsManaged instance from a non-definitions context. This is considered unsafe.`,
+			);
+		}
 		return existing;
 	} else {
 		if (!IS_SERVER) {

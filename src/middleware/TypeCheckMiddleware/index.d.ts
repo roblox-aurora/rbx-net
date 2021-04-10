@@ -1,4 +1,4 @@
-import { TypeCheckerConstructor } from "./types";
+import { TypeChecking } from "./types";
 
-declare const createTypeChecker: TypeCheckerConstructor;
-export = createTypeChecker;
+declare const NetTypeCheckingMiddleware: TypeChecking;
+export = NetTypeCheckingMiddleware;

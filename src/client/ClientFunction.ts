@@ -12,7 +12,7 @@ export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, Ser
 		name: string,
 	) {
 		return Promise.defer<ClientFunction<CallArgs, ServerReturnType>>(async (resolve) => {
-			await waitForRemote("RemoteFunction", name, 10);
+			await waitForRemote("RemoteFunction", name, 60);
 			resolve(new ClientFunction(name));
 		});
 	}

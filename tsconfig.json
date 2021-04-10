@@ -12,21 +12,17 @@
 		"strict": true,
 		"target": "ESNext",
 		"typeRoots": ["node_modules/@rbxts"],
-
-		// configurable
 		"rootDir": "src",
 		"outDir": "out",
 		"removeComments": false,
-		"baseUrl": "src",
 		"stripInternal": true,
-		//"incremental": true,
-		//"tsBuildInfoFile": "out/tsconfig.tsbuildinfo",
 		"declaration": true,
 		"plugins": [
 			{
 				"transform": "rbxts-transform-env"
 			}, {
-				"transform": "rbxts-transform-debug"
+				"transform": "rbxts-transform-debug",
+				"enabled": false
 			}
 		]
 	},

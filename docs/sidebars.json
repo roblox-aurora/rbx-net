@@ -11,10 +11,18 @@
 		},
 		{
 			"type": "category",
-			"label": "Guides",
+			"label": "Definitions Guide",
 			"items": [
-				"guides/basics",
-				"guides/definitions",
+				"definitions/overview",
+				"definitions/starting",
+				"definitions/implementing",
+				"definitions/namespacing"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Advanced Guides",
+			"items": [
 				"guides/uuid",
 				"guides/custom-player-objects"
 			]
