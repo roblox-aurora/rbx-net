@@ -42,9 +42,9 @@ export namespace NetMiddleware {
 	 * Creates a global read-only middleware for use in `Net.Definitions` global middleware.
 	 */
 	export function Global(middleware: ReadonlyGlobalMiddlewareArgs) {
-		return identity<NetGlobalMiddleware>((next, event) => (sender, ...args) => {
+		return identity<NetGlobalMiddleware>((processNext, event) => (sender, ...args) => {
 			middleware(event.GetInstance().Name, args, sender);
-			return next(sender, ...args);
+			return processNext(sender, ...args);
 		});
 	}
 }
