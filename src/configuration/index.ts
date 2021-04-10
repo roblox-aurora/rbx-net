@@ -1,69 +1,80 @@
 import { $env } from "rbxts-transform-env";
+import MiddlewareEvent from "../server/MiddlewareEvent";
+import MiddlewareFunction from "../server/MiddlewareFunction";
 import { IS_CLIENT } from "../internal";
 
 const runService = game.GetService("RunService");
 
 const IS_SERVER = runService.IsServer();
 
-interface RbxNetConfigItem {
-	/**
-	 * The throttle reset timer (default: 60 seconds)
-	 */
-	ServerThrottleResetTimer: number;
+type ErrorHandler = (message: string, invokedBy: MiddlewareEvent | MiddlewareFunction) => void;
 
+interface MutableClientConfiguration {
 	EnableDebugMessages: boolean;
-
-	/**
-	 * The message shown when the throttle has been exceeded.
-	 * {player} will be replaced with the player's name!
-	 */
-	ServerThrottleMessage: string;
-
-	/** @internal */
-	__stfuTypescript: undefined;
 }
 
-let throttleResetTimer = 60;
-let rateLimitReachedMessage = "Request limit exceeded ({limit}) by {player} via {remote}";
+interface MutableConfiguration extends MutableClientConfiguration {
+	/** @deprecated */
+	ServerThrottleResetTimer: number;
+	/** @deprecated */
+	ServerThrottleMessage: string;
+}
+
+interface ClientConfiguration extends Readonly<MutableClientConfiguration> {}
+interface Configuration extends Readonly<MutableConfiguration> {}
+
+let Configuration: Writable<Configuration> = {
+	ServerThrottleResetTimer: 60,
+	EnableDebugMessages: $env<string>("NODE_ENV") === "development",
+	ServerThrottleMessage: "Request limit exceeded ({limit}) by {player} via {remote}",
+};
+
 namespace NetConfig {
 	/** @internal */
-	export let DebugEnabled = $env<string>("NODE_ENV") === "development";
+	export const DebugEnabled = $env<string>("NODE_ENV") === "development";
 
-	/** @rbxts client */
-	export function SetClientConfiguration<K extends keyof Pick<RbxNetConfigItem, "EnableDebugMessages">>(
+	export function SetClient(config: Partial<MutableClientConfiguration>) {
+		assert(IS_CLIENT, "Use SetClient on the client!");
+		Configuration = { ...Configuration, ...config };
+	}
+
+	export function Set(config: Partial<MutableConfiguration>) {
+		assert(IS_SERVER, "Use Set on the server!");
+		Configuration = { ...Configuration, ...config };
+	}
+
+	export function Get() {
+		return Configuration as Readonly<Configuration>;
+	}
+
+	/**
+	 * @deprecated
+	 * @rbxts client
+	 */
+	export function SetClientConfiguration<K extends keyof ClientConfiguration>(
 		key: K,
-		value: RbxNetConfigItem[K],
+		value: ClientConfiguration[K],
 	): void {
 		assert(IS_CLIENT, "Use SetConfiguration on the server!");
 		if (key === "EnableDebugMessages") {
-			DebugEnabled = value as boolean;
+			Configuration.EnableDebugMessages = value;
 		}
 	}
 
-	/** @rbxts server */
-	export function SetConfiguration<K extends keyof RbxNetConfigItem>(key: K, value: RbxNetConfigItem[K]) {
+	/**
+	 * @rbxts server
+	 * @deprecated
+	 * */
+	export function SetConfiguration<K extends keyof Configuration>(key: K, value: Configuration[K]) {
 		assert(IS_SERVER, "Cannot set configuration on client!");
-		if (key === "ServerThrottleResetTimer") {
-			throttleResetTimer = value as number;
-		} else if (key === "ServerThrottleMessage") {
-			rateLimitReachedMessage = value as string;
-		} else if (key === "EnableDebugMessages") {
-			DebugEnabled = value as boolean;
-		}
+		Configuration[key] = value;
 	}
 
-	export function GetConfiguration<K extends keyof RbxNetConfigItem>(key: K): RbxNetConfigItem[K] {
-		if (key === "ServerThrottleResetTimer") {
-			assert(IS_SERVER, "ServerThrottleResetTimer is not used on the client!");
-			return throttleResetTimer as RbxNetConfigItem[K];
-		} else if (key === "ServerThrottleMessage") {
-			assert(IS_SERVER, "ServerThrottleMessage is not used on the client!");
-			return rateLimitReachedMessage as RbxNetConfigItem[K];
-		} else if (key === "EnableDebugMessages") {
-			return DebugEnabled as RbxNetConfigItem[K];
-		} else {
-			return undefined as RbxNetConfigItem[K];
-		}
+	/**
+	 * @deprecated
+	 */
+	export function GetConfiguration<K extends keyof Configuration>(key: K): Configuration[K] {
+		return Configuration[key];
 	}
 
 	/** @internal */

@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/net",
-  "version": "2.1.0-beta.6",
+  "version": "2.1.0",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -27,10 +27,6 @@
     "url": "https://github.com/roblox-aurora/rbx-net/issues"
   },
   "homepage": "https://github.com/roblox-aurora/rbx-net#readme",
-  "publishConfig": {
-    "access": "public",
-    "tag": "beta"
-  },
   "types": "out/index.d.ts",
   "devDependencies": {
     "@rbxts/compiler-types": "^1.0.0-beta.16.1",

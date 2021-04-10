@@ -1,4 +1,6 @@
 import { $env, $ifEnv } from "rbxts-transform-env";
+import MiddlewareEvent from "../server/MiddlewareEvent";
+import MiddlewareFunction from "../server/MiddlewareFunction";
 
 const HttpService = game.GetService("HttpService");
 const runService = game.GetService("RunService");
@@ -38,6 +40,14 @@ export function isLuaTable(value: unknown): value is Map<unknown, unknown> {
 
 export interface NetManagedInstance {
 	GetInstance(): RemoteEvent | RemoteFunction;
+}
+
+/** @internal */
+export class NetMiddlewareEvent implements NetManagedInstance {
+	constructor(private netInstance: MiddlewareEvent | MiddlewareFunction) {}
+	GetInstance(): RemoteEvent | RemoteFunction {
+		return this.netInstance.GetInstance();
+	}
 }
 
 const REMOTES_FOLDER_NAME = "_NetManaged";

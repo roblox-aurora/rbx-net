@@ -69,10 +69,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Waits for the specified remote
 	 * @param remoteId The remote id
 	 */
+
 	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
+		const item = declarationMap.get(this)![remoteId];
 		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
 
-		const item = declarationMap.get(this)![remoteId];
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			return ClientFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
