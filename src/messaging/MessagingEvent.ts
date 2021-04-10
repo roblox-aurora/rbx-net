@@ -148,7 +148,8 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 		}
 
 		globalSubscriptionCounter++;
-		return MessagingService.SubscribeAsync(this.name, (recieved: ISubscriptionMessage) => {
+		return MessagingService.SubscribeAsync(this.name, (data, sent) => {
+			const recieved = { Data: data, Sent: sent };
 			const { Sent } = recieved;
 
 			if (isJobTargetMessage(recieved)) {
