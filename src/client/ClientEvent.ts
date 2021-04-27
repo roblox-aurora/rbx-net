@@ -32,7 +32,7 @@ class ClientEvent<
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
 	}
 
-	/** @internal */
+	/** @deprecated */
 	public GetInstance() {
 		return this.instance;
 	}
