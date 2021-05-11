@@ -2,6 +2,7 @@ import { DebugLog, DebugWarn } from "../configuration";
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 
 const HttpService = game.GetService("HttpService");
+const RunService = game.GetService("RunService");
 
 export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
 	/**
@@ -122,7 +123,7 @@ export default class ClientAsyncFunction<
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
 			do {
-				game.GetService("RunService").Heartbeat.Wait();
+				RunService.Heartbeat.Wait();
 			} while (connection.Connected && tick() < startTime + this.timeout);
 
 			this.listeners.delete(id);
