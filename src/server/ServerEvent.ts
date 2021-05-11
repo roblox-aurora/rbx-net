@@ -53,10 +53,20 @@ export default class ServerEvent<
 	extends MiddlewareEvent
 	implements NetManagedInstance, ServerListenerEvent<ConnectArgs>, ServerSenderEvent<CallArgs> {
 	private instance: RemoteEvent;
+	private defaultHook?: RBXScriptConnection;
+
+	/** @internal */
+	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
+		// TODO: 2.2 make usable for analytics?
+	};
+
 	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
+
+		// Default connection
+		this.defaultHook = this.instance.OnServerEvent.Connect(ServerEvent.DefaultEventHook);
 	}
 
 	/** @deprecated */
@@ -69,6 +79,8 @@ export default class ServerEvent<
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): RBXScriptConnection {
+		this.defaultHook?.Disconnect();
+
 		const connection = this.instance.OnServerEvent.Connect((player, ...args) => {
 			this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
 		});
