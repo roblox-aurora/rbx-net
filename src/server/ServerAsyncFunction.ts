@@ -3,7 +3,9 @@ import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+
 const HttpService = game.GetService("HttpService");
+const RunService = game.GetService("RunService");
 
 type AsyncEventArgs = [eventId: string, data: unknown];
 
@@ -63,6 +65,12 @@ class ServerAsyncFunction<
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
+	private defaultHook?: RBXScriptConnection;
+
+	/** @internal */
+	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
+		// TODO: 2.2. make usable for analytics?
+	};
 
 	/** @internal */
 	public GetInstance() {
@@ -75,6 +83,9 @@ class ServerAsyncFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
+
+		// Default connection
+		this.defaultHook = this.instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
 	}
 
 	public SetCallTimeout(timeout: number) {
@@ -92,6 +103,8 @@ class ServerAsyncFunction<
 	 * @param callback The callback
 	 */
 	public SetCallback<R extends CallbackReturnType>(callback: (player: Player, ...args: CallbackArgs) => R) {
+		this.defaultHook?.Disconnect();
+
 		if (this.connector) {
 			this.connector.Disconnect();
 			this.connector = undefined;
@@ -155,7 +168,7 @@ class ServerAsyncFunction<
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
 			do {
-				game.GetService("RunService").Stepped.Wait();
+				RunService.Stepped.Wait();
 			} while (connection.Connected && tick() < startTime + this.timeout);
 
 			this.listeners.delete(id);
