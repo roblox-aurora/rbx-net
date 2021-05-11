@@ -3,7 +3,9 @@ import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+
 const HttpService = game.GetService("HttpService");
+const RunService = game.GetService("RunService");
 
 type AsyncEventArgs = [eventId: string, data: unknown];
 
@@ -155,7 +157,7 @@ class ServerAsyncFunction<
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
 			do {
-				game.GetService("RunService").Stepped.Wait();
+				RunService.Stepped.Wait();
 			} while (connection.Connected && tick() < startTime + this.timeout);
 
 			this.listeners.delete(id);
