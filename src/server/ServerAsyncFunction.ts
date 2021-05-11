@@ -73,8 +73,15 @@ class ServerAsyncFunction<
 	};
 
 	/** @internal */
-	public GetInstance() {
+	public INTERNAL_GetInstance() {
 		return this.instance;
+	}
+
+	/**
+	 * Destroys this AsyncFunction, this will mean that any existing client equivalent senders/recievers will not work.
+	 */
+	public Destroy() {
+		this.instance.Destroy();
 	}
 
 	constructor(name: string);

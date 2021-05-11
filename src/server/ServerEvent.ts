@@ -69,9 +69,16 @@ export default class ServerEvent<
 		this.defaultHook = this.instance.OnServerEvent.Connect(ServerEvent.DefaultEventHook);
 	}
 
-	/** @deprecated */
-	public GetInstance() {
+	/** @internal */
+	public INTERNAL_GetInstance() {
 		return this.instance;
+	}
+
+	/**
+	 * Destroys this event, this will mean that any existing client listeners or senders will _not_ function.
+	 */
+	public Destroy() {
+		this.instance.Destroy();
 	}
 
 	/**

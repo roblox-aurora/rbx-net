@@ -25,7 +25,7 @@ export default class ServerFunction<
 	}
 
 	/** @internal */
-	public GetInstance() {
+	public INTERNAL_GetInstance() {
 		return this.instance;
 	}
 

@@ -149,7 +149,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				} else {
 					asyncFunction = new ServerAsyncFunction(remoteId);
 				}
-				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
+				CollectionService.AddTag(asyncFunction.INTERNAL_GetInstance(), TagId.DefinitionManaged);
 				remoteAsyncFunctionCache.set(remoteId, asyncFunction);
 			}
 
@@ -168,7 +168,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				} else {
 					event = new ServerEvent(remoteId);
 				}
-				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
+				CollectionService.AddTag(event.INTERNAL_GetInstance(), TagId.DefinitionManaged);
 				remoteEventCache.set(remoteId, event);
 			}
 
