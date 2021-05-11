@@ -9,10 +9,19 @@ export default class ServerFunction<
 > extends MiddlewareFunction {
 	private instance: RemoteFunction;
 
+	public static readonly DefaultFunctionHook = () => {
+		// TODO: 2.2 make usable for analytics?
+		// Although, unlike `Event`, this will need to be part of `SetCallback`'s stuff.
+		return undefined;
+	};
+
 	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs> = []) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteFunction", name);
 		assert(IS_SERVER, "Cannot create a Net.ServerFunction on the Client!");
+
+		// Default listener
+		this.instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
 	}
 
 	/** @internal */

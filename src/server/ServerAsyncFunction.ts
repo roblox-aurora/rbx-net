@@ -65,6 +65,11 @@ class ServerAsyncFunction<
 	private listeners = new Map<string, IAsyncListener>();
 
 	/** @internal */
+	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
+		// TODO: 2.2. make usable for analytics?
+	};
+
+	/** @internal */
 	public GetInstance() {
 		return this.instance;
 	}
@@ -75,6 +80,9 @@ class ServerAsyncFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name);
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
+
+		// Default connection
+		this.instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
 	}
 
 	public SetCallTimeout(timeout: number) {
