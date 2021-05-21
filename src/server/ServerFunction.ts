@@ -2,6 +2,7 @@ import { MiddlewareOverload } from "../middleware";
 import { findOrCreateRemote, IS_SERVER } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
+import { NetEvents } from "../internal/Events";
 
 export default class ServerFunction<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
@@ -9,9 +10,8 @@ export default class ServerFunction<
 > extends MiddlewareFunction {
 	private instance: RemoteFunction;
 
-	public static readonly DefaultFunctionHook = () => {
-		// TODO: 2.2 make usable for analytics?
-		// Although, unlike `Event`, this will need to be part of `SetCallback`'s stuff.
+	public readonly DefaultFunctionHook = (player: Player) => {
+		NetEvents.ServerRemoteCalledWithNoHandler.Fire(player, this);
 		return undefined;
 	};
 
@@ -19,17 +19,25 @@ export default class ServerFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
 			// Default listener
-			instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
+			instance.OnServerInvoke = this.DefaultFunctionHook;
 		});
 		assert(IS_SERVER, "Cannot create a Net.ServerFunction on the Client!");
 
 		// Default listener
-		this.instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
+		this.instance.OnServerInvoke = this.DefaultFunctionHook;
 	}
 
 	/** @internal */
-	public INTERNAL_GetInstance() {
+	public GetInstance() {
 		return this.instance;
+	}
+
+	/**
+	 * Get the id of this remote event
+	 * @returns The id
+	 */
+	public GetId() {
+		return this.instance.Name;
 	}
 
 	public SetCallback<R extends Returns>(callback: (player: Player, ...args: CallbackArgs) => R) {

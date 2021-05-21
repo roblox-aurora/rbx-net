@@ -3,6 +3,7 @@ import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+import { NetEvents } from "../internal/Events";
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
@@ -68,13 +69,22 @@ class ServerAsyncFunction<
 	private defaultHook?: RBXScriptConnection;
 
 	/** @internal */
-	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
+	private readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
 		// TODO: 2.2. make usable for analytics?
+		NetEvents.ServerRemoteCalledWithNoHandler.Fire(player, this);
 	};
 
 	/** @internal */
-	public INTERNAL_GetInstance() {
+	public GetInstance() {
 		return this.instance;
+	}
+
+	/**
+	 * Get the id of this remote event
+	 * @returns The id
+	 */
+	public GetId() {
+		return this.instance.Name;
 	}
 
 	/**
@@ -90,12 +100,12 @@ class ServerAsyncFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
 			// Default connection
-			this.defaultHook = instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
+			this.defaultHook = instance.OnServerEvent.Connect(this.DefaultEventHook);
 		});
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
 
 		// Default connection
-		this.defaultHook = this.instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
+		this.defaultHook = this.instance.OnServerEvent.Connect(this.DefaultEventHook);
 	}
 
 	public SetCallTimeout(timeout: number) {
