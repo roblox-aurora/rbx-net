@@ -163,7 +163,11 @@ export function getRemoteOrThrow<K extends keyof RemoteTypes>(remoteType: K, nam
 }
 
 /** @internal */
-export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] {
+export function findOrCreateRemote<K extends keyof RemoteTypes>(
+	remoteType: K,
+	name: string,
+	onCreate?: (instance: RemoteTypes[K]) => void,
+): RemoteTypes[K] {
 	const existing = findRemote(remoteType, name);
 	if (existing) {
 		if (collectionService.HasTag(existing, TagId.DefinitionManaged)) {
@@ -199,6 +203,7 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(remoteType: K, n
 			print("[rbx-net-dev] Registered remote", remote.GetFullName(), "under", remoteType);
 		});
 
+		onCreate?.(remote as RemoteTypes[K]);
 		return remote as RemoteTypes[K];
 	}
 }
