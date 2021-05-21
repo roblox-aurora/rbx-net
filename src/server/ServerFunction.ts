@@ -17,7 +17,10 @@ export default class ServerFunction<
 
 	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs> = []) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("RemoteFunction", name);
+		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
+			// Default listener
+			instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
+		});
 		assert(IS_SERVER, "Cannot create a Net.ServerFunction on the Client!");
 
 		// Default listener

@@ -62,7 +62,10 @@ export default class ServerEvent<
 
 	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("RemoteEvent", name);
+		this.instance = findOrCreateRemote("RemoteEvent", name, (instance) => {
+			// Default connection
+			this.defaultHook = instance.OnServerEvent.Connect(ServerEvent.DefaultEventHook);
+		});
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
 
 		// Default connection
