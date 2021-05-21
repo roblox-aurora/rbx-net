@@ -81,11 +81,11 @@ class ServerAsyncFunction<
 	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs>);
 	constructor(name: string, middlewares: MiddlewareList = []) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("AsyncRemoteFunction", name);
+		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
+			// Default connection
+			this.defaultHook = instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
+		});
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
-
-		// Default connection
-		this.defaultHook = this.instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
 	}
 
 	public SetCallTimeout(timeout: number) {
