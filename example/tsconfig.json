@@ -8,6 +8,7 @@
         "module": "CommonJS",
         "target": "ESNext",
         "moduleResolution": "Node",
+        "experimentalDecorators": true,
         "typeRoots": [
             "../node_modules/@rbxts"
         ],
@@ -34,8 +35,14 @@
                 "transform": "rbxts-transform-env"
             },
             {
+                "transform": "../transformer",
+                "verbose": true,
+                "DEV_moduleOverride": "../src",
+                "@skipModuleCheck": true,
+            },
+            {
                 "transform": "rbxts-transform-debug",
-                "verbose": true
+                "verbose": false
 			}
         ]
     },

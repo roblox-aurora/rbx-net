@@ -20,13 +20,13 @@ namespace Net {
 	 * An object that contains a `Serialize` method.
 	 * @internal Still in development
 	 */
-	export type Serializable<T> = Serialization.Serializable<T>;
+	export type Serializable<T> = NetSerialization.Serializable<T>;
 
-	/**
-	 * A serialized representation of the object
-	 * @internal Still in development
-	 */
-	export type Serialized<T> = Serialization.Serialized<T>;
+	// /**
+	//  * A serialized representation of the object
+	//  * @internal Still in development
+	//  */
+	// export type Serialized<T> = Serialization.Serialized<T>;
 
 	/**
 	 * Legacy client API for Net
