@@ -77,8 +77,12 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-// const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
-const location = script.Parent!;
+let location: Instance;
+if (script.FindFirstAncestor("Plugin") && runService.IsRunning()) {
+	location = game.GetService("ReplicatedStorage");
+} else {
+	location = script.Parent!;
+}
 
 $ifEnv("NODE_ENV", "development", () => {
 	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
