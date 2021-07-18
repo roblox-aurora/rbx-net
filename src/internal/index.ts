@@ -1,3 +1,4 @@
+/// <reference types="@rbxts/types/plugin" />
 import { $env, $ifEnv } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
@@ -78,17 +79,20 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 }
 
 let location: Instance;
-if (script.FindFirstAncestor("Plugin") && runService.IsRunning()) {
+let remoteFolder: Folder;
+const plugin = script.FindFirstAncestorOfClass("Plugin");
+if (plugin && runService.IsRunning()) {
 	location = game.GetService("ReplicatedStorage");
+	remoteFolder = findOrCreateFolder(location, `${REMOTES_FOLDER_NAME}_${plugin.Name}`);
 } else {
 	location = script.Parent!;
+	remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME);
 }
 
 $ifEnv("NODE_ENV", "development", () => {
 	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
 });
 
-const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 /**
  * Errors with variables formatted in a message
  * @param message The message
