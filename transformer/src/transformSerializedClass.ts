@@ -53,16 +53,26 @@ export function generateSerializedMembers(declaration: ts.ClassDeclaration, useD
 	}
 
 	return factory.createBlock(
-		[factory.createReturnStatement(factory.createObjectLiteralExpression(bindingElements))],
+		[
+			factory.createReturnStatement(
+				factory.createObjectLiteralExpression([
+					factory.createPropertyAssignment("Value", factory.createObjectLiteralExpression(bindingElements)),
+					factory.createPropertyAssignment(
+						"Class",
+						factory.createStringLiteral(declaration.name?.text ?? ""),
+					),
+				]),
+			),
+		],
 		true,
 	);
 }
 
-export function getSerializedInterfaceName(declaration: ts.ClassDeclaration) {
-	return `_serialized_${declaration.name?.text ?? ""}`;
+export function getSerializedInterfaceName(declaration: ts.ClassDeclaration, value = true) {
+	return value ? `$_Value${declaration.name?.text ?? ""}` : `$_Serialized${declaration.name?.text ?? ""}`;
 }
 
-export function generateSerializedInterface(declaration: ts.ClassDeclaration) {
+export function generateSerializedInterface(declaration: ts.ClassDeclaration, typeChecker: ts.TypeChecker) {
 	const bindingElements = new Array<ts.TypeElement>();
 
 	for (const member of declaration.members) {
@@ -103,15 +113,54 @@ export function generateSerializedInterface(declaration: ts.ClassDeclaration) {
 		}
 	}
 
-	const int = factory.createInterfaceDeclaration(
-		undefined,
-		undefined,
-		getSerializedInterfaceName(declaration),
-		undefined,
-		undefined,
-		bindingElements,
-	);
+	const int = [
+		factory.createInterfaceDeclaration(
+			undefined,
+			undefined,
+			getSerializedInterfaceName(declaration),
+			declaration.typeParameters,
+			undefined,
+			bindingElements,
+		),
+		factory.createInterfaceDeclaration(
+			undefined,
+			undefined,
+			getSerializedInterfaceName(declaration, false),
+			declaration.typeParameters,
+			undefined,
+			[
+				factory.createPropertySignature(
+					undefined,
+					"Class",
+					undefined,
+					factory.createLiteralTypeNode(factory.createStringLiteral(declaration.name?.text ?? "")),
+				),
+				factory.createPropertySignature(
+					undefined,
+					"Value",
+					undefined,
+					factory.createTypeReferenceNode(
+						getSerializedInterfaceName(declaration),
+						convertTypeParametersToArguments(declaration.typeParameters),
+					),
+				),
+			],
+		),
+	];
 	return int;
+}
+
+export function convertTypeParametersToArguments(
+	params: ts.NodeArray<ts.TypeParameterDeclaration> | undefined,
+): ts.TypeNode[] {
+	const arr = new Array<ts.TypeNode>();
+	if (params) {
+		for (const param of params) {
+			const node = factory.createTypeReferenceNode(param.name.text);
+			arr.push(node);
+		}
+	}
+	return arr;
 }
 
 export function generateDeserializeMembers(
@@ -137,7 +186,10 @@ export function generateDeserializeMembers(
 				);
 				if (isPrivate) {
 					constructorArguments.push(
-						factory.createPropertyAccessExpression(serializedValueIdentifier, parameter.name.getText()),
+						factory.createPropertyAccessExpression(
+							factory.createPropertyAccessExpression(serializedValueIdentifier, "Value"),
+							parameter.name.getText(),
+						),
 					);
 				}
 			}
@@ -148,7 +200,7 @@ export function generateDeserializeMembers(
 					factory.createPropertyAccessExpression(id, factory.createIdentifier(member.name.getText())),
 					factory.createToken(ts.SyntaxKind.EqualsToken),
 					factory.createPropertyAccessExpression(
-						serializedValueIdentifier,
+						factory.createPropertyAccessExpression(serializedValueIdentifier, "Value"),
 						factory.createIdentifier(member.name.getText()),
 					),
 				),
@@ -158,6 +210,29 @@ export function generateDeserializeMembers(
 
 	return factory.createBlock(
 		[
+			factory.createExpressionStatement(
+				factory.createCallExpression(
+					factory.createIdentifier("assert"),
+					[],
+					[
+						factory.createBinaryExpression(
+							factory.createCallExpression(factory.createIdentifier("typeIs"), undefined, [
+								serializedValueIdentifier,
+								factory.createStringLiteral("table"),
+							]),
+							factory.createToken(ts.SyntaxKind.AmpersandAmpersandToken),
+							factory.createBinaryExpression(
+								factory.createPropertyAccessExpression(serializedValueIdentifier, "Class"),
+								factory.createToken(ts.SyntaxKind.EqualsEqualsEqualsToken),
+								factory.createStringLiteral(declaration.name?.text ?? ""),
+							),
+						),
+						factory.createStringLiteral(
+							"Expected Serialized object of type " + declaration.name?.text ?? "",
+						),
+					],
+				),
+			),
 			factory.createVariableStatement(
 				undefined,
 				factory.createVariableDeclarationList(
@@ -165,14 +240,17 @@ export function generateDeserializeMembers(
 						factory.createVariableDeclaration(
 							id,
 							undefined,
-							factory.createTypeReferenceNode(declaration.name?.text ?? ""),
+							factory.createTypeReferenceNode(
+								declaration.name?.text ?? "",
+								convertTypeParametersToArguments(declaration.typeParameters),
+							),
 							useDefault
 								? factory.createCallExpression(
 										factory.createPropertyAccessExpression(
 											factory.createIdentifier(declaration.name?.text ?? ""),
 											"default",
 										),
-										undefined,
+										convertTypeParametersToArguments(declaration.typeParameters),
 										[],
 								  )
 								: factory.createNewExpression(

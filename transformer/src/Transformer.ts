@@ -2,6 +2,7 @@ import ts, { factory } from "byots";
 import { formatTransformerDebug, formatTransformerDiagnostic, formatTransformerInfo } from "./shared";
 import NetSymbolManager from "./SymbolManager";
 import {
+	convertTypeParametersToArguments,
 	generateDeserializeMembers,
 	generateSerializedInterface,
 	generateSerializedMembers,
@@ -91,7 +92,7 @@ export default class TransformState {
 				const isDefault = this.getDefaultDecorator(node, node.decorators);
 
 				return [
-					generateSerializedInterface(node),
+					...generateSerializedInterface(node, this.typeChecker),
 					factory.updateClassDeclaration(
 						node,
 						node.decorators,
@@ -126,7 +127,7 @@ export default class TransformState {
 								undefined,
 								factory.createIdentifier("deserialize"),
 								undefined,
-								undefined,
+								node.typeParameters,
 								[
 									factory.createParameterDeclaration(
 										undefined,
@@ -134,7 +135,10 @@ export default class TransformState {
 										undefined,
 										"value",
 										undefined,
-										factory.createTypeReferenceNode(getSerializedInterfaceName(node)),
+										factory.createTypeReferenceNode(
+											getSerializedInterfaceName(node, false),
+											convertTypeParametersToArguments(node.typeParameters),
+										),
 									),
 								],
 								undefined,

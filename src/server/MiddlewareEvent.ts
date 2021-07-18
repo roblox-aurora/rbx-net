@@ -42,6 +42,18 @@ abstract class MiddlewareEvent {
 			warn("[rbx-net] " + tostring(e));
 		}
 	}
+
+	protected _processArguments(args: unknown[]) {
+		for (const [index, value] of ipairs(args)) {
+			if (typeIs(value, "table")) {
+				const meta = getmetatable(value);
+				// if (meta) {
+				// 	args[index - 1] = meta.serialize();
+				// }
+			}
+		}
+		return args;
+	}
 }
 
 export default MiddlewareEvent;

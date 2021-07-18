@@ -14,7 +14,25 @@ const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
 
 testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);
 
-@Net.Serialization.Serializable()
-class Person {
-	public constructor(private name: string, private age: number) {}
+class Result<T extends defined, E extends defined> {
+	private constructor(protected okValue: T | undefined, protected errValue: E | undefined) {}
+	public isOk(): this is { okValue: T; errValue: undefined } {
+		return this.okValue !== undefined;
+	}
+	public isErr(): this is { errValue: E } {
+		return this.errValue !== undefined;
+	}
+
+	public static ok<T>(value: T) {
+		return new Result(value, undefined);
+	}
 }
+Net.Serialization.AddSerializer("Result", Result, (value) => {
+	return {
+		Ok: value.isOk() ? value.okValue : undefined,
+		Err: value.isErr() ? value.errValue : undefined,
+	};
+})(Result.ok(10));
+Net.Serialization.AddDeserializer("Result", Result, (value) => {
+	return Result.ok(10);
+});

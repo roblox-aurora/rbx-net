@@ -29,6 +29,7 @@
 	"exclude": [
 		"example/**/*",
 		"test/**/*",
+		"transformer/**/*",
 		"out"
 	]
 }
