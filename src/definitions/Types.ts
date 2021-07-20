@@ -223,7 +223,7 @@ export type InferClientRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 	: T extends ServerToClientEventDeclaration<infer A>
 	? ClientListenerEvent<A>
 	: T extends BidirectionalEventDeclaration<infer S, infer C>
-	? ClientEvent<S, C>
+	? ClientEvent<C, S>
 	: T extends LegacyEventDeclaration<infer SA, infer CA>
 	? ClientEvent<CA, SA>
 	: T extends LegacyAsyncFunctionDeclaration<infer SA, infer SR, infer CA, infer CR>
