@@ -4,4 +4,4 @@
 !out/*.d.ts
 !out/**/*.d.ts
 out/Test/**/*
-transformer/out/**/*.js
+#transformer/out/**/*.js # No transformer yet.

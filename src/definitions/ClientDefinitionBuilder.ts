@@ -35,6 +35,8 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * @throws If the equivalent `Create(remoteId)` has not been called on the server, this will throw an error.
 	 *
 	 * @param remoteId The id of the remote
+	 * @deprecated Use `WaitFor` as Get is unreliable, especially with DeferredEvents
+	 * @hidden
 	 */
 	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
@@ -94,15 +96,15 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.Client.Get(name).Connect(fn)
+	 * Declaration.Client.WaitFor(name).then(remote => remote.Connect(fn))
 	 * ```
 	 */
-	OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
+	async OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
 		name: K,
 		fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<ServerToClientEventDeclaration<any>>;
-		result.Connect(fn);
+		const remote = await (this.WaitFor(name) as Promise<InferClientRemote<ServerToClientEventDeclaration<any>>>);
+		return remote.Connect(fn);
 	}
 
 	/**
@@ -115,14 +117,16 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.Client.Get(name).SetCallback(fn)
+	 * Declaration.Client.WaitFor(name).then(remote => remote.SetCallback(fn))
 	 * ```
 	 */
-	OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
+	async OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
 		name: K,
 		fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
-		result.SetCallback(fn);
+		const remote = await (this.WaitFor(name) as Promise<
+			InferClientRemote<AsyncClientFunctionDeclaration<any, any>>
+		>);
+		return remote.SetCallback(fn);
 	}
 }
