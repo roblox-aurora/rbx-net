@@ -45,7 +45,7 @@ export default class ClientAsyncFunction<
 	CallReturnType = unknown,
 	CallbackReturnType = unknown
 > implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
-	private instance: RemoteEvent;
+	private instance?: RemoteEvent;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
@@ -81,20 +81,20 @@ export default class ClientAsyncFunction<
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnClientEvent.Connect(async (...args: CallbackArgs) => {
+		this.connector = this.instance?.OnClientEvent.Connect(async (...args: CallbackArgs) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
 				const result: unknown | Promise<unknown> = callback(...(data as CallbackArgs));
 				if (Promise.is(result)) {
 					result
 						.then((promiseResult) => {
-							this.instance.FireServer(eventId, promiseResult);
+							this.instance!.FireServer(eventId, promiseResult);
 						})
 						.catch((err: string) => {
 							warn("[rbx-net] Failed to send response to server: " + err);
 						});
 				} else {
-					this.instance.FireServer(eventId, result);
+					this.instance!.FireServer(eventId, result);
 				}
 			} else {
 				warn("Recieved message without eventId");
@@ -103,13 +103,17 @@ export default class ClientAsyncFunction<
 	}
 
 	public async CallServerAsync(...args: CallArgs): Promise<CallReturnType> {
+		if (this.instance === undefined) {
+			return Promise.reject("Remote does not exist anymore") as Promise<CallReturnType>;
+		}
+
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
 			DebugLog("Connected CallServerAsync EventId", id);
-			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
+			const connection = this.instance!.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
 				const [eventId, data] = recvArgs;
 
 				if (typeIs(eventId, "string") && data !== undefined) {

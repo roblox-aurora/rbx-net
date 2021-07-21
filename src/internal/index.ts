@@ -40,7 +40,9 @@ export function isLuaTable(value: unknown): value is Map<unknown, unknown> {
 }
 
 export interface NetManagedInstance {
+	/** @internal */
 	GetInstance(): RemoteEvent | RemoteFunction;
+	GetId(): string;
 }
 
 /** @internal */
@@ -48,6 +50,9 @@ export class NetMiddlewareEvent implements NetManagedInstance {
 	constructor(private netInstance: MiddlewareEvent | MiddlewareFunction) {}
 	GetInstance(): RemoteEvent | RemoteFunction {
 		return this.netInstance.GetInstance();
+	}
+	GetId() {
+		return this.netInstance.GetInstance().Name;
 	}
 }
 

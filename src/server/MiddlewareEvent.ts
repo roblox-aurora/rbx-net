@@ -9,6 +9,7 @@ abstract class MiddlewareEvent {
 
 	/** @internal */
 	abstract GetInstance(): RemoteEvent;
+	abstract GetId(): string;
 
 	/** @internal */
 	public _use(middleware: NetGlobalMiddleware) {

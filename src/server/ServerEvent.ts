@@ -2,6 +2,7 @@ import { NetMiddleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+import { NetEvents } from "../internal/Events";
 
 /**
  * Interface for server listening events
@@ -56,22 +57,40 @@ export default class ServerEvent<
 	private defaultHook?: RBXScriptConnection;
 
 	/** @internal */
-	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
-		// TODO: 2.2 make usable for analytics?
+	private readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
+		NetEvents.ServerRemoteCalledWithNoHandler.Fire(player, this);
 	};
 
 	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteEvent", name, (instance) => {
 			// Default connection
-			this.defaultHook = instance.OnServerEvent.Connect(ServerEvent.DefaultEventHook);
+			this.defaultHook = instance.OnServerEvent.Connect(this.DefaultEventHook);
 		});
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
+
+		// Default connection
+		this.defaultHook = this.instance.OnServerEvent.Connect(this.DefaultEventHook);
 	}
 
-	/** @deprecated */
+	/**
+	 * Get the id of this remote event
+	 * @returns The id
+	 */
+	public GetId() {
+		return this.instance.Name;
+	}
+
+	/** @internal */
 	public GetInstance() {
 		return this.instance;
+	}
+
+	/**
+	 * Destroys this event, this will mean that any existing client listeners or senders will _not_ function.
+	 */
+	public Destroy() {
+		this.instance.Destroy();
 	}
 
 	/**

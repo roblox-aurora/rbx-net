@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/net",
-  "version": "2.1.4",
+  "version": "2.2.0-beta.0",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -15,6 +15,9 @@
     "watch:example": "cross-env NODE_ENV=development TYPE=TestTS rbxtsc-dev -w --type=game -p ./example -i ./include",
     "serve:example": "rojo serve ./example/default.project.json --port 34567",
     "dev:example": "concurrently npm:watch:example npm:serve:example"
+  },
+  "publishConfig": {
+    "tag": "beta"
   },
   "repository": {
     "type": "git",

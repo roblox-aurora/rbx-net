@@ -8,7 +8,7 @@ export interface ClientListenerEvent<CallArguments extends ReadonlyArray<unknown
 	 * Connects a callback function to this event, in which if any events are recieved by the server will be called.
 	 * @param callback The callback function
 	 */
-	Connect(callback: (...args: CallArguments) => void): RBXScriptConnection;
+	Connect(callback: (...args: CallArguments) => void): RBXScriptConnection | undefined;
 }
 
 /**
@@ -26,7 +26,7 @@ class ClientEvent<
 	ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
 > implements ClientListenerEvent<ConnectArgs>, ClientSenderEvent<CallArguments> {
-	private instance: RemoteEvent;
+	private instance?: RemoteEvent;
 	public constructor(name: string) {
 		this.instance = getRemoteOrThrow("RemoteEvent", name);
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
@@ -48,11 +48,13 @@ class ClientEvent<
 	}
 
 	public SendToServer(...args: CallArguments) {
-		this.instance.FireServer(...args);
+		this.instance?.FireServer(...args);
 	}
 
-	public Connect(callback: (...args: ConnectArgs) => void): RBXScriptConnection {
-		return this.instance.OnClientEvent.Connect(callback);
+	public Connect(callback: (...args: ConnectArgs) => void) {
+		if (this.instance) {
+			return this.instance.OnClientEvent.Connect(callback);
+		}
 	}
 }
 

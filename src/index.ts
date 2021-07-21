@@ -6,6 +6,8 @@ import { $env, $ifEnv } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
 import type { $DebugInfo } from "rbxts-transform-debug";
 import NetSerialization from "./serialization";
+import { NetEvents } from "./internal/Events";
+import Signal from "./internal/Signal";
 
 const BUILD_TYPE = $env("TYPE", "TS");
 
@@ -18,13 +20,13 @@ namespace Net {
 	 * An object that contains a `Serialize` method.
 	 * @internal Still in development
 	 */
-	export type Serializable<T> = Serialization.Serializable<T>;
+	export type Serializable<T> = NetSerialization.Serializable<T>;
 
-	/**
-	 * A serialized representation of the object
-	 * @internal Still in development
-	 */
-	export type Serialized<T> = Serialization.Serialized<T>;
+	// /**
+	//  * A serialized representation of the object
+	//  * @internal Still in development
+	//  */
+	// export type Serialized<T> = Serialization.Serialized<T>;
 
 	/**
 	 * Legacy client API for Net
@@ -40,6 +42,19 @@ namespace Net {
 	 * The definitions API for Net
 	 */
 	export const Definitions = NetDefinitions;
+
+	/**
+	 * Connects to local events for purposes of analytics/error reporting
+	 * @param key The key of the vent
+	 * @param value The callback
+	 * @returns The connection
+	 */
+	export function On<K extends ExtractKeys<NetEvents, Signal>>(
+		key: K,
+		value: NetEvents.SignalCallback<NetEvents[K]>,
+	) {
+		return NetEvents[key].Connect(value);
+	}
 
 	/**
 	 * The version of RbxNet
@@ -91,6 +106,9 @@ $ifEnv("NODE_ENV", "development", () => {
 	$dbg(Net.Client.AsyncFunction, sanity);
 
 	$dbg(createTypeChecker, sanity);
+	Net.On("ServerRemoteCalledWithNoHandler", (player, remote) => {
+		warn("ServerRemoteCalledWithNoHandler", player, remote.GetId());
+	});
 });
 
 export = Net;
