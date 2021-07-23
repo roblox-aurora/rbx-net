@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/net",
-  "version": "2.2.0-beta.0",
+  "version": "3.0.0-beta.0",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -33,6 +33,7 @@
   "types": "out/index.d.ts",
   "devDependencies": {
     "@rbxts/compiler-types": "^1.1.1-types.3",
+    "@rbxts/rust-classes": "^0.10.0",
     "@rbxts/t": "^1.3.5",
     "@rbxts/types": "^1.0.471",
     "@typescript-eslint/eslint-plugin": "^4.9.0",
@@ -47,6 +48,5 @@
     "rbxts-transform-debug": "^0.4.0",
     "rbxts-transform-env": "^0.3.0",
     "typescript": "^4.1.2"
-  },
-  "dependencies": {}
+  }
 }

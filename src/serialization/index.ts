@@ -1,9 +1,5 @@
 namespace NetSerialization {
-	export interface Serialized<T> {
-		Class: string;
-		Value: T;
-	}
-
+	/** @internal */
 	export interface SerializeOptions {
 		serializedId?: string;
 		fields: string[];
@@ -13,6 +9,7 @@ namespace NetSerialization {
 	 * Generates all the serialization structures required for Net to serialize this object
 	 * @param _options The options for the generator
 	 * @decorator
+	 * @internal
 	 */
 	export function Serializable(_options?: NetSerialization.SerializeOptions) {
 		return (_object: new (...args: any[]) => any) => {
@@ -23,59 +20,64 @@ namespace NetSerialization {
 	/**
 	 * Declares this class as having a `default` static member that returns a default version of itself.
 	 * @param _object
+	 * @internal
 	 */
 	export const Default = (_object: new (...args: any[]) => any) => {
 		throw `Serializable is a decorator function`;
 	};
 
-	export interface Serializable<T> {
-		Serialize(): T;
+	export interface ClassSerializationOptions<TClass extends object, TSerialized extends object> {
+		Serialize: (value: PrototypeOf<TClass>) => TSerialized;
+		Deserialize: (value: TSerialized) => PrototypeOf<TClass>;
 	}
 
-	export interface SerializableClass<T extends Serializable<any>, U> {
-		new (...args: any[]): T & Serializable<U>;
-		deserialize?(value: U): T;
+	export interface Serializer<TValue, TSerialized> {
+		Serialize(value: TValue): TSerialized;
+		Deserialize(value: TSerialized): TValue;
 	}
 
-	const dud = 1;
+	type NetClassSerializer<TClass extends object, TSerialized extends object> = Serializer<
+		PrototypeOf<TClass>,
+		SerializedClass<TSerialized>
+	>;
 
-	function hasKey<K extends string>(value: defined): value is { Serialize: defined } {
-		return "Serialize" in value;
+	class ClassSerializer<TClass extends object, TSerialized extends object>
+		implements NetClassSerializer<TClass, TSerialized> {
+		public constructor(
+			private typeId: TClass,
+			private serialization: ClassSerializationOptions<TClass, TSerialized>,
+		) {}
+
+		public Serialize(value: PrototypeOf<TClass>): SerializedClass<TSerialized> {
+			return {
+				SerializeClassId: tostring(this.typeId),
+				SerializeClassValue: this.serialization.Serialize(value),
+			};
+		}
+
+		public Deserialize(value: SerializedClass<TSerialized>): PrototypeOf<TClass> {
+			assert(value.SerializeClassId === tostring(this.typeId), "Attempted to deserialize invalid class");
+			return this.serialization.Deserialize(value.SerializeClassValue);
+		}
 	}
 
-	function hasSerializer(value: defined): value is { Serialize(): defined } {
-		return hasKey(value) && typeIs(value.Serialize, "function");
+	/**
+	 * Creates a class serializer to be used by Net.
+	 * This should be called through a ModuleScript so can be accessed by both client and server.
+	 * @param typeId The class
+	 * @param options The serializer and deserializer options
+	 * @returns The class, yo.
+	 */
+	export function CreateClassSerializer<TClass extends object, TSerialized extends object>(
+		typeId: TClass,
+		options: ClassSerializationOptions<TClass, TSerialized>,
+	): NetClassSerializer<TClass, TSerialized> {
+		const serializer = new ClassSerializer(typeId, options);
+		return serializer;
 	}
-
-	export function Serialize(value: object) {}
-	export function Deserialize() {}
-
-	const serializers = new Map<string, SerializableClass<any, any>>();
-	const serializationFunctions = new Map<defined, (value: any) => defined>();
-
-	export function AddSerializableClass<T extends Serializable<any>, U>(
-		serializeId: string,
-		serializer: SerializableClass<T, U>,
-	) {
-		serializers.set(serializeId, serializer);
-	}
-
-	export function AddSerializer<T extends object, R extends Record<string, unknown>>(
-		serializationKey: string,
-		object: T,
-		value: (value: PrototypeOf<T>) => R,
-	) {
-		serializationFunctions.set(object, value);
-		return value;
-	}
-
-	export function AddDeserializer<T extends object>(
-		serializationKey: string,
-		object: T,
-		value: (value: Record<string, unknown>) => PrototypeOf<T>,
-	) {}
 }
 
-type PrototypeOf<T> = T extends { prototype: infer P } ? P : T;
+type PrototypeOf<T> = T extends { prototype: infer P } ? P : never;
+type SerializedClass<T> = { SerializeClassId: string; SerializeClassValue: T };
 
 export default NetSerialization;

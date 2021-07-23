@@ -10,7 +10,6 @@ const testEvents = Remotes.Server.GetNamespace("TestingEvents");
 testFunctions.OnFunction("CallServerAndAddNumbers", (_, a, b) => a + b);
 testEvents.OnEvent("PrintMessage", print);
 const testLegacy = Remotes.Server.GetNamespace("Legacy").Create("LegacyFunction");
-const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
 
 testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);
 
@@ -26,13 +25,29 @@ class Result<T extends defined, E extends defined> {
 	public static ok<T>(value: T) {
 		return new Result(value, undefined);
 	}
+
+	public static err<T>(value: T) {
+		return new Result(undefined, value);
+	}
+
+	public unwrapErr() {
+		return this.errValue!;
+	}
 }
-Net.Serialization.AddSerializer("Result", Result, (value) => {
-	return {
-		Ok: value.isOk() ? value.okValue : undefined,
-		Err: value.isErr() ? value.errValue : undefined,
-	};
-})(Result.ok(10));
-Net.Serialization.AddDeserializer("Result", Result, (value) => {
-	return Result.ok(10);
+
+Net.Serialization.CreateClassSerializer(Result, {
+	Serialize: (value: Result<defined, defined>) => {
+		if (value.isOk()) {
+			return { errValue: undefined, okValue: value.okValue };
+		} else {
+			return { errValue: value.unwrapErr(), okValue: undefined };
+		}
+	},
+	Deserialize: (value) => {
+		if (value.okValue !== undefined) {
+			return Result.ok(value.okValue);
+		} else {
+			return Result.err(value.errValue);
+		}
+	},
 });

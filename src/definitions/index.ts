@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
+import { MiddlewareOverload, NetGlobalMiddleware, NetMiddleware } from "../middleware";
 import {
 	LegacyAsyncFunctionDeclaration,
 	FunctionDeclaration,
@@ -19,8 +19,21 @@ import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { warnOnce } from "../internal";
 import { $nameof } from "rbxts-transform-debug";
 import { NamespaceBuilder } from "./NamespaceBuilder";
+import NetSerialization from "../serialization";
 
 namespace NetDefinitions {
+	export interface CreateOptions {
+		/**
+		 * The global middlewares to apply to all the remotes
+		 */
+		readonly GlobalMiddleware?: NetGlobalMiddleware[];
+		/**
+		 * The global serializers to apply to all the remotes.
+		 * This is useful for shared class types that need to be sent over the network.
+		 */
+		readonly Serializers?: NetSerialization.Serializer<any, any>[];
+	}
+
 	/**
 	 * Validates the specified declarations to ensure they're valid before usage
 	 * @param declarations The declarations
@@ -36,11 +49,11 @@ namespace NetDefinitions {
 	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T, globalMiddleware?: NetGlobalMiddleware[]) {
+	export function Create<T extends RemoteDeclarations>(declarations: T, createOptions: CreateOptions) {
 		validateDeclarations(declarations);
 		return identity<DefinitionsCreateResult<T>>({
-			Server: new ServerDefinitionBuilder<T>(declarations, globalMiddleware),
-			Client: new ClientDefinitionBuilder<T>(declarations),
+			Server: new ServerDefinitionBuilder<T>(declarations, createOptions),
+			Client: new ClientDefinitionBuilder<T>(declarations, createOptions),
 		});
 	}
 

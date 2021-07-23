@@ -52,9 +52,7 @@ class ClientEvent<
 	}
 
 	public Connect(callback: (...args: ConnectArgs) => void) {
-		if (this.instance) {
-			return this.instance.OnClientEvent.Connect(callback);
-		}
+		return this.instance?.OnClientEvent.Connect(callback);
 	}
 }
 

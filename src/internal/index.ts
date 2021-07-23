@@ -1,4 +1,3 @@
-/// <reference types="@rbxts/types/plugin" />
 import { $env, $ifEnv } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
@@ -85,6 +84,8 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 
 let location: Instance;
 let remoteFolder: Folder;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+/** @ts-ignore */
 const plugin = script.FindFirstAncestorOfClass("Plugin");
 if (plugin && runService.IsRunning()) {
 	location = game.GetService("ReplicatedStorage");

@@ -1,4 +1,5 @@
 import Net from "@rbxts/net";
+import { Option, Result } from "@rbxts/rust-classes";
 import t from "@rbxts/t";
 import { $print } from "rbxts-transform-debug";
 
@@ -19,6 +20,36 @@ const {
 	ClientToServerEvent,
 } = Net.Definitions;
 
+const RustResultSerializer = Net.Serialization.CreateClassSerializer(Result, {
+	Serialize: (value: Result<defined, defined>) => {
+		if (value.isOk()) {
+			return { okValue: value.okValue };
+		} else {
+			return { errValue: value.unwrapErr() };
+		}
+	},
+	Deserialize: (serialized) => {
+		if (serialized.okValue !== undefined) {
+			return Result.ok(serialized.okValue);
+		} else {
+			return Result.err(serialized.errValue);
+		}
+	},
+});
+
+const RustOptionSerializer = Net.Serialization.CreateClassSerializer(Option, {
+	Serialize: (value: Option<defined>) => {
+		if (value.isSome()) {
+			return { value };
+		} else {
+			return { value: undefined };
+		}
+	},
+	Deserialize: (serialized) => {
+		return Option.wrap(serialized.value);
+	},
+});
+
 const Remotes = Create(
 	{
 		TestStandaloneEvent: ServerToClientEvent<[message2: string]>(),
@@ -35,11 +66,14 @@ const Remotes = Create(
 			LegacyAsyncFunction: AsyncFunction<(server: number) => string, (client: number) => string>(),
 		}),
 	},
-	[
-		Net.Middleware.Global((remote, data, player) => {
-			$print("call from", player, "via", remote, ...data);
-		}),
-	],
+	{
+		GlobalMiddleware: [
+			Net.Middleware.Global((remote, data, player) => {
+				$print("call from", player, "via", remote, ...data);
+			}),
+		],
+		Serializers: [RustResultSerializer, RustOptionSerializer],
+	},
 );
 
 export default Remotes;

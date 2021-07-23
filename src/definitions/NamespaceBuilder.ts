@@ -1,5 +1,5 @@
 import { $dbg, $print } from "rbxts-transform-debug";
-import { NetGlobalMiddleware } from "../middleware";
+import NetDefinitions from ".";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { NamespaceDeclaration, RemoteDeclarations } from "./Types";
@@ -28,18 +28,21 @@ export class NamespaceBuilder<N extends RemoteDeclarations> {
 
 	/** @internal */
 	_buildServerDefinition(
-		globalMiddleware?: NetGlobalMiddleware[] | undefined,
+		createOptions?: NetDefinitions.CreateOptions | undefined,
 		namespace?: string,
 	): ServerDefinitionBuilder<N> {
-		assert(RunService.IsServer());
+		assert(RunService.IsServer(), "Server namespaces require the server");
 		$print("Building server definition", declarationMap.get(this)!);
-		return new ServerDefinitionBuilder<N>(declarationMap.get(this) as N, globalMiddleware, namespace);
+		return new ServerDefinitionBuilder<N>(declarationMap.get(this) as N, createOptions, namespace);
 	}
 
 	/** @internal */
-	_buildClientDefinition(namespace?: string): ClientDefinitionBuilder<N> {
-		assert(RunService.IsClient());
+	_buildClientDefinition(
+		createOptions?: NetDefinitions.CreateOptions | undefined,
+		namespace?: string,
+	): ClientDefinitionBuilder<N> {
+		assert(RunService.IsClient(), "Client namespaces require the client");
 		$print("Building client definition", declarationMap.get(this)!);
-		return new ClientDefinitionBuilder<N>(declarationMap.get(this) as N, namespace);
+		return new ClientDefinitionBuilder<N>(declarationMap.get(this) as N, createOptions, namespace);
 	}
 }

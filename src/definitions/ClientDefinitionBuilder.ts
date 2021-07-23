@@ -1,4 +1,5 @@
 import { $nameof } from "rbxts-transform-debug";
+import NetDefinitions from ".";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
@@ -20,7 +21,7 @@ import {
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private namespace = "") {
+	public constructor(declarations: T, private options?: NetDefinitions.CreateOptions, private namespace = "") {
 		declarationMap.set(this, declarations);
 	}
 
@@ -63,6 +64,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		const group = declarationMap.get(this)![groupName] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group.Type === "Namespace");
 		return group.Definitions._buildClientDefinition(
+			this.options,
 			this.namespace !== "" ? [this.namespace, groupName].join(":") : groupName,
 		);
 	}

@@ -13,28 +13,19 @@ const BUILD_TYPE = $env("TYPE", "TS");
 
 /**
  * Networking Library for Roblox
- * @version 2.0
+ * @version 3.0
  */
 namespace Net {
 	/**
-	 * An object that contains a `Serialize` method.
-	 * @internal Still in development
-	 */
-	export type Serializable<T> = NetSerialization.Serializable<T>;
-
-	// /**
-	//  * A serialized representation of the object
-	//  * @internal Still in development
-	//  */
-	// export type Serialized<T> = Serialization.Serialized<T>;
-
-	/**
 	 * Legacy client API for Net
+	 * @hidden
+	 * @deprecated Use `Net.Definitions`.
 	 */
 	export const Client = NetClientContext;
 
 	/**
 	 * Legacy server API for Net
+	 * @hidden
 	 */
 	export const Server = NetServerContext;
 
@@ -66,17 +57,15 @@ namespace Net {
 	})`;
 
 	/**
-	 * Built-in middlewares
+	 * Middleware namespace
+	 * @version 2.0
 	 */
 	export const Middleware = NetMiddleware;
-	/**
-	 * Middleware function type for Net
-	 */
 	export type Middleware = NetMiddleware;
 
 	/**
 	 * Network serialization namespace
-	 * @internal Still in development
+	 * @version 3.0
 	 */
 	export const Serialization = NetSerialization;
 }

@@ -20,6 +20,8 @@ import {
 } from "./Types";
 import { TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
+import NetSerialization from "../serialization";
+import NetDefinitions from ".";
 const CollectionService = game.GetService("CollectionService");
 
 // Tidy up all the types here.
@@ -50,7 +52,13 @@ const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private globalMiddleware?: NetGlobalMiddleware[], private namespace = "") {
+	private globalMiddleware?: NetGlobalMiddleware[];
+	private serializers?: NetSerialization.Serializer<any, any>[];
+
+	public constructor(declarations: T, private options?: NetDefinitions.CreateOptions, private namespace = "") {
+		this.serializers = options?.Serializers;
+		this.globalMiddleware = options?.GlobalMiddleware;
+
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
 			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
@@ -100,7 +108,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(group.Type === "Namespace");
 		$print(`Fetch Group`, groupId);
 		return group.Definitions._buildServerDefinition(
-			this.globalMiddleware,
+			this.options,
 			this.namespace !== "" ? [this.namespace, groupId].join(":") : groupId,
 		);
 	}
