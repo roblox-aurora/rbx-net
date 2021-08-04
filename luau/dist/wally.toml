@@ -1,0 +1,8 @@
+[package]
+name = "vorlias/net"
+description = "Advanced multi-language networking library for Roblox."
+version = "2.1.4"
+license = "MIT"
+authors = ["Vorlias"]
+realm = "shared"
+registry = "https://github.com/upliftgames/wally-index"
