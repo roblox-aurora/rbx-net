@@ -2,21 +2,21 @@
 <rss version="2.0">
     <channel>
         <title>RbxNet Blog</title>
-        <link>https://docs.australis.dev/rbx-net/blog</link>
+        <link>https://rbxnet.australis.dev/blog</link>
         <description>RbxNet Blog</description>
         <lastBuildDate>Sun, 12 Jan 2020 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <item>
             <title><![CDATA[v2.0.0-alpha.7]]></title>
-            <link>https://docs.australis.dev/rbx-net/rbx-net/blog/update7</link>
+            <link>https://rbxnet.australis.dev/rbx-net/blog/update7</link>
             <guid>update7</guid>
             <pubDate>Sun, 12 Jan 2020 00:00:00 GMT</pubDate>
             <description><![CDATA[- This change adds Net.Middleware.Logger - A in-built logging middleware.]]></description>
         </item>
         <item>
             <title><![CDATA[v2.0.0-alpha.6]]></title>
-            <link>https://docs.australis.dev/rbx-net/rbx-net/blog/update6</link>
+            <link>https://rbxnet.australis.dev/rbx-net/blog/update6</link>
             <guid>update6</guid>
             <pubDate>Tue, 07 Jan 2020 00:00:00 GMT</pubDate>
             <description><![CDATA[This change fixes the types relating around the changes in @rbxts/compiler-types@1.0.0-beta.13.1]]></description>
