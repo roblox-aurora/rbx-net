@@ -10,14 +10,14 @@
     <entry>
         <title type="html"><![CDATA[v2.0.0-alpha.7]]></title>
         <id>update7</id>
-        <link href="https://rbxnet.australis.dev/rbx-net/blog/update7"/>
+        <link href="https://rbxnet.australis.dev/blog/update7"/>
         <updated>2020-01-12T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[- This change adds Net.Middleware.Logger - A in-built logging middleware.]]></summary>
     </entry>
     <entry>
         <title type="html"><![CDATA[v2.0.0-alpha.6]]></title>
         <id>update6</id>
-        <link href="https://rbxnet.australis.dev/rbx-net/blog/update6"/>
+        <link href="https://rbxnet.australis.dev/blog/update6"/>
         <updated>2020-01-07T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[This change fixes the types relating around the changes in @rbxts/compiler-types@1.0.0-beta.13.1]]></summary>
     </entry>
