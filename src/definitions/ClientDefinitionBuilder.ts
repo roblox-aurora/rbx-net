@@ -30,25 +30,18 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
-	 * Gets the specified client remote instance `remoteId` based on the definition and returns it.
+	 * (Internally uses {@link WaitFor})
 	 *
-	 * @throws If the equivalent `Create(remoteId)` has not been called on the server, this will throw an error.
+	 * Will yield the current thread until the remote is found, or after 60 seconds will error.
+	 *
+	 * If you want to fetch the remote asynchronously, please use {@link WaitFor} instead.
 	 *
 	 * @param remoteId The id of the remote
+	 *
+	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
 	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
-		const item = declarationMap.get(this)![remoteId];
-		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
-		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
-		if (item.Type === "Function") {
-			return new ClientFunction(remoteId) as InferClientRemote<T[K]>;
-		} else if (item.Type === "AsyncFunction") {
-			return new ClientAsyncFunction(remoteId) as InferClientRemote<T[K]>;
-		} else if (item.Type === "Event") {
-			return new ClientEvent(remoteId) as InferClientRemote<T[K]>;
-		}
-
-		throw `Invalid Type`;
+		return this.WaitFor(remoteId).expect();
 	}
 
 	/**
@@ -66,8 +59,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
-	 * Waits for the specified remote
+	 * Waits for the specified remote to exist, then returns it in a promises
+	 *
 	 * @param remoteId The remote id
+	 *
+	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
 
 	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
@@ -94,7 +90,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.Client.Get(name).Connect(fn)
+	 * Declaration.Client.WaitFor(name).expect().Connect(fn)
 	 * ```
 	 */
 	OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
@@ -115,7 +111,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.Client.Get(name).SetCallback(fn)
+	 * Declaration.Client.WaitFor(name).expect().SetCallback(fn)
 	 * ```
 	 */
 	OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
