@@ -101,7 +101,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		name: K,
 		fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<ServerToClientEventDeclaration<any>>;
+		const result = this.WaitFor(name).expect() as InferClientRemote<ServerToClientEventDeclaration<any>>;
 		result.Connect(fn);
 	}
 
@@ -122,7 +122,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		name: K,
 		fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>,
 	) {
-		const result = this.Get(name) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
+		const result = this.WaitFor(name).expect() as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
 }
