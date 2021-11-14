@@ -44,7 +44,7 @@ type ServerFunctionCallbackFunction<T extends RemoteDeclarations, K extends keyo
 	Extract<T[K], AsyncServerFunctionDeclaration<any, any>>
 >;
 
-type RemoteDict<T extends RemoteDeclarations> =
+type RemoteDeclarationDict<T extends RemoteDeclarations> =
 	| Record<keyof FilterDeclarations<T> & string, DeclarationLike>
 	| Record<keyof FilterGroups<T> & string, DeclarationNamespaceLike>;
 
@@ -53,7 +53,7 @@ const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, 
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
-const ROOT_NAMESPACE_ID = "@ROOT";
+const ROOT_NAMESPACE_ID = "@";
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(
@@ -78,10 +78,14 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	private InitializeServerRemotes() {
 		$print("Running remote prefetch for", this.namespace);
 
-		const wm = declarationMap.get(this)! as RemoteDict<T>;
-		for (const [id, declaration] of pairs(wm)) {
+		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
+		for (const [id, declaration] of pairs(declarations)) {
 			const remoteInstanceId =
-				this.namespace !== ROOT_NAMESPACE_ID ? ([this.namespace, id].join(":") as keyof RemoteDict<T>) : id;
+				this.namespace !== ROOT_NAMESPACE_ID
+					? ([this.namespace, id].join(":") as keyof RemoteDeclarationDict<T>)
+					: id;
+
+			$print("Generating server-side remote", this.namespace, id, "as", remoteInstanceId);
 
 			if (declaration.Type === "Function") {
 				let func: ServerFunction;
@@ -158,7 +162,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 */
 	public OnEvent<K extends ServerEventDeclarationKeys<T>>(name: K, fn: ServerEventConnectFunction<T, K>) {
-		const result = this.Create(name) as InferServerRemote<
+		const result = this.Get(name) as InferServerRemote<
 			ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
 		>;
 		result.Connect(fn);
@@ -187,12 +191,12 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
-	 * Gets the specified remote object
-	 *
-	 * _The result will be cached_.
+	 * Fetches the remote object with the specified id in this namespace.
 	 *
 	 * @param remoteId The remote id
 	 * @returns The server-side remote object
+	 *
+	 * @see {@link OnEvent}, {@link OnFunction} for nicer alternatives for event/callback handling.
 	 */
 	public Get<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
@@ -228,7 +232,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Retrieves the specified server remote instance `remoteId` based on the definition and returns it.
 	 *
 	 * @param remoteId the id of the remote
-	 * @deprecated Use `Get`. Remotes are now automatically generated at runtime.
+	 * @deprecated Use {@link Get}. Remotes are now automatically generated at runtime.
 	 *
 	 */
 	public Create<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
@@ -249,7 +253,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 */
 	public OnFunction<K extends ServerFunctionDeclarationKeys<T>>(name: K, fn: ServerFunctionCallbackFunction<T, K>) {
-		const result = this.Create(name) as InferServerRemote<AsyncServerFunctionDeclaration<any, any>>;
+		const result = this.Get(name) as InferServerRemote<AsyncServerFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
 }
