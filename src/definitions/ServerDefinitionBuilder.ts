@@ -44,10 +44,9 @@ type ServerFunctionCallbackFunction<T extends RemoteDeclarations, K extends keyo
 	Extract<T[K], AsyncServerFunctionDeclaration<any, any>>
 >;
 
-type RemoteDict<T extends RemoteDeclarations> = Record<
-	keyof FilterDeclarations<T> & string,
-	DeclarationLike | DeclarationNamespaceLike
->;
+type RemoteDict<T extends RemoteDeclarations> =
+	| Record<keyof FilterDeclarations<T> & string, DeclarationLike>
+	| Record<keyof FilterGroups<T> & string, DeclarationNamespaceLike>;
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
@@ -56,7 +55,11 @@ const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private globalMiddleware?: NetGlobalMiddleware[], private namespace = "") {
+	public constructor(
+		declarations: T,
+		private globalMiddleware?: NetGlobalMiddleware[],
+		private namespace = "global",
+	) {
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
 			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
@@ -67,12 +70,12 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 		// We only run remote creation on the server
 		if (RunService.IsServer()) {
-			this.InitializeAllServerRemotes();
+			this.InitializeServerRemotes();
 		}
 	}
 
-	private InitializeAllServerRemotes() {
-		$print("Running Net remote pre-init");
+	private InitializeServerRemotes() {
+		$print("Running remote prefetch for", this.namespace);
 
 		const wm = declarationMap.get(this)! as RemoteDict<T>;
 		for (const [remoteId, item] of pairs(wm)) {
@@ -127,6 +130,9 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				}
 
 				this.globalMiddleware?.forEach((mw) => event._use(mw));
+			} else if (item.Type === "Namespace") {
+				// A straight fetch of our namespace should recursively call 'InitializeAllServerRemotes'
+				this.GetNamespace(remoteId);
 			}
 		}
 	}
