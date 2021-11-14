@@ -11,16 +11,17 @@ import {
 	FilterDeclarations,
 	FilterGroups,
 	NamespaceDeclaration,
-	InferGroupDeclaration,
 	InferServerCallback,
 	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
 	DeclarationLike,
+	DeclarationNamespaceLike,
 } from "./Types";
 import { TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 const CollectionService = game.GetService("CollectionService");
+const RunService = game.GetService("RunService");
 
 // Tidy up all the types here.
 type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
@@ -43,6 +44,11 @@ type ServerFunctionCallbackFunction<T extends RemoteDeclarations, K extends keyo
 	Extract<T[K], AsyncServerFunctionDeclaration<any, any>>
 >;
 
+type RemoteDict<T extends RemoteDeclarations> = Record<
+	keyof FilterDeclarations<T> & string,
+	DeclarationLike | DeclarationNamespaceLike
+>;
+
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
 const remoteEventCache = new Map<string, ServerEvent>();
@@ -58,6 +64,71 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
 			}
 		});
+
+		// We only run remote creation on the server
+		if (RunService.IsServer()) {
+			this.InitializeAllServerRemotes();
+		}
+	}
+
+	private InitializeAllServerRemotes() {
+		$print("Running Net remote pre-init");
+
+		const wm = declarationMap.get(this)! as RemoteDict<T>;
+		for (const [remoteId, item] of pairs(wm)) {
+			if (item.Type === "Function") {
+				let func: ServerFunction;
+
+				// This should make certain use cases cheaper
+				if (remoteFunctionCache.has(remoteId)) {
+					continue;
+				} else {
+					if (item.ServerMiddleware) {
+						func = new ServerFunction(remoteId, item.ServerMiddleware);
+					} else {
+						func = new ServerFunction(remoteId);
+					}
+					CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
+					remoteFunctionCache.set(remoteId, func);
+				}
+
+				this.globalMiddleware?.forEach((mw) => func._use(mw));
+			} else if (item.Type === "AsyncFunction") {
+				let asyncFunction: ServerAsyncFunction;
+
+				// This should make certain use cases cheaper
+				if (remoteAsyncFunctionCache.has(remoteId)) {
+					continue;
+				} else {
+					if (item.ServerMiddleware) {
+						asyncFunction = new ServerAsyncFunction(remoteId, item.ServerMiddleware);
+					} else {
+						asyncFunction = new ServerAsyncFunction(remoteId);
+					}
+					CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
+					remoteAsyncFunctionCache.set(remoteId, asyncFunction);
+				}
+
+				this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
+			} else if (item.Type === "Event") {
+				let event: ServerEvent;
+
+				// This should make certain use cases cheaper
+				if (remoteEventCache.has(remoteId)) {
+					continue;
+				} else {
+					if (item.ServerMiddleware) {
+						event = new ServerEvent(remoteId, item.ServerMiddleware);
+					} else {
+						event = new ServerEvent(remoteId);
+					}
+					CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
+					remoteEventCache.set(remoteId, event);
+				}
+
+				this.globalMiddleware?.forEach((mw) => event._use(mw));
+			}
+		}
 	}
 
 	/** @internal */
@@ -106,77 +177,52 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/**
-	 * Creates or retrieves the specified server remote instance `remoteId` based on the definition and returns it.
+	 * Gets the specified remote object
 	 *
-	 * _The created remote will be cached_
+	 * _The result will be cached_.
 	 *
-	 * @param remoteId the id of the remote
-	 *
+	 * @param remoteId The remote id
+	 * @returns The server-side remote object
 	 */
-	public Create<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
+	public Get<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
 		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
-			let func: ServerFunction;
-
-			// This should make certain use cases cheaper
 			if (remoteFunctionCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				if (item.ServerMiddleware) {
-					func = new ServerFunction(remoteId, item.ServerMiddleware);
-				} else {
-					func = new ServerFunction(remoteId);
-				}
-				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
-				remoteFunctionCache.set(remoteId, func);
+				throw `Failed to fetch remote ${remoteId}`;
 			}
-
-			this.globalMiddleware?.forEach((mw) => func._use(mw));
-			return func as InferServerRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
-			let asyncFunction: ServerAsyncFunction;
-
-			// This should make certain use cases cheaper
 			if (remoteAsyncFunctionCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteAsyncFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				if (item.ServerMiddleware) {
-					asyncFunction = new ServerAsyncFunction(remoteId, item.ServerMiddleware);
-				} else {
-					asyncFunction = new ServerAsyncFunction(remoteId);
-				}
-				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
-				remoteAsyncFunctionCache.set(remoteId, asyncFunction);
+				throw `Failed to fetch remote ${remoteId}`;
 			}
-
-			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
-			return asyncFunction as InferServerRemote<T[K]>;
 		} else if (item.Type === "Event") {
-			let event: ServerEvent;
-
-			// This should make certain use cases cheaper
 			if (remoteEventCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteEventCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				if (item.ServerMiddleware) {
-					event = new ServerEvent(remoteId, item.ServerMiddleware);
-				} else {
-					event = new ServerEvent(remoteId);
-				}
-				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
-				remoteEventCache.set(remoteId, event);
+				throw `Failed to fetch remote ${remoteId}`;
 			}
-
-			this.globalMiddleware?.forEach((mw) => event._use(mw));
-			return event as InferServerRemote<T[K]>;
+		} else {
+			throw `Invalid type for ${remoteId}`;
 		}
+	}
 
-		throw `Invalid Type`;
+	/**
+	 * Retrieves the specified server remote instance `remoteId` based on the definition and returns it.
+	 *
+	 * @param remoteId the id of the remote
+	 * @deprecated Use `Get`. Remotes are now automatically generated at runtime.
+	 *
+	 */
+	public Create<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
+		return this.Get<K>(remoteId);
 	}
 
 	/**
