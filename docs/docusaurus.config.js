@@ -27,10 +27,6 @@ module.exports = {
       },
       items: [
         {
-          label: "Documentation",
-          type: "docsVersion",
-        },
-        {
           type: "docsVersionDropdown",
           position: "left",
 
@@ -40,6 +36,10 @@ module.exports = {
 
           // Do not add the link active class when browsing docs.
           dropdownActiveClassDisabled: true,
+        },
+        {
+          label: "Documentation",
+          type: "docsVersion",
         },
         // { to: "docs/api", label: "API", position: "right" },
         { to: "blog", label: "Updates", position: "right" },
