@@ -112,10 +112,10 @@ const TestRemote = ClientRemotes.Get("TestRemote");
 ```
 
 ### OnEvent(name, callback)
-Similar to `Get` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
+Similar to `Get` but only works on events, and is pretty much a shortcut for `Get(name).Connect(callback)`
 
 ### OnFunction(name, callback)
-Similar to `Get` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
+Similar to `Get` but only works on events, and is pretty much a shortcut for `Get(name).SetCallback(callback)`
 
 ### GetNamespace(name)
 Gets a child namespace under this namespace
