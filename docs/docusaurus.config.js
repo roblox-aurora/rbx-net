@@ -32,7 +32,7 @@ module.exports = {
         },
         {
           type: "docsVersionDropdown",
-          position: "right",
+          position: "left",
 
           // Add additional dropdown items at the beginning/end of the dropdown.
           dropdownItemsBefore: [],
@@ -98,11 +98,15 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.json"),
-          lastVersion: "current",
+          lastVersion: "2.1.x",
           versions: {
             current: {
               label: require("../package.json").version,
-              path: "2.1"
+              path: "2.2"
+            },
+            "2.1.x": {
+              label: "2.1.5",
+              path: "2.1",
             },
             "2.0.x": {
               label: "2.0.0",

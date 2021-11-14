@@ -67,7 +67,7 @@ Contains all the definition builders for server-side events and functions.
 
 ```ts
 class ServerDefinitionBuilder<T extends RemoteDeclaration> {
-    Get(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
+    Create(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
     GetNamespace<K extends string>(name: K): SeverDefinitionBuilder<T[K]>;
     OnEvent(name: string, callback: Callback): void;
     OnFunction(name: string, callback: Callback): void;
@@ -75,18 +75,18 @@ class ServerDefinitionBuilder<T extends RemoteDeclaration> {
 ```
 
 
-### Get(name)
+### Create(name)
 Will get the specified event by name, and return it. The returned object will be the type provided in the definition.
 
 ```ts title="server/example.server.ts"
 import { Server as ServerRemotes } from "shared/remotes.ts";
-const TestRemote = ServerRemotes.Get("TestRemote");
+const TestRemote = ServerRemotes.Create("TestRemote");
 ```
 
 ### OnFunction(name, callback)
-Similar to `Get` but only works on events, and is pretty much a shortcut for `Get(name).SetCallback(callback)`
+Similar to `Create` but only works on events, and is pretty much a shortcut for `Create(name).SetCallback(callback)`
 ### OnEvent(name, callback)
-Similar to `Get` but only works on events, and is pretty much a shortcut for `Get(name).Connect(callback)`
+Similar to `Create` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
 ### GetNamespace(name)
 Gets a child namespace under this namespace
 
@@ -98,7 +98,6 @@ class ClientDefinitionBuilder<T extends RemoteDeclaration> {
     Get(name: string): ServerEvent | ServerAsyncFunction | ServerFunction;
     GetNamespace<K extends string>(name: K): ClientDefinitionBuilder<T[K]>;
     OnEvent(name: string, callback: Callback): void;
-    OnFunction(name: string, callback: Callback): void;
 }
 ```
 ### Get(name)
@@ -112,9 +111,6 @@ const TestRemote = ClientRemotes.Get("TestRemote");
 ```
 
 ### OnEvent(name, callback)
-Similar to `Get` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
-
-### OnFunction(name, callback)
 Similar to `Get` but only works on events, and is pretty much a shortcut for `Create(name).Connect(callback)`
 
 ### GetNamespace(name)
