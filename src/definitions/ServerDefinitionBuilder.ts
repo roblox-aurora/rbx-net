@@ -53,12 +53,13 @@ const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, 
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
+const ROOT_NAMESPACE_ID = "@ROOT";
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(
 		declarations: T,
 		private globalMiddleware?: NetGlobalMiddleware[],
-		private namespace = "global",
+		private namespace = ROOT_NAMESPACE_ID,
 	) {
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
@@ -78,61 +79,64 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		$print("Running remote prefetch for", this.namespace);
 
 		const wm = declarationMap.get(this)! as RemoteDict<T>;
-		for (const [remoteId, item] of pairs(wm)) {
-			if (item.Type === "Function") {
+		for (const [id, declaration] of pairs(wm)) {
+			const remoteInstanceId =
+				this.namespace !== ROOT_NAMESPACE_ID ? ([this.namespace, id].join(":") as keyof RemoteDict<T>) : id;
+
+			if (declaration.Type === "Function") {
 				let func: ServerFunction;
 
 				// This should make certain use cases cheaper
-				if (remoteFunctionCache.has(remoteId)) {
+				if (remoteFunctionCache.has(remoteInstanceId)) {
 					continue;
 				} else {
-					if (item.ServerMiddleware) {
-						func = new ServerFunction(remoteId, item.ServerMiddleware);
+					if (declaration.ServerMiddleware) {
+						func = new ServerFunction(remoteInstanceId, declaration.ServerMiddleware);
 					} else {
-						func = new ServerFunction(remoteId);
+						func = new ServerFunction(remoteInstanceId);
 					}
 					CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
-					remoteFunctionCache.set(remoteId, func);
+					remoteFunctionCache.set(remoteInstanceId, func);
 				}
 
 				this.globalMiddleware?.forEach((mw) => func._use(mw));
-			} else if (item.Type === "AsyncFunction") {
+			} else if (declaration.Type === "AsyncFunction") {
 				let asyncFunction: ServerAsyncFunction;
 
 				// This should make certain use cases cheaper
-				if (remoteAsyncFunctionCache.has(remoteId)) {
+				if (remoteAsyncFunctionCache.has(remoteInstanceId)) {
 					continue;
 				} else {
-					if (item.ServerMiddleware) {
-						asyncFunction = new ServerAsyncFunction(remoteId, item.ServerMiddleware);
+					if (declaration.ServerMiddleware) {
+						asyncFunction = new ServerAsyncFunction(remoteInstanceId, declaration.ServerMiddleware);
 					} else {
-						asyncFunction = new ServerAsyncFunction(remoteId);
+						asyncFunction = new ServerAsyncFunction(remoteInstanceId);
 					}
 					CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
-					remoteAsyncFunctionCache.set(remoteId, asyncFunction);
+					remoteAsyncFunctionCache.set(remoteInstanceId, asyncFunction);
 				}
 
 				this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
-			} else if (item.Type === "Event") {
+			} else if (declaration.Type === "Event") {
 				let event: ServerEvent;
 
 				// This should make certain use cases cheaper
-				if (remoteEventCache.has(remoteId)) {
+				if (remoteEventCache.has(remoteInstanceId)) {
 					continue;
 				} else {
-					if (item.ServerMiddleware) {
-						event = new ServerEvent(remoteId, item.ServerMiddleware);
+					if (declaration.ServerMiddleware) {
+						event = new ServerEvent(remoteInstanceId, declaration.ServerMiddleware);
 					} else {
-						event = new ServerEvent(remoteId);
+						event = new ServerEvent(remoteInstanceId);
 					}
 					CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
-					remoteEventCache.set(remoteId, event);
+					remoteEventCache.set(remoteInstanceId, event);
 				}
 
 				this.globalMiddleware?.forEach((mw) => event._use(mw));
-			} else if (item.Type === "Namespace") {
+			} else if (declaration.Type === "Namespace") {
 				// A straight fetch of our namespace should recursively call 'InitializeAllServerRemotes'
-				this.GetNamespace(remoteId);
+				this.GetNamespace(id);
 			}
 		}
 	}
@@ -192,7 +196,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 */
 	public Get<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
-		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		remoteId = this.namespace !== ROOT_NAMESPACE_ID ? ([this.namespace, remoteId].join(":") as K) : remoteId;
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			if (remoteFunctionCache.has(remoteId)) {
