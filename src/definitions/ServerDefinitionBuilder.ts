@@ -71,11 +71,92 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 		// We only run remote creation on the server
 		if (RunService.IsServer()) {
-			this.InitializeServerRemotes();
+			this._InitServer();
 		}
 	}
 
-	private InitializeServerRemotes() {
+	/** @internal Used internally by Net. Do not use. */
+	private _CreateOrGetRemote(id: string, declaration: DeclarationLike) {
+		/**
+		 * This is used to generate or fetch the specified remote from a declaration
+		 *
+		 * The generated remote id is based off the current namespace.
+		 */
+
+		const remoteInstanceId =
+			this.namespace !== ROOT_NAMESPACE_ID
+				? ([this.namespace, id].join(":") as keyof RemoteDeclarationDict<T>)
+				: id;
+
+		if (declaration.Type === "Function") {
+			let func: ServerFunction;
+
+			if (remoteFunctionCache.has(remoteInstanceId)) {
+				return remoteFunctionCache.get(remoteInstanceId)!;
+			} else {
+				if (declaration.ServerMiddleware) {
+					func = new ServerFunction(remoteInstanceId, declaration.ServerMiddleware);
+				} else {
+					func = new ServerFunction(remoteInstanceId);
+				}
+				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
+				remoteFunctionCache.set(remoteInstanceId, func);
+
+				this.globalMiddleware?.forEach((mw) => func._use(mw));
+				return func;
+			}
+		} else if (declaration.Type === "AsyncFunction") {
+			let asyncFunction: ServerAsyncFunction;
+
+			// This should make certain use cases cheaper
+			if (remoteAsyncFunctionCache.has(remoteInstanceId)) {
+				return remoteAsyncFunctionCache.get(remoteInstanceId)!;
+			} else {
+				if (declaration.ServerMiddleware) {
+					asyncFunction = new ServerAsyncFunction(remoteInstanceId, declaration.ServerMiddleware);
+				} else {
+					asyncFunction = new ServerAsyncFunction(remoteInstanceId);
+				}
+				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
+				remoteAsyncFunctionCache.set(remoteInstanceId, asyncFunction);
+			}
+
+			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
+			return asyncFunction;
+		} else if (declaration.Type === "Event") {
+			let event: ServerEvent;
+
+			// This should make certain use cases cheaper
+			if (remoteEventCache.has(remoteInstanceId)) {
+				return remoteEventCache.get(remoteInstanceId)!;
+			} else {
+				if (declaration.ServerMiddleware) {
+					event = new ServerEvent(remoteInstanceId, declaration.ServerMiddleware);
+				} else {
+					event = new ServerEvent(remoteInstanceId);
+				}
+				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
+				remoteEventCache.set(remoteInstanceId, event);
+			}
+
+			this.globalMiddleware?.forEach((mw) => event._use(mw));
+			return event;
+		} else {
+			throw `Invalid type`;
+		}
+	}
+
+	/** @internal Used internally by Net. Do not use. */
+	private _InitServer() {
+		/**
+		 * Used to generate all the remotes on the server-side straight away.
+		 *
+		 * So long as the remote declaration file is imported, and it's the server this _should_ run.
+		 *
+		 * This will fix https://github.com/roblox-aurora/rbx-net/issues/57, which is a long standing race-condition issue
+		 * I, as well as many other users have run into from time to time.
+		 */
+
 		$print("Running remote prefetch for", this.namespace);
 
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
@@ -87,60 +168,15 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 			$print("Generating server-side remote", this.namespace, id, "as", remoteInstanceId);
 
-			if (declaration.Type === "Function") {
-				let func: ServerFunction;
-
-				// This should make certain use cases cheaper
-				if (remoteFunctionCache.has(remoteInstanceId)) {
-					continue;
-				} else {
-					if (declaration.ServerMiddleware) {
-						func = new ServerFunction(remoteInstanceId, declaration.ServerMiddleware);
-					} else {
-						func = new ServerFunction(remoteInstanceId);
-					}
-					CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
-					remoteFunctionCache.set(remoteInstanceId, func);
-				}
-
-				this.globalMiddleware?.forEach((mw) => func._use(mw));
-			} else if (declaration.Type === "AsyncFunction") {
-				let asyncFunction: ServerAsyncFunction;
-
-				// This should make certain use cases cheaper
-				if (remoteAsyncFunctionCache.has(remoteInstanceId)) {
-					continue;
-				} else {
-					if (declaration.ServerMiddleware) {
-						asyncFunction = new ServerAsyncFunction(remoteInstanceId, declaration.ServerMiddleware);
-					} else {
-						asyncFunction = new ServerAsyncFunction(remoteInstanceId);
-					}
-					CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
-					remoteAsyncFunctionCache.set(remoteInstanceId, asyncFunction);
-				}
-
-				this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
-			} else if (declaration.Type === "Event") {
-				let event: ServerEvent;
-
-				// This should make certain use cases cheaper
-				if (remoteEventCache.has(remoteInstanceId)) {
-					continue;
-				} else {
-					if (declaration.ServerMiddleware) {
-						event = new ServerEvent(remoteInstanceId, declaration.ServerMiddleware);
-					} else {
-						event = new ServerEvent(remoteInstanceId);
-					}
-					CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
-					remoteEventCache.set(remoteInstanceId, event);
-				}
-
-				this.globalMiddleware?.forEach((mw) => event._use(mw));
-			} else if (declaration.Type === "Namespace") {
-				// A straight fetch of our namespace should recursively call 'InitializeAllServerRemotes'
-				this.GetNamespace(id);
+			switch (declaration.Type) {
+				case "Event":
+				case "AsyncFunction":
+				case "Function":
+					this._CreateOrGetRemote(id, declaration);
+					break;
+				case "Namespace":
+					this.GetNamespace(id);
+					break;
 			}
 		}
 	}
