@@ -12,3 +12,11 @@ const testLegacy = Remotes.Server.GetNamespace("Legacy").Create("LegacyFunction"
 const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
 
 testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);
+
+type GlobalNamespace = Net.Util.GetDeclarationDefinitions<typeof Remotes>;
+type GlobalNamespaceAsServerRemotes = Net.Util.GetServerRemotes<GlobalNamespace>;
+type GlobalNamespaceAsClientRemotes = Net.Util.GetClientRemotes<GlobalNamespace>;
+
+type NamespaceTest = Net.Util.GetNamespaceDefinitions<GlobalNamespace, "TestingEvents">;
+type TestNamespaceAsServerRemotes = Net.Util.GetServerRemotes<NamespaceTest>;
+type TestNamespaceAsClientRemotes = Net.Util.GetClientRemotes<NamespaceTest>;
