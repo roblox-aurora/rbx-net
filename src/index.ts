@@ -55,7 +55,6 @@ namespace Net {
 
 	/**
 	 * Utility types for Net
-	 * @internal
 	 */
 	export namespace Util {
 		/**
