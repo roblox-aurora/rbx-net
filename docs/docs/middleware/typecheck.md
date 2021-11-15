@@ -16,7 +16,7 @@ This middleware just takes type checking functions.
 
 ## Using a library like `t`
 
-The rate limiter middleware is created as such:
+The type checking middleware is created as such:
 
 <Tabs defaultValue={DEFAULT_VALUE} groupId={GROUP} values={TABS}>
  <TabItem value="ts">
