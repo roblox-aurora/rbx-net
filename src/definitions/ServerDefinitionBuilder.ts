@@ -194,7 +194,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * Shortcut for:
 	 * ```ts
-	 * Declaration.Server.Create(name).Connect(fn)
+	 * Declaration.Server.Get(name).Connect(fn)
 	 * ```
 	 */
 	public OnEvent<K extends ServerEventDeclarationKeys<T>>(name: K, fn: ServerEventConnectFunction<T, K>) {
@@ -210,7 +210,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * ```ts
 	 * const FeatureA = Remotes.Server.Group("FeatureA");
-	 * const FeatureAEvent = FeatureA.Create("FeatureAEvent");
+	 * const FeatureAEvent = FeatureA.Get("FeatureAEvent");
 	 * ```
 	 *
 	 */

@@ -1,8 +1,9 @@
 import { DebugLog, DebugWarn } from "../configuration";
-import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
+import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
+const CollectionService = game.GetService("CollectionService");
 
 export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
 	/**
@@ -50,7 +51,7 @@ export default class ClientAsyncFunction<
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
 
-	constructor(name: string) {
+	constructor(private name: string) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
@@ -103,6 +104,10 @@ export default class ClientAsyncFunction<
 	}
 
 	public async CallServerAsync(...args: CallArgs): Promise<CallReturnType> {
+		if (CollectionService.HasTag(this.instance, TagId.DefaultFunctionListener)) {
+			throw `Attempted to call AsyncFunction '${this.name}' - which has no user defined callback`;
+		}
+
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 

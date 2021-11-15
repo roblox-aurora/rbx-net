@@ -56,6 +56,7 @@ const REMOTES_FOLDER_NAME = "_NetManaged";
 export const enum TagId {
 	RecieveOnly = "NetRecieveOnly",
 	Managed = "NetManagedInstance",
+	DefaultFunctionListener = "NetDefaultListener",
 	Async = "NetManagedAsyncFunction",
 	LegacyFunction = "NetManagedLegacyFunction",
 	Event = "NetManagedEvent",

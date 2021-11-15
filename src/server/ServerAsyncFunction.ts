@@ -1,8 +1,9 @@
 import { NetGlobalMiddleware, NetMiddleware } from "../middleware";
 import { DebugLog, DebugWarn } from "../configuration";
-import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
+import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+const CollectionService = game.GetService("CollectionService");
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
@@ -84,6 +85,7 @@ class ServerAsyncFunction<
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
 			// Default connection
 			this.defaultHook = instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
+			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
 		});
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
 	}
@@ -103,7 +105,11 @@ class ServerAsyncFunction<
 	 * @param callback The callback
 	 */
 	public SetCallback<R extends CallbackReturnType>(callback: (player: Player, ...args: CallbackArgs) => R) {
-		this.defaultHook?.Disconnect();
+		if (this.defaultHook !== undefined) {
+			this.defaultHook.Disconnect();
+			this.defaultHook = undefined;
+			CollectionService.RemoveTag(this.instance, TagId.DefaultFunctionListener);
+		}
 
 		if (this.connector) {
 			this.connector.Disconnect();

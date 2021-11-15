@@ -1,7 +1,8 @@
 import { MiddlewareOverload } from "../middleware";
-import { findOrCreateRemote, IS_SERVER } from "../internal";
+import { findOrCreateRemote, IS_SERVER, TagId } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
+const CollectionService = game.GetService("CollectionService");
 
 export default class ServerFunction<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
@@ -20,6 +21,7 @@ export default class ServerFunction<
 		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
 			// Default listener
 			instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
+			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
 		});
 		assert(IS_SERVER, "Cannot create a Net.ServerFunction on the Client!");
 	}
@@ -30,6 +32,9 @@ export default class ServerFunction<
 	}
 
 	public SetCallback<R extends Returns>(callback: (player: Player, ...args: CallbackArgs) => R) {
+		if (CollectionService.HasTag(this.instance, TagId.DefaultFunctionListener)) {
+			CollectionService.RemoveTag(this.instance, TagId.DefaultFunctionListener);
+		}
 		this.instance.OnServerInvoke = (player: Player, ...args: ReadonlyArray<unknown>) => {
 			const result: Promise<unknown> | unknown = this._processMiddleware<CallbackArgs, R>(callback)?.(
 				player,
