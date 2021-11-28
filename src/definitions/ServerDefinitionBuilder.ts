@@ -223,7 +223,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		$print(`Fetch Group`, namespaceId);
 		return group.Definitions._buildServerDefinition(
 			this.globalMiddleware,
-			this.namespace !== "" ? [this.namespace, namespaceId].join(":") : namespaceId,
+			this.namespace !== ROOT_NAMESPACE_ID ? [this.namespace, namespaceId].join(":") : namespaceId,
 		);
 	}
 

@@ -1,4 +1,4 @@
-import { $nameof } from "rbxts-transform-debug";
+import { $nameof, $print } from "rbxts-transform-debug";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
@@ -18,9 +18,10 @@ import {
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
+const ROOT_NAMESPACE_ID = "@";
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private namespace = "") {
+	public constructor(declarations: T, private namespace = ROOT_NAMESPACE_ID) {
 		declarationMap.set(this, declarations);
 	}
 
@@ -55,7 +56,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		return group.Definitions._buildClientDefinition(
-			this.namespace !== "" ? [this.namespace, namespaceId].join(":") : namespaceId,
+			this.namespace !== ROOT_NAMESPACE_ID ? [this.namespace, namespaceId].join(":") : namespaceId,
 		);
 	}
 
@@ -69,9 +70,12 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
 		const item = declarationMap.get(this)![remoteId];
-		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		remoteId = this.namespace !== ROOT_NAMESPACE_ID ? ([this.namespace, remoteId].join(":") as K) : remoteId;
 
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
+
+		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
+
 		if (item.Type === "Function") {
 			return ClientFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "Event") {
