@@ -206,7 +206,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 	/**
 	 * Gets the specified group as a definition builder
-	 * @param groupId The name of the group
+	 * @param namespaceId The name of the group
 	 *
 	 * ```ts
 	 * const FeatureA = Remotes.Server.Group("FeatureA");
@@ -215,14 +215,15 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 */
 	public GetNamespace<K extends keyof FilterGroups<T> & string>(
-		groupId: K,
+		namespaceId: K,
 	): ServerDefinitionBuilder<InferDefinition<T[K]>> {
-		const group = declarationMap.get(this)![groupId] as NamespaceDeclaration<RemoteDeclarations>;
+		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
+		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
-		$print(`Fetch Group`, groupId);
+		$print(`Fetch Group`, namespaceId);
 		return group.Definitions._buildServerDefinition(
 			this.globalMiddleware,
-			this.namespace !== "" ? [this.namespace, groupId].join(":") : groupId,
+			this.namespace !== "" ? [this.namespace, namespaceId].join(":") : namespaceId,
 		);
 	}
 

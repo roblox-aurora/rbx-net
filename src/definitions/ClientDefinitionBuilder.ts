@@ -46,15 +46,16 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 	/**
 	 * Gets the specified remote declaration group (or sub group) in which namespaced remotes can be accessed
-	 * @param groupName The group name
+	 * @param namespaceId The group name
 	 */
 	GetNamespace<K extends keyof FilterGroups<T> & string>(
-		groupName: K,
+		namespaceId: K,
 	): ClientDefinitionBuilder<InferDefinition<T[K]>> {
-		const group = declarationMap.get(this)![groupName] as NamespaceDeclaration<RemoteDeclarations>;
+		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
+		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		return group.Definitions._buildClientDefinition(
-			this.namespace !== "" ? [this.namespace, groupName].join(":") : groupName,
+			this.namespace !== "" ? [this.namespace, namespaceId].join(":") : namespaceId,
 		);
 	}
 
