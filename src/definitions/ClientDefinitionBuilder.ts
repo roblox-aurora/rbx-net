@@ -2,6 +2,7 @@ import { $nameof, $print } from "rbxts-transform-debug";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
+import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
 import { InferDefinition, ToClientBuilder } from "./NamespaceBuilder";
 import {
 	AsyncClientFunctionDeclaration,
@@ -18,10 +19,9 @@ import {
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
-const ROOT_NAMESPACE_ID = "@";
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private namespace = ROOT_NAMESPACE_ID) {
+	public constructor(declarations: T, private namespace = NAMESPACE_ROOT) {
 		declarationMap.set(this, declarations);
 	}
 
@@ -56,7 +56,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		return group.Definitions._buildClientDefinition(
-			this.namespace !== ROOT_NAMESPACE_ID ? [this.namespace, namespaceId].join(":") : namespaceId,
+			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}
 
@@ -70,7 +70,8 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
 		const item = declarationMap.get(this)![remoteId];
-		remoteId = this.namespace !== ROOT_NAMESPACE_ID ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		remoteId =
+			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
 
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 

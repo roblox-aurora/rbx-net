@@ -18,6 +18,12 @@ export interface RequestCounter {
 }
 
 /** @internal */
+export const NAMESPACE_SEPARATOR = "/";
+
+/** @internal */
+export const NAMESPACE_ROOT = "@";
+
+/** @internal */
 export const IS_SERVER = !runService.IsRunning() || runService.IsServer();
 
 /** @internal */

@@ -18,7 +18,7 @@ import {
 	DeclarationLike,
 	DeclarationNamespaceLike,
 } from "./Types";
-import { TagId } from "../internal";
+import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
@@ -53,13 +53,12 @@ const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, 
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
-const ROOT_NAMESPACE_ID = "@";
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(
 		declarations: T,
 		private globalMiddleware?: NetGlobalMiddleware[],
-		private namespace = ROOT_NAMESPACE_ID,
+		private namespace = NAMESPACE_ROOT,
 	) {
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
@@ -84,8 +83,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 */
 
 		const remoteInstanceId =
-			this.namespace !== ROOT_NAMESPACE_ID
-				? ([this.namespace, id].join(":") as keyof RemoteDeclarationDict<T>)
+			this.namespace !== NAMESPACE_ROOT
+				? ([this.namespace, id].join(NAMESPACE_SEPARATOR) as keyof RemoteDeclarationDict<T>)
 				: id;
 
 		if (declaration.Type === "Function") {
@@ -162,8 +161,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
 		for (const [id, declaration] of pairs(declarations)) {
 			const remoteInstanceId =
-				this.namespace !== ROOT_NAMESPACE_ID
-					? ([this.namespace, id].join(":") as keyof RemoteDeclarationDict<T>)
+				this.namespace !== NAMESPACE_ROOT
+					? ([this.namespace, id].join(NAMESPACE_SEPARATOR) as keyof RemoteDeclarationDict<T>)
 					: id;
 
 			$print("Generating server-side remote", this.namespace, id, "as", remoteInstanceId);
@@ -223,7 +222,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		$print(`Fetch Group`, namespaceId);
 		return group.Definitions._buildServerDefinition(
 			this.globalMiddleware,
-			this.namespace !== ROOT_NAMESPACE_ID ? [this.namespace, namespaceId].join(":") : namespaceId,
+			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}
 
@@ -237,7 +236,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 */
 	public Get<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
-		remoteId = this.namespace !== ROOT_NAMESPACE_ID ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		remoteId =
+			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 		if (item.Type === "Function") {
 			if (remoteFunctionCache.has(remoteId)) {

@@ -1,19 +1,15 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import NetDefinitions from "./definitions";
-import { createTypeChecker, NetMiddleware } from "./middleware";
+import { NetMiddleware } from "./middleware";
 import { $env, $ifEnv, $NODE_ENV } from "rbxts-transform-env";
-import { $dbg } from "rbxts-transform-debug";
-import type { $DebugInfo } from "rbxts-transform-debug";
+import { $print } from "rbxts-transform-debug";
 import NetSerialization from "./serialization";
-import { ServerDefinitionBuilder } from "./definitions/ServerDefinitionBuilder";
-import { ClientDefinitionBuilder } from "./definitions/ClientDefinitionBuilder";
 import {
 	ClientBuildResult,
 	DefinitionsCreateResult,
 	FilterDeclarations,
 	FilterGroups,
-	InferServerRemote,
 	NamespaceDeclaration,
 	RemoteDeclarations,
 	ServerBuildResult,
@@ -150,30 +146,7 @@ namespace Net {
 }
 
 $ifEnv("NODE_ENV", "development", () => {
-	$dbg(Net.VERSION);
-
-	const sanity = (value: unknown, debug: $DebugInfo) => {
-		if (value === undefined) {
-			throw `[${debug.file}:${debug.lineNumber}] ${debug.rawText} - FAIL`;
-		} else {
-			print(`[${debug.file}:${debug.lineNumber}] ${debug.rawText} - OK`);
-		}
-	};
-
-	$dbg(Net.Definitions, sanity);
-
-	$dbg(Net.Server, sanity);
-	$dbg(Net.Server.Function, sanity);
-	$dbg("new" in Net.Server.Function);
-	$dbg(Net.Server.Event, sanity);
-	$dbg(Net.Server.AsyncFunction, sanity);
-
-	$dbg(Net.Client, sanity);
-	$dbg(Net.Client.Function, sanity);
-	$dbg(Net.Client.Event, sanity);
-	$dbg(Net.Client.AsyncFunction, sanity);
-
-	$dbg(createTypeChecker, sanity);
+	$print(`Net ${Net.DIST} ${Net.VERSION}`);
 });
 
 export = Net;
