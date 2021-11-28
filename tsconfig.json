@@ -14,12 +14,13 @@
 		"typeRoots": ["node_modules/@rbxts"],
 		"rootDir": "src",
 		"outDir": "out",
-		"removeComments": false,
+		"removeComments": true,
 		"stripInternal": true,
 		"declaration": true,
 		"plugins": [
 			{
-				"transform": "rbxts-transform-env"
+				"transform": "rbxts-transform-env",
+				"shortcircuitEnvConditionals": true
 			}, {
 				"transform": "rbxts-transform-debug",
 				"enabled": true,

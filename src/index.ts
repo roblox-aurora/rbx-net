@@ -2,7 +2,7 @@ import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import NetDefinitions from "./definitions";
 import { createTypeChecker, NetMiddleware } from "./middleware";
-import { $env, $ifEnv } from "rbxts-transform-env";
+import { $env, $ifEnv, $NODE_ENV } from "rbxts-transform-env";
 import { $dbg } from "rbxts-transform-debug";
 import type { $DebugInfo } from "rbxts-transform-debug";
 import NetSerialization from "./serialization";
@@ -18,8 +18,6 @@ import {
 	RemoteDeclarations,
 	ServerBuildResult,
 } from "./definitions/Types";
-
-const BUILD_TYPE = $env("TYPE", "TS");
 
 /**
  * Networking Library for Roblox
@@ -127,14 +125,11 @@ namespace Net {
 			: never;
 	}
 
+	export const DIST = $env<string>("TYPE", "TS");
 	/**
 	 * The version of RbxNet
 	 */
-	export const VERSION = `${PKG_VERSION} (${
-		$env<"production" | "development">("NODE_ENV", "production") === "development"
-			? "DEV " + BUILD_TYPE
-			: BUILD_TYPE
-	})`;
+	export const VERSION = $NODE_ENV === "production" ? PKG_VERSION : `DEV ${DIST})} ${PKG_VERSION}`;
 
 	/**
 	 * Built-in middlewares
