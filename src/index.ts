@@ -38,11 +38,13 @@ namespace Net {
 
 	/**
 	 * Legacy client API for Net
+	 * @deprecated
 	 */
 	export const Client = NetClientContext;
 
 	/**
 	 * Legacy server API for Net
+	 * @deprecated
 	 */
 	export const Server = NetServerContext;
 
