@@ -1,7 +1,7 @@
-![](logo.png) RbxNet v2.1
-===========
-Advanced multi-language networking library for Roblox.
------
+<img src="logo.png" align="right"/>
+
+<h1>RbxNet v2.2</h1>
+<h3>Advanced multi-language networking library for Roblox.</h3>
 
 
 RbxNet is a _networking library_ for Roblox, built in TypeScript. It simplifies the creation and management of networking in Roblox.
@@ -18,10 +18,4 @@ RbxNet is a _networking library_ for Roblox, built in TypeScript. It simplifies 
 
 # Documentation:
 
-[Available Here](https://docs.vorlias.com/rbx-net/)
-
-# Version 2.0
-## Changes from 1.x
-See [MIGRATION](MIGRATION.md)
-
-
+[Available Here](https://rbxnet.australis.dev/)
