@@ -17,7 +17,7 @@ import {
 
 /**
  * Networking Library for Roblox
- * @version 2.2
+ * @version 3.0
  */
 namespace Net {
 	/**
@@ -34,13 +34,13 @@ namespace Net {
 
 	/**
 	 * Legacy client API for Net
-	 * @deprecated
+	 * @deprecated @hidden
 	 */
 	export const Client = NetClientContext;
 
 	/**
 	 * Legacy server API for Net
-	 * @deprecated
+	 * @deprecated @hidden
 	 */
 	export const Server = NetServerContext;
 

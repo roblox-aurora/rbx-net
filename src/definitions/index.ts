@@ -18,7 +18,25 @@ import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { warnOnce } from "../internal";
 import { $nameof } from "rbxts-transform-debug";
-import { NamespaceBuilder } from "./NamespaceBuilder";
+import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
+
+export interface DefinitionConfiguration {
+	/**
+	 * Middleware that's applied to _all_ remotes on the server
+	 *
+	 * @default undefined
+	 */
+	readonly ServerGlobalMiddleware?: NetGlobalMiddleware[];
+
+	/**
+	 * Whether or not the server remotes are automatically generated
+	 *
+	 * This will default to `true` if the top-level definition, or the value of the parent namespace.
+	 *
+	 * @default true
+	 */
+	readonly ServerAutoGenerateRemotes?: boolean;
+}
 
 namespace NetDefinitions {
 	/**
@@ -36,10 +54,10 @@ namespace NetDefinitions {
 	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T, globalMiddleware?: NetGlobalMiddleware[]) {
+	export function Create<T extends RemoteDeclarations>(declarations: T, configuration: DefinitionConfiguration) {
 		validateDeclarations(declarations);
 		return identity<DefinitionsCreateResult<T>>({
-			Server: new ServerDefinitionBuilder<T>(declarations, globalMiddleware),
+			Server: new ServerDefinitionBuilder<T>(declarations, configuration),
 			Client: new ClientDefinitionBuilder<T>(declarations),
 		});
 	}
@@ -59,10 +77,10 @@ namespace NetDefinitions {
 	 *
 	 * This is useful for categorizing remotes by feature.
 	 */
-	export function Namespace<T extends RemoteDeclarations>(declarations: T) {
+	export function Namespace<T extends RemoteDeclarations>(declarations: T, configuration?: NamespaceConfiguration) {
 		return {
 			Type: "Namespace",
-			Definitions: new NamespaceBuilder(declarations),
+			Definitions: new NamespaceBuilder(declarations, configuration),
 		} as NamespaceDeclaration<T>;
 	}
 

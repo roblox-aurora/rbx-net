@@ -55,7 +55,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
-		return group.Definitions._buildClientDefinition(
+		return group.Definitions._BuildClientDefinition(
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}

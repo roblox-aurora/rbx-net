@@ -13,7 +13,7 @@ import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/S
 import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
-import { NamespaceBuilder } from "./NamespaceBuilder";
+import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
 
 export interface FunctionDeclarationLike {
 	/**

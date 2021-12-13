@@ -20,6 +20,7 @@ import {
 } from "./Types";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
+import { DefinitionConfiguration } from ".";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 
@@ -54,12 +55,17 @@ const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
 
+export interface ServerDefinitionConfig extends DefinitionConfiguration {}
+
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(
-		declarations: T,
-		private globalMiddleware?: NetGlobalMiddleware[],
-		private namespace = NAMESPACE_ROOT,
-	) {
+	private globalMiddleware?: NetGlobalMiddleware[];
+
+	public constructor(declarations: T, private config: ServerDefinitionConfig, private namespace = NAMESPACE_ROOT) {
+		const {
+			ServerAutoGenerateRemotes: AutoGenerateServerRemotes = true,
+			ServerGlobalMiddleware: GlobalMiddleware,
+		} = config;
+
 		declarationMap.set(this, declarations);
 		$dbg(declarations, (value, source) => {
 			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
@@ -69,13 +75,16 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		});
 
 		// We only run remote creation on the server
-		if (RunService.IsServer()) {
+		if (RunService.IsServer() && AutoGenerateServerRemotes) {
 			this._InitServer();
 		}
+
+		this.globalMiddleware = GlobalMiddleware;
 	}
 
 	/** @internal Used internally by Net. Do not use. */
 	private _CreateOrGetRemote(id: string, declaration: DeclarationLike) {
+		assert(RunService.IsServer(), "Can only create remotes on the server");
 		/**
 		 * This is used to generate or fetch the specified remote from a declaration
 		 *
@@ -220,8 +229,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		$print(`Fetch Group`, namespaceId);
-		return group.Definitions._buildServerDefinition(
-			this.globalMiddleware,
+		return group.Definitions._BuildServerDefinition(
+			group.Definitions._CombineConfigurations(this.config),
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}
@@ -244,21 +253,21 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				throw `Failed to fetch remote ${remoteId}`;
+				return this._CreateOrGetRemote(remoteId, item) as InferServerRemote<T[K]>;
 			}
 		} else if (item.Type === "AsyncFunction") {
 			if (remoteAsyncFunctionCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteAsyncFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				throw `Failed to fetch remote ${remoteId}`;
+				return this._CreateOrGetRemote(remoteId, item) as InferServerRemote<T[K]>;
 			}
 		} else if (item.Type === "Event") {
 			if (remoteEventCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteEventCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				throw `Failed to fetch remote ${remoteId}`;
+				return this._CreateOrGetRemote(remoteId, item) as InferServerRemote<T[K]>;
 			}
 		} else {
 			throw `Invalid type for ${remoteId}`;
