@@ -1,5 +1,3 @@
-import { NetGlobalMiddleware, NetMiddleware } from "../middleware";
-import { DebugLog, DebugWarn } from "../configuration";
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
@@ -157,14 +155,12 @@ class ServerAsyncFunction<
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
-			DebugLog("Connected CallPlayerAsync EventId", id);
 			const connection = this.instance.OnServerEvent.Connect(
 				(fromPlayer: Player, ...recvArgs: Array<unknown>) => {
 					const [eventId, data] = recvArgs;
 
 					if (typeIs(eventId, "string") && data !== undefined) {
 						if (player === player && eventId === id) {
-							DebugLog("Disconnected CallPlayerAsync EventId", eventId);
 							connection.Disconnect();
 							resolve(data as CallReturnType);
 						}
@@ -180,7 +176,6 @@ class ServerAsyncFunction<
 			this.listeners.delete(id);
 
 			if (tick() >= startTime && connection.Connected) {
-				DebugWarn("(timeout) Disconnected CallPlayerAsync EventId", id);
 				connection.Disconnect();
 				reject("Request to client timed out");
 			}

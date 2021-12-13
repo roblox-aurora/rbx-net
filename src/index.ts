@@ -4,7 +4,6 @@ import NetDefinitions from "./definitions";
 import { NetMiddleware } from "./middleware";
 import { $env, $ifEnv, $NODE_ENV } from "rbxts-transform-env";
 import { $print } from "rbxts-transform-debug";
-import NetSerialization from "./serialization";
 import {
 	ClientBuildResult,
 	DefinitionsCreateResult,
@@ -21,26 +20,14 @@ import {
  */
 namespace Net {
 	/**
-	 * An object that contains a `Serialize` method.
-	 * @internal Still in development
-	 */
-	export type Serializable<T> = Serialization.Serializable<T>;
-
-	/**
-	 * A serialized representation of the object
-	 * @internal Still in development
-	 */
-	export type Serialized<T> = Serialization.Serialized<T>;
-
-	/**
 	 * Legacy client API for Net
-	 * @deprecated @hidden
+	 * @deprecated
 	 */
 	export const Client = NetClientContext;
 
 	/**
 	 * Legacy server API for Net
-	 * @deprecated @hidden
+	 * @deprecated
 	 */
 	export const Server = NetServerContext;
 
@@ -137,12 +124,6 @@ namespace Net {
 	 * Middleware function type for Net
 	 */
 	export type Middleware = NetMiddleware;
-
-	/**
-	 * Network serialization namespace
-	 * @internal Still in development
-	 */
-	export const Serialization = NetSerialization;
 }
 
 $ifEnv("NODE_ENV", "development", () => {

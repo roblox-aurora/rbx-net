@@ -63,7 +63,16 @@ export interface FunctionDeclaration<T extends readonly unknown[], R extends unk
  * The DefinitionBuilders type
  */
 export interface DefinitionsCreateResult<T extends RemoteDeclarations> {
+	/**
+	 * The server namespace for this definitions file, which allows manipulating remotes from the server
+	 * @server
+	 */
 	readonly Server: ServerDefinitionBuilder<T>;
+
+	/**
+	 * The client namespace for this definitions file, which allows manipulating remotes from the client
+	 * @client
+	 */
 	readonly Client: ClientDefinitionBuilder<T>;
 }
 

@@ -1,6 +1,5 @@
-import { errorft, format, IS_SERVER, NetManagedInstance, RequestCounter, ServerTickFunctions } from "../../internal";
+import { format, IS_SERVER, NetManagedInstance, RequestCounter, ServerTickFunctions } from "../../internal";
 import throttler from "./throttle";
-import { GetConfiguration } from "../../configuration";
 import { NetMiddleware } from "../../middleware";
 
 const throttles = new Map<NetManagedInstance, RequestCounter>();
@@ -16,12 +15,22 @@ export interface RateLimitError {
 
 export interface RateLimitOptions {
 	MaxRequestsPerMinute: number;
+	/**
+	 * @default "Request limit exceeded ({limit}) by {player} via {remote}"
+	 */
+	ThrottleMessage?: string;
+	// /**
+	//  * @default 60
+	//  */
+	// ThrottleTimer?: number;
 	ErrorHandler?: (rateLimitError: RateLimitError) => void;
 }
 
 export function rateLimitWarningHandler(rateLimitError: RateLimitError) {
 	warn("[rbx-net]", rateLimitError.Message);
 }
+
+const THROTTLE_RESET_TIMER = 60;
 
 /**
  * Creates a throttle middleware for this event
@@ -34,6 +43,8 @@ export function rateLimitWarningHandler(rateLimitError: RateLimitError) {
 function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
 	const maxRequestsPerMinute = options.MaxRequestsPerMinute;
 	const errorHandler = options.ErrorHandler ?? rateLimitWarningHandler;
+	const throttleMessage = options.ThrottleMessage ?? "Request limit exceeded ({limit}) by {player} via {remote}";
+
 	return (processNext, event) => {
 		const instance = event.GetInstance();
 		let throttle = throttles.get(event)!;
@@ -45,7 +56,7 @@ function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
 			const count = throttle.Get(player);
 			if (count >= maxRequestsPerMinute) {
 				errorHandler?.({
-					Message: format(GetConfiguration("ServerThrottleMessage"), {
+					Message: format(throttleMessage, {
 						player: player.UserId,
 						remote: instance.Name,
 						limit: maxRequestsPerMinute,
@@ -65,7 +76,7 @@ function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
 if (IS_SERVER) {
 	let lastTick = 0;
 	ServerTickFunctions.push(() => {
-		if (tick() > lastTick + GetConfiguration("ServerThrottleResetTimer")) {
+		if (tick() > lastTick + THROTTLE_RESET_TIMER) {
 			lastTick = tick();
 			throttler.Clear();
 		}

@@ -1,4 +1,3 @@
-import { DebugLog, DebugWarn } from "../configuration";
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
 
 const HttpService = game.GetService("HttpService");
@@ -113,13 +112,11 @@ export default class ClientAsyncFunction<
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
-			DebugLog("Connected CallServerAsync EventId", id);
 			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
 				const [eventId, data] = recvArgs;
 
 				if (typeIs(eventId, "string") && data !== undefined) {
 					if (eventId === id) {
-						DebugLog("Disconnected CallServerAsync EventId", eventId);
 						connection.Disconnect();
 						resolve(data as CallReturnType);
 					}
@@ -134,7 +131,6 @@ export default class ClientAsyncFunction<
 			this.listeners.delete(id);
 
 			if (tick() >= startTime && connection.Connected) {
-				DebugWarn("(timeout) Disconnected CallServerAsync EventId", id);
 				connection.Disconnect();
 				reject("Request to server timed out after " + this.timeout + " seconds");
 			}

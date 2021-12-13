@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
 import {
-	LegacyAsyncFunctionDeclaration,
 	FunctionDeclaration,
-	LegacyEventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
 	NamespaceDeclaration,
@@ -16,8 +14,6 @@ import {
 } from "./Types";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
-import { warnOnce } from "../internal";
-import { $nameof } from "rbxts-transform-debug";
 import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
 
 export interface DefinitionConfiguration {
@@ -51,7 +47,7 @@ namespace NetDefinitions {
 
 	/**
 	 * Creates definitions for Remote instances that can be used on both the client and server.
-	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
+	 * @description https://docs.vorlias.com/rbx-net/docs/3.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
 	export function Create<T extends RemoteDeclarations>(declarations: T, configuration: DefinitionConfiguration) {
@@ -193,91 +189,6 @@ namespace NetDefinitions {
 			Type: "Event",
 			ServerMiddleware: [],
 		} as BidirectionalEventDeclaration<ServerArgs, ClientArgs>;
-	}
-
-	/// REGION deprecated members
-
-	/**
-	 * Creates a definition for a function
-	 * @deprecated
-	 */
-	export function Function<ServerFunction extends (...args: any[]) => any>(
-		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
-	): FunctionDeclaration<Parameters<ServerFunction>, ReturnType<ServerFunction>>;
-	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
-		mw?: MiddlewareOverload<ServerArgs>,
-	): FunctionDeclaration<ServerArgs, ServerReturns>;
-	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
-		mw?: MiddlewareOverload<any>,
-	) {
-		warnOnce(
-			`Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
-				ServerFunction,
-			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
-		);
-		return {
-			Type: "Function",
-			ServerMiddleware: mw,
-		} as FunctionDeclaration<ServerArgs, ServerReturns>;
-	}
-
-	/**
-	 * Creates a definition for an event
-	 *
-	 *
-	 * ### If the event is fired by the client to the server, use `ClientToServerEvent`.
-	 * ### If the event is fired by the server to the client, use `ServerToClientEvent`.
-	 * ### If the event is both fired by client and server, use `BidirectionalEvent`.
-	 *
-	 * @deprecated This will be removed in future - please redesign your definitions
-	 *
-	 */
-	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
-		mw?: MiddlewareOverload<any>,
-	): LegacyEventDeclaration<ServerArgs, ClientArgs>;
-	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
-		mw?: MiddlewareOverload<any>,
-	) {
-		warnOnce(
-			`Definition '${$nameof(Event)}' is deprecated, use '${$nameof(ServerToClientEvent)}', '${$nameof(
-				ClientToServerEvent,
-			)}' or '${$nameof(
-				BidirectionalEvent,
-			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
-		);
-		return {
-			Type: "Event",
-			ServerMiddleware: mw,
-		} as LegacyEventDeclaration<ServerArgs, ClientArgs>;
-	}
-
-	/**
-	 * Creates a definition for an async function
-	 *
-	 * ### If the function callback is on the server, use `AsyncServerFunction`.
-	 * ### If the function callback is on the client, use `AsyncClientFunction`.
-	 *
-	 * @deprecated This will be removed in future - please redesign your definitions
-	 */
-
-	export function AsyncFunction<
-		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined,
-		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
-	>(mw?: MiddlewareOverload<any>) {
-		warnOnce(
-			`Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(ServerAsyncFunction)}' or '${$nameof(
-				ClientAsyncFunction,
-			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
-		);
-		return {
-			Type: "AsyncFunction",
-			ServerMiddleware: mw,
-		} as LegacyAsyncFunctionDeclaration<
-			Parameters<ServerFunction>,
-			ReturnType<ServerFunction>,
-			Parameters<ClientFunction>,
-			ReturnType<ClientFunction>
-		>;
 	}
 }
 
