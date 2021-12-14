@@ -1,9 +1,10 @@
 import { $nameof, $print } from "rbxts-transform-debug";
+import { DefinitionConfiguration } from ".";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
-import { InferDefinition, ToClientBuilder } from "./NamespaceBuilder";
+import { InferDefinition } from "./NamespaceBuilder";
 import {
 	AsyncClientFunctionDeclaration,
 	DeclarationsOf,
@@ -12,17 +13,22 @@ import {
 	InferClientCallback,
 	InferClientConnect,
 	InferClientRemote,
-	InferGroupDeclaration,
 	RemoteDeclarations,
 	ServerToClientEventDeclaration,
 } from "./Types";
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
+const shouldYield = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, boolean>();
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private namespace = NAMESPACE_ROOT) {
+	public constructor(
+		declarations: T,
+		private configuration: DefinitionConfiguration,
+		private namespace = NAMESPACE_ROOT,
+	) {
 		declarationMap.set(this, declarations);
+		shouldYield.set(this, configuration.ClientGetShouldYield ?? true);
 	}
 
 	/** @internal */
@@ -42,7 +48,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
 	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
-		return this.WaitFor(remoteId).expect();
+		if (shouldYield.get(this)) {
+			return this.WaitFor(remoteId).expect();
+		} else {
+			return this.GetOrThrow(remoteId);
+		}
 	}
 
 	/**
@@ -58,6 +68,26 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		return group.Definitions._BuildClientDefinition(
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
+	}
+
+	private GetOrThrow<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
+		const item = declarationMap.get(this)![remoteId];
+		remoteId =
+			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
+
+		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
+
+		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
+
+		if (item.Type === "Function") {
+			return new ClientFunction(remoteId) as InferClientRemote<T[K]>;
+		} else if (item.Type === "Event") {
+			return new ClientEvent(remoteId) as InferClientRemote<T[K]>;
+		} else if (item.Type === "AsyncFunction") {
+			return new ClientAsyncFunction(remoteId) as InferClientRemote<T[K]>;
+		}
+
+		throw `Invalid Type`;
 	}
 
 	/**

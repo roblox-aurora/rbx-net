@@ -32,6 +32,17 @@ export interface DefinitionConfiguration {
 	 * @default true
 	 */
 	readonly ServerAutoGenerateRemotes?: boolean;
+
+	/**
+	 * Whether or not `Client.Get(...)` should yield for the remote to exist
+	 *
+	 * If `true` - Will yield until the remote exists, or error after 60 seconds.
+	 *
+	 * If `false` - Will error if the remote does not exist.
+	 *
+	 * @default true
+	 */
+	readonly ClientGetShouldYield?: boolean;
 }
 
 namespace NetDefinitions {
