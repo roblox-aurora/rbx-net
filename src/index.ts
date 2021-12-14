@@ -1,6 +1,6 @@
 import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
-import NetDefinitions from "./definitions";
+import NetDefinitions, { DefinitionConfiguration } from "./definitions";
 import { NetMiddleware } from "./middleware";
 import { $env, $ifEnv, $NODE_ENV } from "rbxts-transform-env";
 import { $print } from "rbxts-transform-debug";
@@ -124,6 +124,17 @@ namespace Net {
 	 * Middleware function type for Net
 	 */
 	export type Middleware = NetMiddleware;
+
+	/**
+	 * Short-hand for `Net.Definitions.Create`
+	 * @see {@link Definitions.Create}
+	 */
+	export function CreateDefinitions<T extends RemoteDeclarations>(
+		declarations: T,
+		configuration?: DefinitionConfiguration,
+	) {
+		return Definitions.Create(declarations, configuration);
+	}
 }
 
 $ifEnv("NODE_ENV", "development", () => {
