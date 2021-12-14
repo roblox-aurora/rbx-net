@@ -5,6 +5,12 @@ import MessagingService from "./MessagingService";
 const Players = game.GetService("Players");
 const IS_STUDIO = game.GetService("RunService").IsStudio();
 
+declare global {
+	interface MessagingService extends Instance {
+		SubscribeAsync(name: string, callback: (data: ISubscriptionMessage) => void): RBXScriptConnection;
+	}
+}
+
 interface IQueuedMessage {
 	Name: string;
 	Data: unknown;
@@ -148,8 +154,8 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 		}
 
 		globalSubscriptionCounter++;
-		return MessagingService.SubscribeAsync(this.name, (data, sent) => {
-			const recieved = { Data: data, Sent: sent };
+		return MessagingService.SubscribeAsync(this.name, (message) => {
+			const recieved = message;
 			const { Sent } = recieved;
 
 			if (isJobTargetMessage(recieved)) {
