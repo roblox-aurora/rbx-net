@@ -13,7 +13,8 @@ export type ToServerBuilder<T> = T extends NamespaceBuilder<infer A> ? ServerDef
 export type ToClientBuilder<T> = T extends NamespaceBuilder<infer A> ? ClientDefinitionBuilder<A> : never;
 export type InferDefinition<T> = T extends NamespaceDeclaration<infer R> ? R : never;
 
-export interface NamespaceConfiguration extends Omit<DefinitionConfiguration, "ServerGlobalMiddleware"> {}
+export interface NamespaceConfiguration
+	extends Omit<DefinitionConfiguration, "ServerGlobalMiddleware" | "ClientGetShouldYield"> {}
 
 /**
  * A namespace builder. Internally used to construct definition builders
