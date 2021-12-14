@@ -14,7 +14,7 @@
 		"typeRoots": ["node_modules/@rbxts"],
 		"rootDir": "src",
 		"outDir": "out",
-		"removeComments": true,
+		"removeComments": false,
 		"stripInternal": true,
 		"declaration": true,
 		"plugins": [
