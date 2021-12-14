@@ -61,7 +61,9 @@ namespace NetDefinitions {
 	 * @description https://docs.vorlias.com/rbx-net/docs/3.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T, configuration: DefinitionConfiguration) {
+	export function Create<T extends RemoteDeclarations>(declarations: T, configuration?: DefinitionConfiguration) {
+		configuration ??= {};
+
 		validateDeclarations(declarations);
 		return identity<DefinitionsCreateResult<T>>({
 			Server: new ServerDefinitionBuilder<T>(declarations, configuration),
