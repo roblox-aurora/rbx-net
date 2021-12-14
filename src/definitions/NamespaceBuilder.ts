@@ -43,13 +43,13 @@ export class NamespaceBuilder<N extends RemoteDeclarations> {
 	_BuildServerDefinition(configuration: NamespaceConfiguration, namespace?: string): ServerDefinitionBuilder<N> {
 		assert(RunService.IsServer());
 		$print("Building server definition", declarationMap.get(this)!);
-		return new ServerDefinitionBuilder<N>(declarationMap.get(this) as N, configuration);
+		return new ServerDefinitionBuilder<N>(declarationMap.get(this) as N, configuration, namespace);
 	}
 
 	/** @internal */
-	_BuildClientDefinition(namespace?: string): ClientDefinitionBuilder<N> {
+	_BuildClientDefinition(configuration: NamespaceConfiguration, namespace?: string): ClientDefinitionBuilder<N> {
 		assert(RunService.IsClient());
 		$print("Building client definition", declarationMap.get(this)!);
-		return new ClientDefinitionBuilder<N>(declarationMap.get(this) as N, namespace);
+		return new ClientDefinitionBuilder<N>(declarationMap.get(this) as N, configuration, namespace);
 	}
 }

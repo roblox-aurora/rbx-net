@@ -24,11 +24,11 @@ const shouldYield = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, boo
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(
 		declarations: T,
-		private configuration: DefinitionConfiguration,
+		private configuration?: DefinitionConfiguration,
 		private namespace = NAMESPACE_ROOT,
 	) {
 		declarationMap.set(this, declarations);
-		shouldYield.set(this, configuration.ClientGetShouldYield ?? true);
+		shouldYield.set(this, configuration?.ClientGetShouldYield ?? true);
 	}
 
 	/** @internal */
@@ -66,6 +66,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		return group.Definitions._BuildClientDefinition(
+			group.Definitions._CombineConfigurations(this.configuration ?? {}),
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}

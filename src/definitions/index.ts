@@ -65,7 +65,7 @@ namespace NetDefinitions {
 		validateDeclarations(declarations);
 		return identity<DefinitionsCreateResult<T>>({
 			Server: new ServerDefinitionBuilder<T>(declarations, configuration),
-			Client: new ClientDefinitionBuilder<T>(declarations),
+			Client: new ClientDefinitionBuilder<T>(declarations, configuration),
 		});
 	}
 
