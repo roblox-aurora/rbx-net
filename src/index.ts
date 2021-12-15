@@ -7,8 +7,9 @@ import { $print } from "rbxts-transform-debug";
 import {
 	ClientBuildResult,
 	DefinitionsCreateResult,
-	FilterDeclarations,
+	FilterClientDeclarations,
 	FilterGroups,
+	FilterServerDeclarations,
 	NamespaceDeclaration,
 	RemoteDeclarations,
 	ServerBuildResult,
@@ -48,7 +49,7 @@ namespace Net {
 		 * type ServerGlobalRemotes = Net.Util.GetServerRemotes<GlobalNamespace>;
 		 * ```
 		 */
-		export type GetServerRemotes<T extends RemoteDeclarations> = ServerBuildResult<FilterDeclarations<T>>;
+		export type GetServerRemotes<T extends RemoteDeclarations> = ServerBuildResult<FilterServerDeclarations<T>>;
 
 		/**
 		 * Returns a `key -> value` type map of remotes in the specified declaration, mapped to client objects.
@@ -58,7 +59,7 @@ namespace Net {
 		 * type ClientGlobalRemotes = Net.Util.GetClientRemotes<GlobalNamespace>;
 		 * ```
 		 */
-		export type GetClientRemotes<T extends RemoteDeclarations> = ClientBuildResult<FilterDeclarations<T>>;
+		export type GetClientRemotes<T extends RemoteDeclarations> = ClientBuildResult<FilterClientDeclarations<T>>;
 
 		/**
 		 * Returns the sub declaration of a declaration based on the given namespace
@@ -92,8 +93,23 @@ namespace Net {
 		 * type RemoteIds = Net.Util.GetRemoteKeys<typeof Remotes>;
 		 * ```
 		 */
-		export type GetRemoteKeys<T extends DefinitionsCreateResult<any>> = T extends DefinitionsCreateResult<infer A>
-			? keyof FilterDeclarations<A>
+		export type GetClientRemoteKeys<T extends DefinitionsCreateResult<any>> = T extends DefinitionsCreateResult<
+			infer A
+		>
+			? keyof FilterClientDeclarations<A>
+			: never;
+
+		/**
+		 * Gets the keys for each remote item in a definition
+		 *
+		 * ```ts
+		 * type RemoteIds = Net.Util.GetRemoteKeys<typeof Remotes>;
+		 * ```
+		 */
+		export type GetServerRemoteKeys<T extends DefinitionsCreateResult<any>> = T extends DefinitionsCreateResult<
+			infer A
+		>
+			? keyof FilterServerDeclarations<A>
 			: never;
 
 		/**
