@@ -1,4 +1,7 @@
-import MessagingEvent, { isSubscriptionMessage, ISubscriptionMessage } from "../messaging/MessagingEvent";
+import ExperienceBroadcastEvent, {
+	isSubscriptionMessage,
+	ISubscriptionMessage,
+} from "../messaging/ExperienceBroadcastEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
 const Players = game.GetService("Players");
@@ -28,12 +31,12 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
  */
 export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unknown[]> {
 	private readonly instance: ServerEvent<[], TArgs>;
-	private readonly event: MessagingEvent;
+	private readonly event: ExperienceBroadcastEvent;
 	private readonly eventHandler: RBXScriptConnection;
 
 	constructor(name: string) {
 		this.instance = new ServerEvent(getGlobalRemote(name));
-		this.event = new MessagingEvent(name);
+		this.event = new ExperienceBroadcastEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
 		this.eventHandler = this.event.Connect((message) => {

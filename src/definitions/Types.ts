@@ -15,7 +15,7 @@ import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
 import { GameMessagingEvent } from "../server";
-import MessagingEvent from "../messaging/MessagingEvent";
+import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 
 export interface FunctionDeclarationLike {
 	/**
@@ -181,9 +181,10 @@ export interface ServerToClientEventDeclaration<_ServerArgs extends readonly unk
 /**
  * A declaration for a server -> server event
  */
-export interface ServerToServerEventDeclaration<_ServerArgs extends unknown> extends MessagingEventDeclarationLike {
+export interface ExperienceBroadcastEventDeclaration<_ServerArgs extends unknown>
+	extends MessagingEventDeclarationLike {
 	/** @deprecated */
-	readonly _nominal_ServerToServerEvent: unique symbol;
+	readonly _nominal_ExperienceBroadcastEvent: unique symbol;
 }
 
 /**
@@ -291,8 +292,8 @@ export type InferServerRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 	? ServerAsyncFunction<SA, CA, SR, CR>
 	: T extends FunctionDeclaration<infer SA, infer SR>
 	? ServerFunction<SA, SR>
-	: T extends ServerToServerEventDeclaration<infer A>
-	? MessagingEvent<A>
+	: T extends ExperienceBroadcastEventDeclaration<infer A>
+	? ExperienceBroadcastEvent<A>
 	: never;
 
 /////////////////////////////////////////

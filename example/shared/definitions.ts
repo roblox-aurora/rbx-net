@@ -16,7 +16,7 @@ const {
 	ClientToServerEvent,
 	ServerFunction,
 	BidirectionalEvent,
-	ServerToServerEvent,
+	ExperienceBroadcastEvent,
 } = Net.Definitions;
 
 const Remotes = Create(
@@ -34,7 +34,7 @@ const Remotes = Create(
 			LegacyFunction: ServerFunction<(server: number) => string>(),
 			LegacyAsyncFunction: ServerAsyncFunction<(server: number) => string>(),
 		}),
-		Srv: ServerToServerEvent<string>(),
+		Srv: ExperienceBroadcastEvent<{ text: string }>(),
 	},
 	{
 		ServerGlobalMiddleware: [

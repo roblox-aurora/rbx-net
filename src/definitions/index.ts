@@ -11,7 +11,7 @@ import {
 	AsyncServerFunctionDeclaration,
 	AsyncClientFunctionDeclaration,
 	DeclarationTypeCheck,
-	ServerToServerEventDeclaration,
+	ExperienceBroadcastEventDeclaration,
 } from "./Types";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
@@ -111,15 +111,22 @@ namespace NetDefinitions {
 	}
 
 	/**
-	 * Defines an event (via MessagingService) between servers in the same game.
+	 * **_Note_: Unlike other definitions in Net, this is only available on the server.**
 	 *
-	 * Unlike other definitions in Net, this is only available on the server.
+	 * Defines an event in which allows broadcasting messages between servers in the experience.
+	 *
+	 * `Source Server` [`Broadcasts`] -> `Other Servers` [`Recieves Broadcast`]
+	 *
+	 * or at a target {@link DataModel.JobId JobId}
+	 *
+	 * `Source Server [`Broadcasts`] -> `Target Server` [`Recieves Broadcast`]
+	 *
 	 * @returns
 	 */
-	export function ServerToServerEvent<ServerArgs extends defined = defined>() {
+	export function ExperienceBroadcastEvent<ServerArgs extends defined = defined>() {
 		return {
 			Type: "Messaging",
-		} as ServerToServerEventDeclaration<ServerArgs>;
+		} as ExperienceBroadcastEventDeclaration<ServerArgs>;
 	}
 
 	/**

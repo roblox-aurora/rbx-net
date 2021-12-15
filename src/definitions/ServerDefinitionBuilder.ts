@@ -21,7 +21,7 @@ import {
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import { DefinitionConfiguration } from ".";
-import MessagingEvent from "../messaging/MessagingEvent";
+import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 
@@ -55,7 +55,7 @@ const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, 
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
-const messagingEventCache = new Map<string, MessagingEvent>();
+const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
 
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
@@ -152,11 +152,11 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			this.globalMiddleware?.forEach((mw) => event._use(mw));
 			return event;
 		} else if (declaration.Type === "Messaging") {
-			let event: MessagingEvent;
+			let event: ExperienceBroadcastEvent;
 			if (messagingEventCache.has(remoteInstanceId)) {
 				return messagingEventCache.get(remoteInstanceId)!;
 			} else {
-				event = new MessagingEvent(remoteInstanceId);
+				event = new ExperienceBroadcastEvent(remoteInstanceId);
 				messagingEventCache.set(remoteInstanceId, event);
 			}
 

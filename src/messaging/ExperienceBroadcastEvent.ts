@@ -70,7 +70,7 @@ function processMessageQueue() {
 			globalEventMessageCounter++;
 		}
 
-		if (globalEventMessageCounter >= MessagingEvent.GetMessageLimit()) {
+		if (globalEventMessageCounter >= ExperienceBroadcastEvent.GetMessageLimit()) {
 			warn("[rbx-net] Too many messages are being sent, any further messages will be queued!");
 		}
 	}
@@ -91,7 +91,7 @@ type JobIdMessage<TMessage> = { jobId: string; message: TMessage };
  * An event that works across all servers
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
-export default class MessagingEvent<TMessage extends unknown = unknown> {
+export default class ExperienceBroadcastEvent<TMessage extends unknown = unknown> {
 	constructor(private name: string) {}
 
 	/**
@@ -114,7 +114,7 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 	 * @param data The data to send
 	 */
 	private sendToAllServersOrQueue(data: TMessage | JobIdMessage<TMessage>) {
-		const limit = MessagingEvent.GetMessageLimit();
+		const limit = ExperienceBroadcastEvent.GetMessageLimit();
 		if (globalEventMessageCounter >= limit) {
 			warn(`[rbx-net] Exceeded message limit of ${limit}, adding to queue...`);
 			globalMessageQueue.push({ Name: this.name, Data: data });
@@ -148,7 +148,7 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 	 * @param handler The message handler
 	 */
 	public Connect(handler: (recievedData: TMessage, timestampSent: number) => void) {
-		const limit = MessagingEvent.GetSubscriptionLimit();
+		const limit = ExperienceBroadcastEvent.GetSubscriptionLimit();
 		if (globalSubscriptionCounter >= limit) {
 			error(`[rbx-net] Exceeded Subscription limit of ${limit}!`);
 		}
