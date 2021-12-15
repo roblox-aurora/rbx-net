@@ -26,7 +26,7 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
+export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unknown[]> {
 	private readonly instance: ServerEvent<[], TArgs>;
 	private readonly event: MessagingEvent;
 	private readonly eventHandler: RBXScriptConnection;

@@ -20,3 +20,5 @@ type GlobalNamespaceAsClientRemotes = Net.Util.GetClientRemotes<GlobalNamespace>
 type NamespaceTest = Net.Util.GetNamespaceDefinitions<GlobalNamespace, "TestingEvents">;
 type TestNamespaceAsServerRemotes = Net.Util.GetServerRemotes<NamespaceTest>;
 type TestNamespaceAsClientRemotes = Net.Util.GetClientRemotes<NamespaceTest>;
+
+Remotes.Server.Get("Srv").Connect((message) => {});

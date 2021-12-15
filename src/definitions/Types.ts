@@ -14,6 +14,8 @@ import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
+import { GameMessagingEvent } from "../server";
+import MessagingEvent from "../messaging/MessagingEvent";
 
 export interface FunctionDeclarationLike {
 	/**
@@ -25,6 +27,16 @@ export interface FunctionDeclarationLike {
 	readonly Type: "Function";
 	/** @internal */
 	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+}
+
+export interface MessagingEventDeclarationLike {
+	/**
+	 * @deprecated
+	 */
+	readonly _nominal_MessagingDeclarationLike: unique symbol;
+
+	/** @internal */
+	readonly Type: "Messaging";
 }
 
 export interface EventDeclarationLike {
@@ -97,7 +109,14 @@ export type FilterGroups<T extends RemoteDeclarations> = {
 	[K in ExtractKeys<T, DeclarationNamespaceLike>]: T[K];
 };
 
-export type FilterDeclarations<T extends RemoteDeclarations> = {
+export type FilterServerDeclarations<T extends RemoteDeclarations> = {
+	[K in ExtractKeys<
+		T,
+		EventDeclarationLike | MessagingEventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike
+	>]: T[K];
+};
+
+export type FilterClientDeclarations<T extends RemoteDeclarations> = {
 	[K in ExtractKeys<T, EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike>]: T[K];
 };
 
@@ -160,6 +179,14 @@ export interface ServerToClientEventDeclaration<_ServerArgs extends readonly unk
 }
 
 /**
+ * A declaration for a server -> server event
+ */
+export interface ServerToServerEventDeclaration<_ServerArgs extends unknown> extends MessagingEventDeclarationLike {
+	/** @deprecated */
+	readonly _nominal_ServerToServerEvent: unique symbol;
+}
+
+/**
  * A declaration for a Bidirectional event
  */
 export interface BidirectionalEventDeclaration<
@@ -191,7 +218,11 @@ export interface NamespaceDeclaration<T extends RemoteDeclarations> extends Decl
 	/** @internal */
 	readonly Definitions: NamespaceBuilder<T>;
 }
-export type DeclarationLike = FunctionDeclarationLike | AsyncFunctionDeclarationLike | EventDeclarationLike;
+export type DeclarationLike =
+	| FunctionDeclarationLike
+	| MessagingEventDeclarationLike
+	| AsyncFunctionDeclarationLike
+	| EventDeclarationLike;
 export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationNamespaceLike>;
 
 ////////////////////////////////
@@ -260,6 +291,8 @@ export type InferServerRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 	? ServerAsyncFunction<SA, CA, SR, CR>
 	: T extends FunctionDeclaration<infer SA, infer SR>
 	? ServerFunction<SA, SR>
+	: T extends ServerToServerEventDeclaration<infer A>
+	? MessagingEvent<A>
 	: never;
 
 /////////////////////////////////////////

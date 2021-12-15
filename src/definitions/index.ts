@@ -11,6 +11,7 @@ import {
 	AsyncServerFunctionDeclaration,
 	AsyncClientFunctionDeclaration,
 	DeclarationTypeCheck,
+	ServerToServerEventDeclaration,
 } from "./Types";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
@@ -107,6 +108,18 @@ namespace NetDefinitions {
 			Type: "AsyncFunction",
 			ServerMiddleware: mw,
 		} as AsyncServerFunctionDeclaration<Parameters<ServerFunction>, ReturnType<ServerFunction>>;
+	}
+
+	/**
+	 * Defines an event (via MessagingService) between servers in the same game.
+	 *
+	 * Unlike other definitions in Net, this is only available on the server.
+	 * @returns
+	 */
+	export function ServerToServerEvent<ServerArgs extends defined = defined>() {
+		return {
+			Type: "Messaging",
+		} as ServerToServerEventDeclaration<ServerArgs>;
 	}
 
 	/**

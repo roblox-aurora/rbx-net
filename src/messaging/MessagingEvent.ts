@@ -128,26 +128,26 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 
 	/**
 	 * Sends a message to a specific server
-	 * @param jobId The game.JobId of the target server
-	 * @param message The message to send
+	 * @param serverJobId The game.JobId of the target server
+	 * @param sendData The message to send
 	 */
-	public SendToServer(jobId: string, message: TMessage) {
-		this.sendToAllServersOrQueue({ jobId, message });
+	public SendToServer(serverJobId: string, sendData: TMessage) {
+		this.sendToAllServersOrQueue({ jobId: serverJobId, message: sendData });
 	}
 
 	/**
 	 * Sends a message to all servers
-	 * @param message The message to send
+	 * @param sendData The message to send
 	 */
-	public SendToAllServers(message: TMessage) {
-		this.sendToAllServersOrQueue(message);
+	public SendToAllServers(sendData: TMessage) {
+		this.sendToAllServersOrQueue(sendData);
 	}
 
 	/**
 	 * Connects a function to a global event
 	 * @param handler The message handler
 	 */
-	public Connect(handler: (message: TMessage, time: number) => void) {
+	public Connect(handler: (recievedData: TMessage, timestampSent: number) => void) {
 		const limit = MessagingEvent.GetSubscriptionLimit();
 		if (globalSubscriptionCounter >= limit) {
 			error(`[rbx-net] Exceeded Subscription limit of ${limit}!`);

@@ -8,7 +8,6 @@ import {
 	BidirectionalEventDeclaration,
 	ClientToServerEventDeclaration,
 	DeclarationsOf,
-	FilterDeclarations,
 	FilterGroups,
 	NamespaceDeclaration,
 	InferServerCallback,
@@ -17,16 +16,18 @@ import {
 	RemoteDeclarations,
 	DeclarationLike,
 	DeclarationNamespaceLike,
+	FilterServerDeclarations,
 } from "./Types";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import { DefinitionConfiguration } from ".";
+import MessagingEvent from "../messaging/MessagingEvent";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 
 // Tidy up all the types here.
 type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
-	FilterDeclarations<T>,
+	FilterServerDeclarations<T>,
 	ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
 > &
 	string;
@@ -36,7 +37,7 @@ type ServerEventConnectFunction<T extends RemoteDeclarations, K extends keyof T>
 >;
 
 type ServerFunctionDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
-	FilterDeclarations<T>,
+	FilterServerDeclarations<T>,
 	AsyncServerFunctionDeclaration<any, any>
 > &
 	string;
@@ -46,7 +47,7 @@ type ServerFunctionCallbackFunction<T extends RemoteDeclarations, K extends keyo
 >;
 
 type RemoteDeclarationDict<T extends RemoteDeclarations> =
-	| Record<keyof FilterDeclarations<T> & string, DeclarationLike>
+	| Record<keyof FilterServerDeclarations<T> & string, DeclarationLike>
 	| Record<keyof FilterGroups<T> & string, DeclarationNamespaceLike>;
 
 // Keep the declarations fully isolated
@@ -54,6 +55,7 @@ const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, 
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
+const messagingEventCache = new Map<string, MessagingEvent>();
 
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
@@ -83,8 +85,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	}
 
 	/** @internal Used internally by Net. Do not use. */
-	private _CreateOrGetRemote(id: string, declaration: DeclarationLike) {
-		assert(RunService.IsServer(), "Can only create remotes on the server");
+	private _CreateOrGetInstance(id: string, declaration: DeclarationLike) {
+		assert(RunService.IsServer(), "Can only create server instances on the server");
 		/**
 		 * This is used to generate or fetch the specified remote from a declaration
 		 *
@@ -149,6 +151,16 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 			this.globalMiddleware?.forEach((mw) => event._use(mw));
 			return event;
+		} else if (declaration.Type === "Messaging") {
+			let event: MessagingEvent;
+			if (messagingEventCache.has(remoteInstanceId)) {
+				return messagingEventCache.get(remoteInstanceId)!;
+			} else {
+				event = new MessagingEvent(remoteInstanceId);
+				messagingEventCache.set(remoteInstanceId, event);
+			}
+
+			return event;
 		} else {
 			throw `Invalid type`;
 		}
@@ -180,7 +192,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				case "Event":
 				case "AsyncFunction":
 				case "Function":
-					this._CreateOrGetRemote(id, declaration);
+				case "Messaging":
+					this._CreateOrGetInstance(id, declaration);
 					break;
 				case "Namespace":
 					this.GetNamespace(id);
@@ -243,7 +256,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer alternatives for event/callback handling.
 	 */
-	public Get<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
+	public Get<K extends keyof FilterServerDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
 		remoteId =
 			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
@@ -253,21 +266,21 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				return this._CreateOrGetRemote(remoteId, item) as InferServerRemote<T[K]>;
+				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
 			}
 		} else if (item.Type === "AsyncFunction") {
 			if (remoteAsyncFunctionCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteAsyncFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				return this._CreateOrGetRemote(remoteId, item) as InferServerRemote<T[K]>;
+				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
 			}
 		} else if (item.Type === "Event") {
 			if (remoteEventCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteEventCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
-				return this._CreateOrGetRemote(remoteId, item) as InferServerRemote<T[K]>;
+				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
 			}
 		} else {
 			throw `Invalid type for ${remoteId}`;
@@ -281,7 +294,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	 * @deprecated Use {@link Get}. Remotes are now automatically generated at runtime.
 	 *
 	 */
-	public Create<K extends keyof FilterDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
+	public Create<K extends keyof FilterServerDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
 		return this.Get<K>(remoteId);
 	}
 

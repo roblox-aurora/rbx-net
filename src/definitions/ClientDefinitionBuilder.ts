@@ -15,6 +15,7 @@ import {
 	InferClientRemote,
 	RemoteDeclarations,
 	ServerToClientEventDeclaration,
+	FilterClientDeclarations,
 } from "./Types";
 
 // Keep the declarations fully isolated
@@ -47,7 +48,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
-	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
+	Get<K extends keyof FilterClientDeclarations<T> & string>(remoteId: K): InferClientRemote<T[K]> {
 		if (shouldYield.get(this)) {
 			return this.WaitFor(remoteId).expect();
 		} else {
@@ -71,7 +72,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		);
 	}
 
-	private GetOrThrow<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
+	private GetOrThrow<K extends keyof FilterClientDeclarations<T> & string>(remoteId: K): InferClientRemote<T[K]> {
 		const item = declarationMap.get(this)![remoteId];
 		remoteId =
 			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
@@ -99,7 +100,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
 
-	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
+	async WaitFor<K extends keyof FilterClientDeclarations<T> & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
 		const item = declarationMap.get(this)![remoteId];
 		remoteId =
 			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
@@ -130,10 +131,9 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.Client.WaitFor(name).expect().Connect(fn)
 	 * ```
 	 */
-	async OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
-		name: K,
-		fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>,
-	) {
+	async OnEvent<
+		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, ServerToClientEventDeclaration<unknown[]>> & string
+	>(name: K, fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<ServerToClientEventDeclaration<any>>;
 		result.Connect(fn);
 	}
@@ -151,10 +151,9 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.Client.WaitFor(name).expect().SetCallback(fn)
 	 * ```
 	 */
-	async OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
-		name: K,
-		fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>,
-	) {
+	async OnFunction<
+		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, AsyncClientFunctionDeclaration<any, any>> & string
+	>(name: K, fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
