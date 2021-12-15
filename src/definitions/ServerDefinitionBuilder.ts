@@ -261,24 +261,15 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		remoteId =
 			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
-		if (item.Type === "Function") {
-			if (remoteFunctionCache.has(remoteId)) {
-				$print(`Fetch cached copy of ${remoteId}`);
-				return remoteFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
-			} else {
-				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
-			}
-		} else if (item.Type === "AsyncFunction") {
+		if (
+			item.Type === "Function" ||
+			item.Type === "AsyncFunction" ||
+			item.Type === "Event" ||
+			item.Type === "Messaging"
+		) {
 			if (remoteAsyncFunctionCache.has(remoteId)) {
 				$print(`Fetch cached copy of ${remoteId}`);
 				return remoteAsyncFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
-			} else {
-				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
-			}
-		} else if (item.Type === "Event") {
-			if (remoteEventCache.has(remoteId)) {
-				$print(`Fetch cached copy of ${remoteId}`);
-				return remoteEventCache.get(remoteId)! as InferServerRemote<T[K]>;
 			} else {
 				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
 			}
