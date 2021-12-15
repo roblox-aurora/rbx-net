@@ -20,9 +20,9 @@ Going by our previous example, say we want to separate up inventory and equipmen
   <TabItem value="ts">
 
 ```ts title="shared/remotes.ts"
-import { Definitions } from "@rbxts/net";
+import Net, { Definitions } from "@rbxts/net";
 
-const Remotes = Definitions.Create({
+const Remotes = Net.CreateDefinitions({
     // These are all remotes relating to the inventory
     Inventory: Definitions.Namespace({
         GetPlayerInventory: Definitions.ServerAsyncFunction<() => SerializedPlayerInventory>(),
@@ -47,7 +47,7 @@ export = Remotes;
 ```lua title="src/shared/remotes.lua"
 local Net = require(ReplicatedStorage.Net)
 
-local Remotes = Net.Definitions.Create({
+local Remotes = Net.CreateDefinitions({
     -- These are all remotes relating to the inventory
     Inventory = Net.Definitions.Namespace({
         PlayerInventoryUpdated = Net.Definitions.ServerToClientEvent(),

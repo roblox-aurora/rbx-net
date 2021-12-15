@@ -29,7 +29,7 @@ The basic declaration of a definition script, is the following:
 ```ts title="shared/remotes.ts"
 import Net from "@rbxts/net";
 
-const Remotes = Net.Definitions.Create({
+const Remotes = Net.CreateDefinitions({
     // Definitions for the actual remotes will go here
 });
 
@@ -42,7 +42,7 @@ export = Remotes;
 ```lua title="src/shared/remotes.lua"
 local Net = require(ReplicatedStorage.Net)
 
-local Remotes = Net.Definitions.Create({
+local Remotes = Net.CreateDefinitions({
     -- Definitions for the actual remotes will go here
 })
 

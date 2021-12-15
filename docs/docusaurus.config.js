@@ -102,7 +102,7 @@ module.exports = {
           versions: {
             current: {
               label: require("../package.json").version,
-              path: "2.2"
+              path: "3.0"
             },
             "2.1.x": {
               label: "2.1.5",

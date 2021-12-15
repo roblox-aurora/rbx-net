@@ -21,7 +21,7 @@ Three files are needed to get started:
 ```ts title="shared/remotes.ts"
 import Net from "@rbxts/net";
 
-const Remotes = Net.Definitions.Create({
+const Remotes = Net.CreateDefinitions({
   PrintMessage: Net.Definitions.ClientToServerEvent<[message: string, other: string]>(),
   MakeHello: Net.Definitions.ServerAsyncFunction<(message: string) => string>(),
 });
@@ -33,13 +33,13 @@ export { Remotes };
 import { Remotes } from "shared/remotes";
 
 // listen to messages
-const PrintMessage = Remotes.Server.Create("PrintMessage");
+const PrintMessage = Remotes.Server.Get("PrintMessage");
 PrintMessage.Connect((player, message, other) => {
   print(`Server recieved message: ${message} from player: ${player} ${other}`);
 });
 
 // listen and respond to messages
-const MakeHello = Remotes.Server.Create("MakeHello");
+const MakeHello = Remotes.Server.Get("MakeHello");
 MakeHello.SetCallback((player, message) => {
   print(`Server got an async message from ${player} containing the message ${message}`);
   return `Hello, ${player}! We got your message: ${message}`;
@@ -68,7 +68,7 @@ MakeHello.CallServerAsync("Net is cool right??").then((result) => {
 ```lua title="src/shared/Remotes.lua"
 local Net = require(ReplicatedStorage.Net)
 
-local Remotes = Net.Definitions.Create({
+local Remotes = Net.CreateDefinitions({
   PrintMessage = Net.Definitions.ClientToServerEvent(),
   MakeHello = Net.Definitions.ServerAsyncFunction(),
 })
@@ -80,13 +80,13 @@ return Remotes
 local Remotes = require(ReplicatedStorage.Common.Remotes)
 
 -- listen to messages
-local PrintMessage = Remotes.Server:Create("PrintMessage")
+local PrintMessage = Remotes.Server:Get("PrintMessage")
 PrintMessage:Connect(function (player, message, other)
   print("Server recieved message", message, "from player:", player, other)
 end)
 
 -- listen and respond to messages
-local MakeHello = Remotes.Server:Create("MakeHello")
+local MakeHello = Remotes.Server:Get("MakeHello")
 MakeHello:SetCallback(function (player, message)
   print("Server got an async message from ", player, "containing the message", message)
   return "Hello, " .. tostring(player) .. " We got your message: " .. message
