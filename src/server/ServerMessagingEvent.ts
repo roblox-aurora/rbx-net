@@ -31,7 +31,7 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
  */
 export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unknown[]> {
 	private readonly instance: ServerEvent<[], TArgs>;
-	private readonly event: ExperienceBroadcastEvent;
+	private readonly event: ExperienceBroadcastEvent<IMessage<TArgs>>;
 	private readonly eventHandler: RBXScriptConnection;
 
 	constructor(name: string) {
@@ -81,12 +81,13 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	}
 
 	/**
-	 * Disconnects this event handler
-	 *
-	 * **NOTE**: Once disconnected, you will have to re-create this object to recieve the messages again.
+	 * Connects to the event on the server
+	 * @returns
 	 */
-	public Disconnect() {
-		this.eventHandler.Disconnect();
+	public Connect(serverListener: (receivedData: IMessage<TArgs>, timestampSent: number) => void) {
+		return this.event.Connect((data, sent) => {
+			serverListener(data, sent);
+		});
 	}
 
 	/**
@@ -94,7 +95,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	 * @param args The args of the message
 	 */
 	public SendToAllServers(...args: TArgs) {
-		this.event.SendToAllServers({ data: [...args] });
+		this.event.SendToAllServers({ InnerData: args });
 	}
 
 	/**
@@ -103,7 +104,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	 * @param args The args of the message
 	 */
 	public SendToServer(jobId: string, ...args: TArgs) {
-		this.event.SendToServer(jobId, { data: [...args] });
+		this.event.SendToServer(jobId, { InnerData: args });
 	}
 
 	/**
@@ -117,7 +118,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 		if (player) {
 			this.instance.SendToPlayer(player, ...args);
 		} else {
-			this.event.SendToAllServers({ data: [...args], targetId: userId });
+			this.event.SendToAllServers({ InnerData: args, TargetId: userId });
 		}
 	}
 
@@ -137,7 +138,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 		}
 
 		if (userIds.size() > 0) {
-			this.event.SendToAllServers({ data: [...args], targetIds: userIds });
+			this.event.SendToAllServers({ InnerData: args, TargetIds: userIds });
 		}
 	}
 }

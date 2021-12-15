@@ -47,6 +47,4 @@ const Remotes = Create(
 	},
 );
 
-Remotes.Server.Get("Srv2");
-
 export default Remotes;

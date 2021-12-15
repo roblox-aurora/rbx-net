@@ -16,7 +16,6 @@ import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { NamespaceBuilder } from "./NamespaceBuilder";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
-import ClientMessagingEvent from "../client/ClientMessagingEvent";
 
 export interface FunctionDeclarationLike {
 	/**

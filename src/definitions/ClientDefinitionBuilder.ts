@@ -3,7 +3,6 @@ import { DefinitionConfiguration } from ".";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
-import ClientMessagingEvent from "../client/ClientMessagingEvent";
 import { getGlobalRemote, NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import {
