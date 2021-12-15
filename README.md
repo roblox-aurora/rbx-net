@@ -1,23 +1,25 @@
 <img src="logo.png" align="right"/>
 
 <h1>RbxNet v3.0</h1>
-<h3>Advanced multi-language networking library for Roblox.</h3>
+<h3>Advanced multi-language networking framework for Roblox.</h3>
 
 <a href="https://www.npmjs.com/package/@rbxts/net"><img src="https://badge.fury.io/js/@rbxts%2Fnet.svg" alt="npm version" height="18"></a>
 <a href="https://wally.run/package/vorlias/net"><img src="https://img.shields.io/badge/wally%20package-2.1.4-red" height="18"/></a>
 
+---
 
-RbxNet is a _networking library_ for Roblox, built in TypeScript. It simplifies the creation and management of networking in Roblox.
+RbxNet is a definition-based _networking framework_ for Roblox, built in TypeScript, but also available in Luau. It simplifies the creation and management of networking in Roblox experiences.
 
 ## Features
-
-- Creation and usage of remotes through "identifiers". Management of the remotes themselves are done by Net itself.
-- Ability for remote definitions through `Net.Definitions`.
-- Asynchronous functions - `AsyncFunction`. No more pitfalls of regular remote functions.
-- Asynchronous callbacks and methods: because it's a roblox-ts library, it supports promises.
-- Server to server events (Via MessagingService)
-- Middleware - Ability to add your own custom behaviours to remotes. Net comes with a runtime type checker, and a rate limiter middleware.
-<!-- - `Net.*.GameMessagingEvent` - interact with `MessagingService` like you would with regular remote events. Cross-server communication with the simple API. All the limitations are handled by Net. -->
+- Create a _definitions_ file of all your networking-based objects in your game. This is a single source of truth for your networking objects. No more tracking instances manually, or having to programmatically create them manually. Each network object is represented by an identifier you define, and by default is created on the server at runtime.
+- Scoped namespacing - Networking objects can be _namespaced_, so you can group related networking objects for easier organization.
+- Simple contextual-based API for fetching and using the networking objects.
+    - `<DefinitionObject>.[Server|Client].Get` To fetch objects from your definitions as usable objects.
+- Ability to add middleware to your networking objects. Type checking, rate limiting, restricting, logging, you name it.
+    - RbxNet comes with `TypeChecking`, `RateLimiter` and `Logger` built-in.
+- `*AsyncFunction`: Asynchronous networking remotes - Event-driven send/recieve messaging between server and client, with no pitfalls of regular `Function`s.
+- Asynchronous callbacks and methods: RbxNet is a roblox-ts native library, meaning it supports promises out of the box.
+- `ExperienceBroadcastEvent` (v3.0): Experience-based broadcasting through `MessagingService`. Allows for uses like cross-server chat, server browsers and announcements.
 
 # Documentation:
 
