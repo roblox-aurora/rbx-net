@@ -307,4 +307,5 @@ export const DeclarationTypeCheck = oneOf<DeclarationLike["Type"] | DeclarationN
 	"Function",
 	"AsyncFunction",
 	"Namespace",
+	"Messaging",
 );
