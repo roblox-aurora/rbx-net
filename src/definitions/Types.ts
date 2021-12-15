@@ -13,9 +13,10 @@ import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/S
 import ServerFunction from "../server/ServerFunction";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
-import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
-import { GameMessagingEvent } from "../server";
+import { NamespaceBuilder } from "./NamespaceBuilder";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
+import ServerMessagingEvent from "../server/ServerMessagingEvent";
+import ClientMessagingEvent from "../client/ClientMessagingEvent";
 
 export interface FunctionDeclarationLike {
 	/**
@@ -27,6 +28,16 @@ export interface FunctionDeclarationLike {
 	readonly Type: "Function";
 	/** @internal */
 	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+}
+
+export interface ExperienceEventDeclarationLike {
+	/**
+	 * @deprecated
+	 */
+	readonly _nominal_ExperienceEventDeclarationLike: unique symbol;
+
+	/** @internal */
+	readonly Type: "ExperienceEvent";
 }
 
 export interface MessagingEventDeclarationLike {
@@ -112,12 +123,19 @@ export type FilterGroups<T extends RemoteDeclarations> = {
 export type FilterServerDeclarations<T extends RemoteDeclarations> = {
 	[K in ExtractKeys<
 		T,
-		EventDeclarationLike | MessagingEventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike
+		| EventDeclarationLike
+		| MessagingEventDeclarationLike
+		| ExperienceEventDeclarationLike
+		| FunctionDeclarationLike
+		| AsyncFunctionDeclarationLike
 	>]: T[K];
 };
 
 export type FilterClientDeclarations<T extends RemoteDeclarations> = {
-	[K in ExtractKeys<T, EventDeclarationLike | FunctionDeclarationLike | AsyncFunctionDeclarationLike>]: T[K];
+	[K in ExtractKeys<
+		T,
+		EventDeclarationLike | FunctionDeclarationLike | ExperienceEventDeclarationLike | AsyncFunctionDeclarationLike
+	>]: T[K];
 };
 
 /**
@@ -188,6 +206,15 @@ export interface ExperienceBroadcastEventDeclaration<_ServerArgs extends unknown
 }
 
 /**
+ * A declaration for a server -> server event, that replicates to clients
+ */
+export interface ExperienceReplicatingEventDeclaration<_ServerArgs extends readonly unknown[]>
+	extends ExperienceEventDeclarationLike {
+	/** @deprecated */
+	readonly _nominal_ExperienceReplicatingEvent: unique symbol;
+}
+
+/**
  * A declaration for a Bidirectional event
  */
 export interface BidirectionalEventDeclaration<
@@ -223,7 +250,8 @@ export type DeclarationLike =
 	| FunctionDeclarationLike
 	| MessagingEventDeclarationLike
 	| AsyncFunctionDeclarationLike
-	| EventDeclarationLike;
+	| EventDeclarationLike
+	| ExperienceEventDeclarationLike;
 export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationNamespaceLike>;
 
 ////////////////////////////////
@@ -271,6 +299,8 @@ export type InferClientRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 	? ClientAsyncFunction<CA, SA, CR, SR>
 	: T extends FunctionDeclaration<infer SA, infer SR>
 	? ClientFunction<SA, SR>
+	: T extends ExperienceReplicatingEventDeclaration<infer A>
+	? ClientListenerEvent<A>
 	: never;
 
 /**
@@ -294,6 +324,8 @@ export type InferServerRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 	? ServerFunction<SA, SR>
 	: T extends ExperienceBroadcastEventDeclaration<infer A>
 	? ExperienceBroadcastEvent<A>
+	: T extends ExperienceReplicatingEventDeclaration<infer A>
+	? ServerMessagingEvent<A>
 	: never;
 
 /////////////////////////////////////////
@@ -309,4 +341,5 @@ export const DeclarationTypeCheck = oneOf<DeclarationLike["Type"] | DeclarationN
 	"AsyncFunction",
 	"Namespace",
 	"Messaging",
+	"ExperienceEvent",
 );

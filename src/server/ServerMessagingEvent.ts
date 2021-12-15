@@ -111,7 +111,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	 * @param userId The userId of the target player
 	 * @param args The args
 	 */
-	public SendToPlayer(userId: number, ...args: TArgs) {
+	public SendToUserId(userId: number, ...args: TArgs) {
 		const player = Players.GetPlayerByUserId(userId);
 		// If the player exists in this instance, just send it straight to them.
 		if (player) {
@@ -126,7 +126,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	 * @param userIds The list of user ids to send this message to
 	 * @param args The args of the message
 	 */
-	public SendToPlayers(userIds: Array<number>, ...args: TArgs) {
+	public SendToUserIds(userIds: Array<number>, ...args: TArgs) {
 		// Check to see if any of these users are in this server first, and handle accordingly.
 		for (const targetId of userIds) {
 			const player = Players.GetPlayerByUserId(targetId);

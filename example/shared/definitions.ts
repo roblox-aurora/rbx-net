@@ -17,6 +17,7 @@ const {
 	ServerFunction,
 	BidirectionalEvent,
 	ExperienceBroadcastEvent,
+	EXPERIMENTAL_ExperienceReplicatedEvent,
 } = Net.Definitions;
 
 const Remotes = Create(
@@ -35,6 +36,7 @@ const Remotes = Create(
 			LegacyAsyncFunction: ServerAsyncFunction<(server: number) => string>(),
 		}),
 		Srv: ExperienceBroadcastEvent<{ text: string }>(),
+		Srv2: EXPERIMENTAL_ExperienceReplicatedEvent<[test: string]>(),
 	},
 	{
 		ServerGlobalMiddleware: [
@@ -44,5 +46,7 @@ const Remotes = Create(
 		],
 	},
 );
+
+Remotes.Server.Get("Srv2");
 
 export default Remotes;

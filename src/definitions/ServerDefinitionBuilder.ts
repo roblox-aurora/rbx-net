@@ -22,6 +22,7 @@ import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import { DefinitionConfiguration } from ".";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
+import ServerMessagingEvent from "../server/ServerMessagingEvent";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 
@@ -56,6 +57,7 @@ const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
 const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
+const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
@@ -161,8 +163,17 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			}
 
 			return event;
+		} else if (declaration.Type === "ExperienceEvent") {
+			let event: ServerMessagingEvent;
+			if (messagingServerEventCache.has(remoteInstanceId)) {
+				return messagingServerEventCache.get(remoteInstanceId)!;
+			} else {
+				event = new ServerMessagingEvent(remoteInstanceId);
+				messagingServerEventCache.set(remoteInstanceId, event);
+			}
+			return event;
 		} else {
-			throw `Invalid type`;
+			throw `Unhandled type`;
 		}
 	}
 

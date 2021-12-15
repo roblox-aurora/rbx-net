@@ -12,6 +12,7 @@ import {
 	AsyncClientFunctionDeclaration,
 	DeclarationTypeCheck,
 	ExperienceBroadcastEventDeclaration,
+	ExperienceReplicatingEventDeclaration,
 } from "./Types";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
@@ -111,6 +112,10 @@ namespace NetDefinitions {
 	}
 
 	/**
+	 * @version 3.0
+	 *
+	 * **_Note_: This uses {@link MessagingService}, and thus is subject to those quotas/limits.**
+	 *
 	 * **_Note_: Unlike other definitions in Net, this is only available on the server.**
 	 *
 	 * Defines an event in which allows broadcasting messages between servers in the experience.
@@ -121,12 +126,29 @@ namespace NetDefinitions {
 	 *
 	 * `Source Server [`Broadcasts`] -> `Target Server` [`Recieves Broadcast`]
 	 *
-	 * @returns
 	 */
 	export function ExperienceBroadcastEvent<ServerArgs extends defined = defined>() {
 		return {
 			Type: "Messaging",
 		} as ExperienceBroadcastEventDeclaration<ServerArgs>;
+	}
+
+	/**
+	 * @version 3.0
+	 *
+	 * **_Note_: This uses {@link MessagingService}, and thus is subject to those quotas/limits.**
+	 *
+	 * Defines an event that allows a server to broadcast to all or specified _clients_ in the experience.
+	 *
+	 * `Source Server` [`Broadcasts`] -> `Other Servers` [`Recieves Broadcast`] -> `Client` [`Recieves Forwarded Broadcast`]
+	 *
+	 * @hidden Experimental API
+	 * @deprecated Not yet official API, could be changed or removed.
+	 */
+	export function EXPERIMENTAL_ExperienceReplicatedEvent<ServerArgs extends readonly unknown[] = unknown[]>() {
+		return {
+			Type: "ExperienceEvent",
+		} as ExperienceReplicatingEventDeclaration<ServerArgs>;
 	}
 
 	/**

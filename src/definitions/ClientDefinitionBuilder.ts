@@ -3,7 +3,8 @@ import { DefinitionConfiguration } from ".";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
-import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
+import ClientMessagingEvent from "../client/ClientMessagingEvent";
+import { getGlobalRemote, NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import {
 	AsyncClientFunctionDeclaration,
@@ -87,9 +88,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 			return new ClientEvent(remoteId) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
 			return new ClientAsyncFunction(remoteId) as InferClientRemote<T[K]>;
+		} else if (item.Type === "ExperienceEvent") {
+			return new ClientEvent(getGlobalRemote(remoteId)) as InferClientRemote<T[K]>;
 		}
 
-		throw `Invalid Type`;
+		throw `Type '${item.Type}' is not a valid client remote object type`;
 	}
 
 	/**
@@ -115,9 +118,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 			return ClientEvent.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "AsyncFunction") {
 			return ClientAsyncFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
+		} else if (item.Type === "ExperienceEvent") {
+			return ClientEvent.Wait(getGlobalRemote(remoteId)) as Promise<InferClientRemote<T[K]>>;
 		}
 
-		throw `Invalid Type`;
+		throw `Type '${item.Type}' is not a valid client remote object type`;
 	}
 
 	/**
