@@ -24,3 +24,7 @@ RbxNet is a definition-based _networking framework_ for Roblox, built in TypeScr
 # Documentation:
 
 [Available Here](https://rbxnet.australis.dev/)
+
+# More Help & Links
+
+[Australis OSS Community](https://discord.gg/SvUcvTRjPZ)
