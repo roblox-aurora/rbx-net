@@ -2,6 +2,7 @@ import { NetMiddleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
 
 /**
  * Interface for server listening events
@@ -11,7 +12,7 @@ export interface ServerListenerEvent<CallArguments extends ReadonlyArray<unknown
 	 * Connects a callback function to this event, in which if any events are recieved by the client will be called.
 	 * @param callback The callback function
 	 */
-	Connect(callback: (player: Player, ...args: CallArguments) => void): RBXScriptConnection;
+	Connect(callback: (player: Player, ...args: CallArguments) => void): Readonly<NetServerSignalConnection>;
 }
 
 /**
@@ -53,20 +54,13 @@ export default class ServerEvent<
 	extends MiddlewareEvent
 	implements NetManagedInstance, ServerListenerEvent<ConnectArgs>, ServerSenderEvent<CallArgs> {
 	private instance: RemoteEvent;
-	private defaultHook?: RBXScriptConnection;
-
-	/** @internal */
-	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
-		// TODO: 2.2 make usable for analytics?
-	};
+	private connection;
 
 	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("RemoteEvent", name, (instance) => {
-			// Default connection
-			this.defaultHook = instance.OnServerEvent.Connect(ServerEvent.DefaultEventHook);
-		});
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
+		this.instance = findOrCreateRemote("RemoteEvent", name);
+		this.connection = new NetServerScriptSignal(this.instance.OnServerEvent, this.instance);
 	}
 
 	/** @deprecated */
@@ -78,14 +72,10 @@ export default class ServerEvent<
 	 * Connect a fucntion to fire when the event is invoked by the client
 	 * @param callback The function fired when the event is invoked by the client
 	 */
-	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): RBXScriptConnection {
-		this.defaultHook?.Disconnect();
-
-		const connection = this.instance.OnServerEvent.Connect((player, ...args) => {
+	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): Readonly<NetServerSignalConnection> {
+		return this.connection.Connect((player, ...args) => {
 			this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
 		});
-
-		return connection;
 	}
 
 	/**
