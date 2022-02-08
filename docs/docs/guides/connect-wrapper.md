@@ -19,9 +19,10 @@ This may come as the following sort of situation:
   <TabItem value="ts">
 
 ```ts
+import Remotes from "shared/remotes";
 import PlayerService from "server/Services/PlayerService";
 
-const PlayerEquipItem = new Net.Server.Event<[itemId: number]>("PlayerEquipItem")
+const PlayerEquipItem = Remotes.Server.Get("PlayerEquipItem");
 PlayerEquipItem.Connect((player, itemId) => {
     const entity = PlayerService.GetEntity(player);
     if (entity) {
@@ -29,7 +30,7 @@ PlayerEquipItem.Connect((player, itemId) => {
     }
 })
 
-const PlayerUnequipItem = new Net.Server.Event<[itemId: number]>("PlayerUnequipItem")
+const PlayerUnequipItem = Remotes.Server.Get("PlayerUnequipItem")
 PlayerUnequipItem.Connect((player, itemId) => {
     const entity = PlayerService.GetEntity(player);
     if (entity) {
@@ -37,7 +38,7 @@ PlayerUnequipItem.Connect((player, itemId) => {
     }
 })
 
-const GetPlayerEquipped = new Net.Server.AsyncFunction("GetPlayerEquipped")
+const GetPlayerEquipped = Remotes.Server.Get("GetPlayerEquipped")
 GetPlayerEquipped.SetCallback((player) => {
     const entity = PlayerService.GetEntity(player);
     if (entity) {
@@ -51,8 +52,9 @@ GetPlayerEquipped.SetCallback((player) => {
 
 ```lua
 local PlayerService = require(ServerScriptService.Services.PlayerService)
+local Remotes = require(ReplicatedStorage.Remotes)
 
-local PlayerEquipItem = Net.Server.Event.new("PlayerEquipItem")
+local PlayerEquipItem = Remotes.Server:Get("PlayerEquipItem")
 PlayerEquipItem:Connect(function (player, itemId)
     local entity = PlayerService:GetEntity(player)
     if entity then
@@ -60,7 +62,7 @@ PlayerEquipItem:Connect(function (player, itemId)
     end
 end)
 
-local PlayerUnequipItem = Net.Server.Event.new("PlayerUnequipItem")
+local PlayerUnequipItem = Remotes.Server:Get("PlayerUnequipItem")
 PlayerUnequipItem:Connect(function (player, itemId)
     local entity = PlayerService:GetEntity(player)
     if entity then
@@ -68,7 +70,7 @@ PlayerUnequipItem:Connect(function (player, itemId)
     end
 end)
 
-local GetPlayerEquipped = Net.Server.AsyncFunction.new("GetPlayerEquipped")
+local GetPlayerEquipped = Remotes.Server:Get("GetPlayerEquipped")
 GetPlayerEquipped:SetCallback(function(player)
     local entity = PlayerService:GetEntity(player)
     if entity then
@@ -136,23 +138,24 @@ Then we can apply this to the code above.
 
 ```ts
 import PlayerService from "server/Services/PlayerService";
+import Remotes from "shared/remotes";
 import withPlayerEntity from "server/Wrappers/withPlayerEntity";
 
-const PlayerEquipItem = new Net.Server.Event<[itemId: number]>("PlayerEquipItem")
+const PlayerEquipItem = Remotes.Server.Get("PlayerEquipItem")
 PlayerEquipItem.Connect(
     withPlayerEntity((entity, itemId) => {
         entity.EquipItem(itemId);
     })
 );
 
-const PlayerUnequipItem = new Net.Server.Event<[itemId: number]>("PlayerUnequipItem")
+const PlayerUnequipItem = Remotes.Server.Get("PlayerUnequipItem")
 PlayerUnequipItem.Connect((player, itemId) => {
     withPlayerEntity((entity, itemId) => {
         entity.UnequipItem(itemId);
     })
 })
 
-const GetPlayerEquipped = new Net.Server.AsyncFunction("GetPlayerEquipped")
+const GetPlayerEquipped = Remotes.Server.Get("GetPlayerEquipped")
 GetPlayerEquipped.SetCallback(
     withPlayerEntity((player) => {
         return entity.GetEquippedItems();
@@ -165,23 +168,24 @@ GetPlayerEquipped.SetCallback(
 
 ```lua
 local PlayerService = require(ServerScriptService.Services.PlayerService)
+local Remotes = require(ReplicatedStorage.Remotes)
 local withPlayerEntity = require(ServerScriptService.Wrappers.withPlayerEntity)
 
-local PlayerEquipItem = Net.Server.Event.new("PlayerEquipItem")
+local PlayerEquipItem = Remotes.Server:Get("PlayerEquipItem")
 PlayerEquipItem:Connect(
     withPlayerEntity(function (entity, itemId)
         entity:EquipItem(itemId)
     end)
 )
 
-local PlayerUnequipItem = Net.Server.Event.new("PlayerUnequipItem")
+local PlayerUnequipItem = Remotes.Server:Get("PlayerUnequipItem")
 PlayerUnequipItem:Connect(
     withPlayerEntity(function (player, itemId)
         entity:UnequipItem(itemId)
     end)
 )
 
-local GetPlayerEquipped = Net.Server.AsyncFunction.new("GetPlayerEquipped")
+local GetPlayerEquipped = Remotes.Server:Get("GetPlayerEquipped")
 GetPlayerEquipped:SetCallback(
     withPlayerEntity(function(player)
         return entity:GetEquippedItems()
