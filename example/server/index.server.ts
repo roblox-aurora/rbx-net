@@ -22,3 +22,7 @@ type TestNamespaceAsServerRemotes = Net.Util.GetServerRemotes<NamespaceTest>;
 type TestNamespaceAsClientRemotes = Net.Util.GetClientRemotes<NamespaceTest>;
 
 Remotes.Server.Get("Srv").Connect((message) => {});
+
+Remotes.Server.GetNamespace("TestingFunctions").OnFunction("CallServerAndAddNumbers", async () => {
+	return 10;
+});

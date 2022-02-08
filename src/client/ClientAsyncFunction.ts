@@ -46,7 +46,7 @@ export default class ClientAsyncFunction<
 	CallbackReturnType = unknown
 > implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
 	private instance: RemoteEvent;
-	private timeout = 10;
+	private timeout = 60;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
 
@@ -124,8 +124,15 @@ export default class ClientAsyncFunction<
 			});
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
+			let warned = false;
+			let elapsedTime = 0;
 			do {
-				RunService.Heartbeat.Wait();
+				elapsedTime += RunService.Heartbeat.Wait()[0];
+				if (elapsedTime >= 20 && !warned) {
+					warned = true;
+					warn(`[rbx-net] CallServerAsync(...) - still waiting for result from remote '${this.name}'`);
+					print(debug.traceback("", 3));
+				}
 			} while (connection.Connected && tick() < startTime + this.timeout);
 
 			this.listeners.delete(id);

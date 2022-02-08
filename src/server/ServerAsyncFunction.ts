@@ -131,9 +131,6 @@ class ServerAsyncFunction<
 							warn("[rbx-net] Failed to send response to client: " + err);
 						});
 				} else {
-					if (result === undefined) {
-						warn("[rbx-net-async] " + this.instance.Name + " returned undefined");
-					}
 					this.instance.FireClient(player, eventId, result);
 				}
 			} else {

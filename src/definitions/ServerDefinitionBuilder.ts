@@ -95,24 +95,19 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 * The generated remote id is based off the current namespace.
 		 */
 
-		const remoteInstanceId =
-			this.namespace !== NAMESPACE_ROOT
-				? ([this.namespace, id].join(NAMESPACE_SEPARATOR) as keyof RemoteDeclarationDict<T>)
-				: id;
-
 		if (declaration.Type === "Function") {
 			let func: ServerFunction;
 
-			if (remoteFunctionCache.has(remoteInstanceId)) {
-				return remoteFunctionCache.get(remoteInstanceId)!;
+			if (remoteFunctionCache.has(id)) {
+				return remoteFunctionCache.get(id)!;
 			} else {
 				if (declaration.ServerMiddleware) {
-					func = new ServerFunction(remoteInstanceId, declaration.ServerMiddleware);
+					func = new ServerFunction(id, declaration.ServerMiddleware);
 				} else {
-					func = new ServerFunction(remoteInstanceId);
+					func = new ServerFunction(id);
 				}
 				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
-				remoteFunctionCache.set(remoteInstanceId, func);
+				remoteFunctionCache.set(id, func);
 
 				this.globalMiddleware?.forEach((mw) => func._use(mw));
 				return func;
@@ -121,16 +116,16 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			let asyncFunction: ServerAsyncFunction;
 
 			// This should make certain use cases cheaper
-			if (remoteAsyncFunctionCache.has(remoteInstanceId)) {
-				return remoteAsyncFunctionCache.get(remoteInstanceId)!;
+			if (remoteAsyncFunctionCache.has(id)) {
+				return remoteAsyncFunctionCache.get(id)!;
 			} else {
 				if (declaration.ServerMiddleware) {
-					asyncFunction = new ServerAsyncFunction(remoteInstanceId, declaration.ServerMiddleware);
+					asyncFunction = new ServerAsyncFunction(id, declaration.ServerMiddleware);
 				} else {
-					asyncFunction = new ServerAsyncFunction(remoteInstanceId);
+					asyncFunction = new ServerAsyncFunction(id);
 				}
 				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
-				remoteAsyncFunctionCache.set(remoteInstanceId, asyncFunction);
+				remoteAsyncFunctionCache.set(id, asyncFunction);
 			}
 
 			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
@@ -139,37 +134,37 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			let event: ServerEvent;
 
 			// This should make certain use cases cheaper
-			if (remoteEventCache.has(remoteInstanceId)) {
-				return remoteEventCache.get(remoteInstanceId)!;
+			if (remoteEventCache.has(id)) {
+				return remoteEventCache.get(id)!;
 			} else {
 				if (declaration.ServerMiddleware) {
-					event = new ServerEvent(remoteInstanceId, declaration.ServerMiddleware);
+					event = new ServerEvent(id, declaration.ServerMiddleware);
 				} else {
-					event = new ServerEvent(remoteInstanceId);
+					event = new ServerEvent(id);
 				}
 				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
-				remoteEventCache.set(remoteInstanceId, event);
+				remoteEventCache.set(id, event);
 			}
 
 			this.globalMiddleware?.forEach((mw) => event._use(mw));
 			return event;
 		} else if (declaration.Type === "Messaging") {
 			let event: ExperienceBroadcastEvent;
-			if (messagingEventCache.has(remoteInstanceId)) {
-				return messagingEventCache.get(remoteInstanceId)!;
+			if (messagingEventCache.has(id)) {
+				return messagingEventCache.get(id)!;
 			} else {
-				event = new ExperienceBroadcastEvent(remoteInstanceId);
-				messagingEventCache.set(remoteInstanceId, event);
+				event = new ExperienceBroadcastEvent(id);
+				messagingEventCache.set(id, event);
 			}
 
 			return event;
 		} else if (declaration.Type === "ExperienceEvent") {
 			let event: ServerMessagingEvent;
-			if (messagingServerEventCache.has(remoteInstanceId)) {
-				return messagingServerEventCache.get(remoteInstanceId)!;
+			if (messagingServerEventCache.has(id)) {
+				return messagingServerEventCache.get(id)!;
 			} else {
-				event = new ServerMessagingEvent(remoteInstanceId);
-				messagingServerEventCache.set(remoteInstanceId, event);
+				event = new ServerMessagingEvent(id);
+				messagingServerEventCache.set(id, event);
 			}
 			return event;
 		} else {
@@ -192,13 +187,6 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
 		for (const [id, declaration] of pairs(declarations)) {
-			const remoteInstanceId =
-				this.namespace !== NAMESPACE_ROOT
-					? ([this.namespace, id].join(NAMESPACE_SEPARATOR) as keyof RemoteDeclarationDict<T>)
-					: id;
-
-			$print("Generating server-side remote", this.namespace, id, "as", remoteInstanceId);
-
 			switch (declaration.Type) {
 				case "Event":
 				case "AsyncFunction":

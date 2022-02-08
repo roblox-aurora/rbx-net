@@ -276,7 +276,7 @@ export type InferClientCallback<T> = T extends LegacyAsyncFunctionDeclaration<an
 export type InferServerCallback<T> = T extends LegacyAsyncFunctionDeclaration<infer A, infer R, any, any>
 	? (player: Player, ...args: A) => R
 	: T extends AsyncServerFunctionDeclaration<infer A, infer R>
-	? (player: Player, ...args: A) => R
+	? ((player: Player, ...args: A) => R) | ((player: Player, ...args: A) => Promise<R>)
 	: never;
 
 /**

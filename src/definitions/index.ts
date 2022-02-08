@@ -103,7 +103,7 @@ namespace NetDefinitions {
 	 * `Server` [`Responds to Call`] -> `Client` [`Recieves Response`]
 	 */
 	export function ServerAsyncFunction<
-		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
+		ServerFunction extends (...args: any[]) => unknown = (...args: unknown[]) => unknown
 	>(mw?: MiddlewareOverload<Parameters<ServerFunction>>) {
 		return {
 			Type: "AsyncFunction",
@@ -227,6 +227,8 @@ namespace NetDefinitions {
 	 * Defines a remote event that can be fired both from the client and server
 	 *
 	 * This should only be required in rare use cases where `ClientToServerEvent` or `ServerToClientEvent` is not sufficient.
+	 *
+	 * Check to see if {@link ServerAsyncFunction} is more sufficient for your use case.
 	 */
 	export function BidirectionalEvent<
 		ServerConnect extends readonly unknown[] = unknown[],
