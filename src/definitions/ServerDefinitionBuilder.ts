@@ -221,7 +221,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		const result = this.Get(name) as InferServerRemote<
 			ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
 		>;
-		result.Connect(fn);
+		return result.Connect(fn);
 	}
 
 	/**

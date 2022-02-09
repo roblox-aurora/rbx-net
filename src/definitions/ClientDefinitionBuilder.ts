@@ -139,7 +139,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, ServerToClientEventDeclaration<unknown[]>> & string
 	>(name: K, fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<ServerToClientEventDeclaration<any>>;
-		result.Connect(fn);
+		return result.Connect(fn);
 	}
 
 	/**
