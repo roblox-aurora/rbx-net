@@ -2,11 +2,18 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://rbxnet.australis.dev/blog</id>
     <title>RbxNet Blog</title>
-    <updated>2020-01-12T00:00:00.000Z</updated>
+    <updated>2021-12-31T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://rbxnet.australis.dev/blog"/>
     <subtitle>RbxNet Blog</subtitle>
     <icon>https://rbxnet.australis.dev/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[v3.0]]></title>
+        <id>3.0-release</id>
+        <link href="https://rbxnet.australis.dev/blog/3.0-release"/>
+        <updated>2021-12-31T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Welcome to the release of v3.0 of RbxNet.]]></summary>
+    </entry>
     <entry>
         <title type="html"><![CDATA[v2.0.0-alpha.7]]></title>
         <id>update7</id>

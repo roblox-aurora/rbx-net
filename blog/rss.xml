@@ -4,9 +4,16 @@
         <title>RbxNet Blog</title>
         <link>https://rbxnet.australis.dev/blog</link>
         <description>RbxNet Blog</description>
-        <lastBuildDate>Sun, 12 Jan 2020 00:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 31 Dec 2021 00:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
+        <item>
+            <title><![CDATA[v3.0]]></title>
+            <link>https://rbxnet.australis.dev/blog/3.0-release</link>
+            <guid>3.0-release</guid>
+            <pubDate>Fri, 31 Dec 2021 00:00:00 GMT</pubDate>
+            <description><![CDATA[Welcome to the release of v3.0 of RbxNet.]]></description>
+        </item>
         <item>
             <title><![CDATA[v2.0.0-alpha.7]]></title>
             <link>https://rbxnet.australis.dev/blog/update7</link>
