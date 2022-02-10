@@ -14,9 +14,9 @@ Say that we have our example definition file here:
   <TabItem value="ts">
 
 ```ts title="shared/remotes.ts"
-import { Definitions } from "@rbxts/net";
+import Net, { Definitions } from "@rbxts/net";
 
-const Remotes = Definitions.Create({
+const Remotes = Net.CreateDefinitions({
     GetPlayerInventory: Definitions.ServerAsyncFunction<() => SerializedPlayerInventory>(),
     GetPlayerEquipped: Definitions.ServerAsyncFunction<() => SerializedPlayerEquipped>(),
 
@@ -36,7 +36,7 @@ export = Remotes;
 ```lua title="src/shared/remotes.lua"
 local Net = require(ReplicatedStorage.Net)
 
-local Remotes = Net.Definitions.Create({
+local Remotes = Net.CreateDefinitions({
     GetPlayerInventory = Net.Definitions.ServerFunction(),
     GetPlayerEquipped = Net.Definitions.ServerFunction(),
 

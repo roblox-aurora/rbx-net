@@ -30,6 +30,9 @@ Given the above knowledge, we can then apply that to our remote definition scrip
 - Function
     - **`Net.Definitions.ServerFunction`** - Defines a synchronous function which exists on the server, and can be called by clients
 
+- Broadcast
+    - **`Net.Definitions.ExperienceBroadcastEvent`** - Defines an event that the server can use to communicate with other servers in the same experience
+
 ### Defining remotes
 
 With the above knowledge, we can create a few example definitions. Say I would like a use case like the following
@@ -40,9 +43,9 @@ With the above knowledge, we can create a few example definitions. Say I would l
   <TabItem value="ts">
 
 ```ts title="shared/remotes.ts"
-import { Definitions } from "@rbxts/net";
+import Net, { Definitions } from "@rbxts/net";
 
-const Remotes = Definitions.Create({
+const Remotes = Net.CreateDefinitions({
     GetPlayerInventory: Definitions.ServerAsyncFunction<() => SerializedPlayerInventory>(),
     GetPlayerEquipped: Definitions.ServerAsyncFunction<() => SerializedPlayerEquipped>(),
 
@@ -62,7 +65,7 @@ export = Remotes;
 ```lua title="src/shared/remotes.lua"
 local Net = require(ReplicatedStorage.Net)
 
-local Remotes = Net.Definitions.Create({
+local Remotes = Net.CreateDefinitions({
     GetPlayerInventory = Net.Definitions.ServerFunction(),
     GetPlayerEquipped = Net.Definitions.ServerFunction(),
 

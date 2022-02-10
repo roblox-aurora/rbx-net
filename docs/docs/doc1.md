@@ -17,7 +17,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
     />
 </div>
 <div align="center">
-	<h1>Roblox Networking (RbxNet) v2.1</h1>
+	<h1>Roblox Networking (RbxNet) v2.2</h1>
     	<a href="https://www.npmjs.com/package/@rbxts/net">
 	</a>
 </div>
@@ -28,7 +28,7 @@ RbxNet is a _networking library_ for Roblox, built in TypeScript. It simplifies 
 
 - Creation and usage of remotes through "identifiers". Management of the remotes themselves are done by Net itself.
 - More explicit, contextual APIs. `Net.Server` for server-based API, and `Net.Client` for client-based API.
-- Ability for remote definitions through `Net.Definitions`.
+- Ability for remote definitions through `Net.Definitions`. Remotes done through this API are auto-generated.
 - Asynchronous functions - `Net.*.AsyncFunction`. No more pitfalls of regular remote functions.
 - Asynchronous callbacks and methods: because it's a roblox-ts library, it supports promises.
 - Middleware - Ability to add your own custom behaviours to remotes. Net comes with a runtime type checker, and a rate limiter middleware.

@@ -11,12 +11,13 @@ import { $print } from "rbxts-transform-debug";
 const {
 	Create,
 	Namespace,
-	Event,
-	Function,
-	AsyncFunction,
 	ServerAsyncFunction,
 	ServerToClientEvent,
 	ClientToServerEvent,
+	ServerFunction,
+	BidirectionalEvent,
+	ExperienceBroadcastEvent,
+	EXPERIMENTAL_ExperienceReplicatedEvent,
 } = Net.Definitions;
 
 const Remotes = Create(
@@ -30,16 +31,20 @@ const Remotes = Create(
 			PrintMessage: ClientToServerEvent<[message: string]>(),
 		}),
 		Legacy: Namespace({
-			LegacyEvent: Event<[message: string], [message2: number]>(),
-			LegacyFunction: Function<(server: number) => string>(),
-			LegacyAsyncFunction: AsyncFunction<(server: number) => string, (client: number) => string>(),
+			LegacyEvent: BidirectionalEvent<[message: string], [message2: number]>(),
+			LegacyFunction: ServerFunction<(server: number) => string>(),
+			LegacyAsyncFunction: ServerAsyncFunction<(server: number) => string>(),
 		}),
+		Srv: ExperienceBroadcastEvent<{ text: string }>(),
+		Srv2: EXPERIMENTAL_ExperienceReplicatedEvent<[test: string]>(),
 	},
-	[
-		Net.Middleware.Global((remote, data, player) => {
-			$print("call from", player, "via", remote, ...data);
-		}),
-	],
+	{
+		ServerGlobalMiddleware: [
+			Net.Middleware.Global((remote, data, player) => {
+				$print("call from", player, "via", remote, ...data);
+			}),
+		],
+	},
 );
 
 export default Remotes;

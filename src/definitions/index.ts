@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
 import {
-	LegacyAsyncFunctionDeclaration,
 	FunctionDeclaration,
-	LegacyEventDeclaration,
 	RemoteDeclarations,
 	DefinitionsCreateResult,
 	NamespaceDeclaration,
@@ -13,12 +11,41 @@ import {
 	AsyncServerFunctionDeclaration,
 	AsyncClientFunctionDeclaration,
 	DeclarationTypeCheck,
+	ExperienceBroadcastEventDeclaration,
+	ExperienceReplicatingEventDeclaration,
 } from "./Types";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
-import { warnOnce } from "../internal";
-import { $nameof } from "rbxts-transform-debug";
-import { NamespaceBuilder } from "./NamespaceBuilder";
+import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
+
+export interface DefinitionConfiguration {
+	/**
+	 * Middleware that's applied to _all_ remotes on the server
+	 *
+	 * @default undefined
+	 */
+	readonly ServerGlobalMiddleware?: NetGlobalMiddleware[];
+
+	/**
+	 * Whether or not the server remotes are automatically generated
+	 *
+	 * This will default to `true` if the top-level definition, or the value of the parent namespace.
+	 *
+	 * @default true
+	 */
+	readonly ServerAutoGenerateRemotes?: boolean;
+
+	/**
+	 * Whether or not `Client.Get(...)` should yield for the remote to exist
+	 *
+	 * If `true` - Will yield until the remote exists, or error after 60 seconds.
+	 *
+	 * If `false` - Will error if the remote does not exist.
+	 *
+	 * @default true
+	 */
+	readonly ClientGetShouldYield?: boolean;
+}
 
 namespace NetDefinitions {
 	/**
@@ -33,14 +60,16 @@ namespace NetDefinitions {
 
 	/**
 	 * Creates definitions for Remote instances that can be used on both the client and server.
-	 * @description https://docs.vorlias.com/rbx-net/docs/2.0/definitions#definitions-oh-my
+	 * @description https://docs.vorlias.com/rbx-net/docs/3.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T, globalMiddleware?: NetGlobalMiddleware[]) {
+	export function Create<T extends RemoteDeclarations>(declarations: T, configuration?: DefinitionConfiguration) {
+		configuration ??= {};
+
 		validateDeclarations(declarations);
 		return identity<DefinitionsCreateResult<T>>({
-			Server: new ServerDefinitionBuilder<T>(declarations, globalMiddleware),
-			Client: new ClientDefinitionBuilder<T>(declarations),
+			Server: new ServerDefinitionBuilder<T>(declarations, configuration),
+			Client: new ClientDefinitionBuilder<T>(declarations, configuration),
 		});
 	}
 
@@ -59,10 +88,10 @@ namespace NetDefinitions {
 	 *
 	 * This is useful for categorizing remotes by feature.
 	 */
-	export function Namespace<T extends RemoteDeclarations>(declarations: T) {
+	export function Namespace<T extends RemoteDeclarations>(declarations: T, configuration?: NamespaceConfiguration) {
 		return {
 			Type: "Namespace",
-			Definitions: new NamespaceBuilder(declarations),
+			Definitions: new NamespaceBuilder(declarations, configuration),
 		} as NamespaceDeclaration<T>;
 	}
 
@@ -74,12 +103,52 @@ namespace NetDefinitions {
 	 * `Server` [`Responds to Call`] -> `Client` [`Recieves Response`]
 	 */
 	export function ServerAsyncFunction<
-		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
+		ServerFunction extends (...args: any[]) => unknown = (...args: unknown[]) => unknown
 	>(mw?: MiddlewareOverload<Parameters<ServerFunction>>) {
 		return {
 			Type: "AsyncFunction",
 			ServerMiddleware: mw,
 		} as AsyncServerFunctionDeclaration<Parameters<ServerFunction>, ReturnType<ServerFunction>>;
+	}
+
+	/**
+	 * @version 3.0
+	 *
+	 * **_Note_: This uses {@link MessagingService}, and thus is subject to those quotas/limits.**
+	 *
+	 * **_Note_: Unlike other definitions in Net, this is only available on the server.**
+	 *
+	 * Defines an event in which allows broadcasting messages between servers in the experience.
+	 *
+	 * `Source Server` [`Broadcasts`] -> `Other Servers` [`Recieves Broadcast`]
+	 *
+	 * or at a target {@link DataModel.JobId JobId}
+	 *
+	 * `Source Server [`Broadcasts`] -> `Target Server` [`Recieves Broadcast`]
+	 *
+	 */
+	export function ExperienceBroadcastEvent<ServerArgs extends defined = defined>() {
+		return {
+			Type: "Messaging",
+		} as ExperienceBroadcastEventDeclaration<ServerArgs>;
+	}
+
+	/**
+	 * @version 3.0
+	 *
+	 * **_Note_: This uses {@link MessagingService}, and thus is subject to those quotas/limits.**
+	 *
+	 * Defines an event that allows a server to broadcast to all or specified _clients_ in the experience.
+	 *
+	 * `Source Server` [`Broadcasts`] -> `Other Servers` [`Recieves Broadcast`] -> `Client` [`Recieves Forwarded Broadcast`]
+	 *
+	 * @hidden Experimental API
+	 * @deprecated Not yet official API, could be changed or removed.
+	 */
+	export function EXPERIMENTAL_ExperienceReplicatedEvent<ServerArgs extends readonly unknown[] = unknown[]>() {
+		return {
+			Type: "ExperienceEvent",
+		} as ExperienceReplicatingEventDeclaration<ServerArgs>;
 	}
 
 	/**
@@ -158,6 +227,8 @@ namespace NetDefinitions {
 	 * Defines a remote event that can be fired both from the client and server
 	 *
 	 * This should only be required in rare use cases where `ClientToServerEvent` or `ServerToClientEvent` is not sufficient.
+	 *
+	 * Check to see if {@link ServerAsyncFunction} is more sufficient for your use case.
 	 */
 	export function BidirectionalEvent<
 		ServerConnect extends readonly unknown[] = unknown[],
@@ -175,91 +246,6 @@ namespace NetDefinitions {
 			Type: "Event",
 			ServerMiddleware: [],
 		} as BidirectionalEventDeclaration<ServerArgs, ClientArgs>;
-	}
-
-	/// REGION deprecated members
-
-	/**
-	 * Creates a definition for a function
-	 * @deprecated
-	 */
-	export function Function<ServerFunction extends (...args: any[]) => any>(
-		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
-	): FunctionDeclaration<Parameters<ServerFunction>, ReturnType<ServerFunction>>;
-	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
-		mw?: MiddlewareOverload<ServerArgs>,
-	): FunctionDeclaration<ServerArgs, ServerReturns>;
-	export function Function<ServerArgs extends ReadonlyArray<unknown>, ServerReturns extends unknown = undefined>(
-		mw?: MiddlewareOverload<any>,
-	) {
-		warnOnce(
-			`Definition '${$nameof(Function)}' is deprecated, use '${$nameof(
-				ServerFunction,
-			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
-		);
-		return {
-			Type: "Function",
-			ServerMiddleware: mw,
-		} as FunctionDeclaration<ServerArgs, ServerReturns>;
-	}
-
-	/**
-	 * Creates a definition for an event
-	 *
-	 *
-	 * ### If the event is fired by the client to the server, use `ClientToServerEvent`.
-	 * ### If the event is fired by the server to the client, use `ServerToClientEvent`.
-	 * ### If the event is both fired by client and server, use `BidirectionalEvent`.
-	 *
-	 * @deprecated This will be removed in future - please redesign your definitions
-	 *
-	 */
-	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
-		mw?: MiddlewareOverload<any>,
-	): LegacyEventDeclaration<ServerArgs, ClientArgs>;
-	export function Event<ServerArgs extends unknown[] = unknown[], ClientArgs extends unknown[] = unknown[]>(
-		mw?: MiddlewareOverload<any>,
-	) {
-		warnOnce(
-			`Definition '${$nameof(Event)}' is deprecated, use '${$nameof(ServerToClientEvent)}', '${$nameof(
-				ClientToServerEvent,
-			)}' or '${$nameof(
-				BidirectionalEvent,
-			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
-		);
-		return {
-			Type: "Event",
-			ServerMiddleware: mw,
-		} as LegacyEventDeclaration<ServerArgs, ClientArgs>;
-	}
-
-	/**
-	 * Creates a definition for an async function
-	 *
-	 * ### If the function callback is on the server, use `AsyncServerFunction`.
-	 * ### If the function callback is on the client, use `AsyncClientFunction`.
-	 *
-	 * @deprecated This will be removed in future - please redesign your definitions
-	 */
-
-	export function AsyncFunction<
-		ServerFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined,
-		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
-	>(mw?: MiddlewareOverload<any>) {
-		warnOnce(
-			`Definition '${$nameof(AsyncFunction)}' is deprecated, use '${$nameof(ServerAsyncFunction)}' or '${$nameof(
-				ClientAsyncFunction,
-			)}' in your declarations - https://github.com/roblox-aurora/rbx-net/issues/35`,
-		);
-		return {
-			Type: "AsyncFunction",
-			ServerMiddleware: mw,
-		} as LegacyAsyncFunctionDeclaration<
-			Parameters<ServerFunction>,
-			ReturnType<ServerFunction>,
-			Parameters<ClientFunction>,
-			ReturnType<ClientFunction>
-		>;
 	}
 }
 

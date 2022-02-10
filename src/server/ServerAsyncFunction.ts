@@ -1,8 +1,7 @@
-import { NetGlobalMiddleware, NetMiddleware } from "../middleware";
-import { DebugLog, DebugWarn } from "../configuration";
-import { findOrCreateRemote, IAsyncListener, IS_CLIENT } from "../internal";
+import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+const CollectionService = game.GetService("CollectionService");
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
@@ -84,6 +83,7 @@ class ServerAsyncFunction<
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
 			// Default connection
 			this.defaultHook = instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
+			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
 		});
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
 	}
@@ -103,7 +103,11 @@ class ServerAsyncFunction<
 	 * @param callback The callback
 	 */
 	public SetCallback<R extends CallbackReturnType>(callback: (player: Player, ...args: CallbackArgs) => R) {
-		this.defaultHook?.Disconnect();
+		if (this.defaultHook !== undefined) {
+			this.defaultHook.Disconnect();
+			this.defaultHook = undefined;
+			CollectionService.RemoveTag(this.instance, TagId.DefaultFunctionListener);
+		}
 
 		if (this.connector) {
 			this.connector.Disconnect();
@@ -127,9 +131,6 @@ class ServerAsyncFunction<
 							warn("[rbx-net] Failed to send response to client: " + err);
 						});
 				} else {
-					if (result === undefined) {
-						warn("[rbx-net-async] " + this.instance.Name + " returned undefined");
-					}
 					this.instance.FireClient(player, eventId, result);
 				}
 			} else {
@@ -151,14 +152,12 @@ class ServerAsyncFunction<
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
-			DebugLog("Connected CallPlayerAsync EventId", id);
 			const connection = this.instance.OnServerEvent.Connect(
 				(fromPlayer: Player, ...recvArgs: Array<unknown>) => {
 					const [eventId, data] = recvArgs;
 
 					if (typeIs(eventId, "string") && data !== undefined) {
 						if (player === player && eventId === id) {
-							DebugLog("Disconnected CallPlayerAsync EventId", eventId);
 							connection.Disconnect();
 							resolve(data as CallReturnType);
 						}
@@ -174,7 +173,6 @@ class ServerAsyncFunction<
 			this.listeners.delete(id);
 
 			if (tick() >= startTime && connection.Connected) {
-				DebugWarn("(timeout) Disconnected CallPlayerAsync EventId", id);
 				connection.Disconnect();
 				reject("Request to client timed out");
 			}

@@ -9,6 +9,7 @@ import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import Code from "@site/src/components/Code";
+import { useVersions, useLatestVersion } from "@theme/hooks/useDocs";
 
 const LATEST_URL = "/docs/2.1";
 /**
@@ -96,8 +97,8 @@ MakeHello.CallServerAsync("Roblox").then((message: string) => {
     print(message); // Should print Hello, Roblox! on the client
 });`;
 const EXAMPLE_CODE_SERVER_TS = `import Remotes from "shared/remotes";
-const PrintMessage = Remotes.Server.Create("PrintMessage")
-const MakeHello = Remotes.Server.Create("MakeHello")
+const PrintMessage = Remotes.Server.Get("PrintMessage")
+const MakeHello = Remotes.Server.Get("MakeHello")
 
 PrintMessage.Connect((player: Player, message: string) => {
     // Will print the message given to it
@@ -114,6 +115,10 @@ end)`;
 function Home() {
   const context = useDocusaurusContext();
   const { siteConfig = {} } = context;
+  const latest = useLatestVersion();
+
+  // console.log(useVersions(), );
+
   return (
     <Layout
       // title={`${siteConfig.title}`}
@@ -130,7 +135,7 @@ function Home() {
                 "button button--outline button--primary button--lg",
                 styles.getStarted
               )}
-              to={useBaseUrl("docs/2.1")}
+              to={useBaseUrl(latest.path)}
             >
               Get Started
             </Link>

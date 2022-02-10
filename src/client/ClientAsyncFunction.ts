@@ -1,8 +1,8 @@
-import { DebugLog, DebugWarn } from "../configuration";
-import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
+import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
+const CollectionService = game.GetService("CollectionService");
 
 export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
 	/**
@@ -46,11 +46,11 @@ export default class ClientAsyncFunction<
 	CallbackReturnType = unknown
 > implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
 	private instance: RemoteEvent;
-	private timeout = 10;
+	private timeout = 60;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
 
-	constructor(name: string) {
+	constructor(private name: string) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
@@ -103,18 +103,20 @@ export default class ClientAsyncFunction<
 	}
 
 	public async CallServerAsync(...args: CallArgs): Promise<CallReturnType> {
+		if (CollectionService.HasTag(this.instance, TagId.DefaultFunctionListener)) {
+			throw `Attempted to call AsyncFunction '${this.name}' - which has no user defined callback`;
+		}
+
 		const id = HttpService.GenerateGUID(false);
 		this.instance.FireServer(id, { ...args });
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
-			DebugLog("Connected CallServerAsync EventId", id);
 			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
 				const [eventId, data] = recvArgs;
 
 				if (typeIs(eventId, "string") && data !== undefined) {
 					if (eventId === id) {
-						DebugLog("Disconnected CallServerAsync EventId", eventId);
 						connection.Disconnect();
 						resolve(data as CallReturnType);
 					}
@@ -122,14 +124,20 @@ export default class ClientAsyncFunction<
 			});
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
+			let warned = false;
+			let elapsedTime = 0;
 			do {
-				RunService.Heartbeat.Wait();
+				elapsedTime += RunService.Heartbeat.Wait()[0];
+				if (elapsedTime >= 20 && !warned) {
+					warned = true;
+					warn(`[rbx-net] CallServerAsync(...) - still waiting for result from remote '${this.name}'`);
+					print(debug.traceback("", 3));
+				}
 			} while (connection.Connected && tick() < startTime + this.timeout);
 
 			this.listeners.delete(id);
 
 			if (tick() >= startTime && connection.Connected) {
-				DebugWarn("(timeout) Disconnected CallServerAsync EventId", id);
 				connection.Disconnect();
 				reject("Request to server timed out after " + this.timeout + " seconds");
 			}

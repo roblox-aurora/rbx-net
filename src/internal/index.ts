@@ -18,6 +18,12 @@ export interface RequestCounter {
 }
 
 /** @internal */
+export const NAMESPACE_SEPARATOR = "/";
+
+/** @internal */
+export const NAMESPACE_ROOT = "@";
+
+/** @internal */
 export const IS_SERVER = !runService.IsRunning() || runService.IsServer();
 
 /** @internal */
@@ -56,6 +62,7 @@ const REMOTES_FOLDER_NAME = "_NetManaged";
 export const enum TagId {
 	RecieveOnly = "NetRecieveOnly",
 	Managed = "NetManagedInstance",
+	DefaultFunctionListener = "NetDefaultListener",
 	Async = "NetManagedAsyncFunction",
 	LegacyFunction = "NetManagedLegacyFunction",
 	Event = "NetManagedEvent",

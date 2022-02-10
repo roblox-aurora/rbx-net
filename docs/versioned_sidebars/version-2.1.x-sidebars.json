@@ -1,0 +1,49 @@
+{
+	"docs": [
+		"version-2.1.x/introduction",
+		{
+			"type": "category",
+			"label": "Installation",
+			"items": [
+				"version-2.1.x/install",
+				"version-2.1.x/install-luau"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Definitions Guide",
+			"items": [
+				"version-2.1.x/definitions/overview",
+				"version-2.1.x/definitions/starting",
+				"version-2.1.x/definitions/implementing"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Advanced Guides",
+			"items": [
+				"version-2.1.x/guides/uuid",
+				"version-2.1.x/guides/custom-player-objects"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Middleware (Advanced)",
+			"items": [
+				"version-2.1.x/middleware/ratelimit",
+				"version-2.1.x/middleware/typecheck"
+			]
+		},
+		{
+			"type": "category",
+			"label": "API",
+			"items": [
+				"version-2.1.x/api/api",
+				"version-2.1.x/api/net.server",
+				"version-2.1.x/api/net.client",
+				"version-2.1.x/api/net.definitions",
+				"version-2.1.x/api/net.middleware"
+			]
+		}
+	]
+}

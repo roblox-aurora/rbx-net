@@ -19,10 +19,14 @@
 		"declaration": true,
 		"plugins": [
 			{
-				"transform": "rbxts-transform-env"
+				"transform": "rbxts-transform-env",
+				"shortcircuitEnvConditionals": true
 			}, {
 				"transform": "rbxts-transform-debug",
-				"enabled": false
+				"enabled": true,
+				"environmentRequires": {
+					"NODE_ENV": "development"
+				}
 			}
 		]
 	},

@@ -1,4 +1,7 @@
-import MessagingEvent, { isSubscriptionMessage, ISubscriptionMessage } from "../messaging/MessagingEvent";
+import ExperienceBroadcastEvent, {
+	isSubscriptionMessage,
+	ISubscriptionMessage,
+} from "../messaging/ExperienceBroadcastEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
 const Players = game.GetService("Players");
@@ -26,14 +29,14 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
+export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unknown[]> {
 	private readonly instance: ServerEvent<[], TArgs>;
-	private readonly event: MessagingEvent;
+	private readonly event: ExperienceBroadcastEvent<IMessage<TArgs>>;
 	private readonly eventHandler: RBXScriptConnection;
 
 	constructor(name: string) {
 		this.instance = new ServerEvent(getGlobalRemote(name));
-		this.event = new MessagingEvent(name);
+		this.event = new ExperienceBroadcastEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
 		this.eventHandler = this.event.Connect((message) => {
@@ -78,12 +81,13 @@ export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	}
 
 	/**
-	 * Disconnects this event handler
-	 *
-	 * **NOTE**: Once disconnected, you will have to re-create this object to recieve the messages again.
+	 * Connects to the event on the server
+	 * @returns
 	 */
-	public Disconnect() {
-		this.eventHandler.Disconnect();
+	public Connect(serverListener: (receivedData: IMessage<TArgs>, timestampSent: number) => void) {
+		return this.event.Connect((data, sent) => {
+			serverListener(data, sent);
+		});
 	}
 
 	/**
@@ -91,7 +95,7 @@ export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	 * @param args The args of the message
 	 */
 	public SendToAllServers(...args: TArgs) {
-		this.event.SendToAllServers({ data: [...args] });
+		this.event.SendToAllServers({ InnerData: args });
 	}
 
 	/**
@@ -100,7 +104,7 @@ export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	 * @param args The args of the message
 	 */
 	public SendToServer(jobId: string, ...args: TArgs) {
-		this.event.SendToServer(jobId, { data: [...args] });
+		this.event.SendToServer(jobId, { InnerData: args });
 	}
 
 	/**
@@ -108,13 +112,13 @@ export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	 * @param userId The userId of the target player
 	 * @param args The args
 	 */
-	public SendToPlayer(userId: number, ...args: TArgs) {
+	public SendToUserId(userId: number, ...args: TArgs) {
 		const player = Players.GetPlayerByUserId(userId);
 		// If the player exists in this instance, just send it straight to them.
 		if (player) {
 			this.instance.SendToPlayer(player, ...args);
 		} else {
-			this.event.SendToAllServers({ data: [...args], targetId: userId });
+			this.event.SendToAllServers({ InnerData: args, TargetId: userId });
 		}
 	}
 
@@ -123,7 +127,7 @@ export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 	 * @param userIds The list of user ids to send this message to
 	 * @param args The args of the message
 	 */
-	public SendToPlayers(userIds: Array<number>, ...args: TArgs) {
+	public SendToUserIds(userIds: Array<number>, ...args: TArgs) {
 		// Check to see if any of these users are in this server first, and handle accordingly.
 		for (const targetId of userIds) {
 			const player = Players.GetPlayerByUserId(targetId);
@@ -134,7 +138,7 @@ export default class ServerMessagingEvent<TArgs extends unknown[] = unknown[]> {
 		}
 
 		if (userIds.size() > 0) {
-			this.event.SendToAllServers({ data: [...args], targetIds: userIds });
+			this.event.SendToAllServers({ InnerData: args, TargetIds: userIds });
 		}
 	}
 }

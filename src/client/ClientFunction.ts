@@ -1,9 +1,10 @@
-import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
+import { getRemoteOrThrow, IS_SERVER, TagId, waitForRemote } from "../internal";
+const CollectionService = game.GetService("CollectionService");
 
 export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, ServerReturnType = unknown> {
 	private instance: RemoteFunction;
 
-	constructor(name: string) {
+	constructor(private name: string) {
 		this.instance = getRemoteOrThrow("RemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientFunction on the Server!");
 	}
@@ -22,6 +23,10 @@ export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, Ser
 	 * @param args The call arguments
 	 */
 	public CallServer(...args: CallArgs): ServerReturnType {
+		if (CollectionService.HasTag(this.instance, TagId.DefaultFunctionListener)) {
+			throw `Attempted to call Function '${this.name}' - which has no user defined callback`;
+		}
+
 		return this.instance.InvokeServer(...args);
 	}
 

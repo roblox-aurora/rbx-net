@@ -1,8 +1,10 @@
-import { $nameof } from "rbxts-transform-debug";
+import { $nameof, $print } from "rbxts-transform-debug";
+import { DefinitionConfiguration } from ".";
 import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
-import { InferDefinition, ToClientBuilder } from "./NamespaceBuilder";
+import { getGlobalRemote, NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
+import { InferDefinition } from "./NamespaceBuilder";
 import {
 	AsyncClientFunctionDeclaration,
 	DeclarationsOf,
@@ -11,17 +13,23 @@ import {
 	InferClientCallback,
 	InferClientConnect,
 	InferClientRemote,
-	InferGroupDeclaration,
 	RemoteDeclarations,
 	ServerToClientEventDeclaration,
+	FilterClientDeclarations,
 } from "./Types";
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
+const shouldYield = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, boolean>();
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
-	public constructor(declarations: T, private namespace = "") {
+	public constructor(
+		declarations: T,
+		private configuration?: DefinitionConfiguration,
+		private namespace = NAMESPACE_ROOT,
+	) {
 		declarationMap.set(this, declarations);
+		shouldYield.set(this, configuration?.ClientGetShouldYield ?? true);
 	}
 
 	/** @internal */
@@ -40,22 +48,50 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 *
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
-	Get<K extends keyof T & string>(remoteId: K): InferClientRemote<T[K]> {
-		return this.WaitFor(remoteId).expect();
+	Get<K extends keyof FilterClientDeclarations<T> & string>(remoteId: K): InferClientRemote<T[K]> {
+		if (shouldYield.get(this)) {
+			return this.WaitFor(remoteId).expect();
+		} else {
+			return this.GetOrThrow(remoteId);
+		}
 	}
 
 	/**
 	 * Gets the specified remote declaration group (or sub group) in which namespaced remotes can be accessed
-	 * @param groupName The group name
+	 * @param namespaceId The group name
 	 */
 	GetNamespace<K extends keyof FilterGroups<T> & string>(
-		groupName: K,
+		namespaceId: K,
 	): ClientDefinitionBuilder<InferDefinition<T[K]>> {
-		const group = declarationMap.get(this)![groupName] as NamespaceDeclaration<RemoteDeclarations>;
+		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
+		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
-		return group.Definitions._buildClientDefinition(
-			this.namespace !== "" ? [this.namespace, groupName].join(":") : groupName,
+		return group.Definitions._BuildClientDefinition(
+			group.Definitions._CombineConfigurations(this.configuration ?? {}),
+			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
+	}
+
+	private GetOrThrow<K extends keyof FilterClientDeclarations<T> & string>(remoteId: K): InferClientRemote<T[K]> {
+		const item = declarationMap.get(this)![remoteId];
+		remoteId =
+			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
+
+		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
+
+		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
+
+		if (item.Type === "Function") {
+			return new ClientFunction(remoteId) as InferClientRemote<T[K]>;
+		} else if (item.Type === "Event") {
+			return new ClientEvent(remoteId) as InferClientRemote<T[K]>;
+		} else if (item.Type === "AsyncFunction") {
+			return new ClientAsyncFunction(remoteId) as InferClientRemote<T[K]>;
+		} else if (item.Type === "ExperienceEvent") {
+			return new ClientEvent(getGlobalRemote(remoteId)) as InferClientRemote<T[K]>;
+		}
+
+		throw `Type '${item.Type}' is not a valid client remote object type`;
 	}
 
 	/**
@@ -66,20 +102,26 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer functional alternatives to grabbing remotes.
 	 */
 
-	async WaitFor<K extends keyof T & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
+	async WaitFor<K extends keyof FilterClientDeclarations<T> & string>(remoteId: K): Promise<InferClientRemote<T[K]>> {
 		const item = declarationMap.get(this)![remoteId];
-		remoteId = this.namespace !== "" ? ([this.namespace, remoteId].join(":") as K) : remoteId;
+		remoteId =
+			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
 
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
+
+		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
+
 		if (item.Type === "Function") {
 			return ClientFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "Event") {
 			return ClientEvent.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "AsyncFunction") {
 			return ClientAsyncFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
+		} else if (item.Type === "ExperienceEvent") {
+			return ClientEvent.Wait(getGlobalRemote(remoteId)) as Promise<InferClientRemote<T[K]>>;
 		}
 
-		throw `Invalid Type`;
+		throw `Type '${item.Type}' is not a valid client remote object type`;
 	}
 
 	/**
@@ -93,12 +135,11 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.Client.WaitFor(name).expect().Connect(fn)
 	 * ```
 	 */
-	async OnEvent<K extends keyof DeclarationsOf<T, ServerToClientEventDeclaration<unknown[]>> & string>(
-		name: K,
-		fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>,
-	) {
+	async OnEvent<
+		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, ServerToClientEventDeclaration<unknown[]>> & string
+	>(name: K, fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<ServerToClientEventDeclaration<any>>;
-		result.Connect(fn);
+		return result.Connect(fn);
 	}
 
 	/**
@@ -114,10 +155,9 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Declaration.Client.WaitFor(name).expect().SetCallback(fn)
 	 * ```
 	 */
-	async OnFunction<K extends keyof DeclarationsOf<T, AsyncClientFunctionDeclaration<any, any>> & string>(
-		name: K,
-		fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>,
-	) {
+	async OnFunction<
+		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, AsyncClientFunctionDeclaration<any, any>> & string
+	>(name: K, fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}

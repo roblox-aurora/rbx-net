@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/net",
-  "version": "2.1.5",
+  "version": "3.0.0",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -10,6 +10,7 @@
     "build:docs": "cd docs && npm run build",
     "start:docs": "cd docs && yarn start",
     "build:dev": "cross-env NODE_ENV=development rbxtsc --verbose",
+    "watch:dev": "cross-env NODE_ENV=development rbxtsc -w --verbose",
     "build:rbxmx": "npm run build:luau && rojo build luau/build.project.json -o luau.net.rbxmx",
     "build:example": "cross-env NODE_ENV=development rbxtsc-dev --type=game -p ./example -i ./include",
     "watch:example": "cross-env NODE_ENV=development TYPE=TestTS rbxtsc-dev -w --type=game -p ./example -i ./include",

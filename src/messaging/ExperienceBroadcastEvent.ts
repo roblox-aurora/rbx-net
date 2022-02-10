@@ -5,6 +5,12 @@ import MessagingService from "./MessagingService";
 const Players = game.GetService("Players");
 const IS_STUDIO = game.GetService("RunService").IsStudio();
 
+declare global {
+	interface MessagingService extends Instance {
+		SubscribeAsync(name: string, callback: (data: ISubscriptionMessage) => void): RBXScriptConnection;
+	}
+}
+
 interface IQueuedMessage {
 	Name: string;
 	Data: unknown;
@@ -64,7 +70,7 @@ function processMessageQueue() {
 			globalEventMessageCounter++;
 		}
 
-		if (globalEventMessageCounter >= MessagingEvent.GetMessageLimit()) {
+		if (globalEventMessageCounter >= ExperienceBroadcastEvent.GetMessageLimit()) {
 			warn("[rbx-net] Too many messages are being sent, any further messages will be queued!");
 		}
 	}
@@ -85,7 +91,7 @@ type JobIdMessage<TMessage> = { jobId: string; message: TMessage };
  * An event that works across all servers
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
-export default class MessagingEvent<TMessage extends unknown = unknown> {
+export default class ExperienceBroadcastEvent<TMessage extends unknown = unknown> {
 	constructor(private name: string) {}
 
 	/**
@@ -108,7 +114,7 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 	 * @param data The data to send
 	 */
 	private sendToAllServersOrQueue(data: TMessage | JobIdMessage<TMessage>) {
-		const limit = MessagingEvent.GetMessageLimit();
+		const limit = ExperienceBroadcastEvent.GetMessageLimit();
 		if (globalEventMessageCounter >= limit) {
 			warn(`[rbx-net] Exceeded message limit of ${limit}, adding to queue...`);
 			globalMessageQueue.push({ Name: this.name, Data: data });
@@ -122,34 +128,34 @@ export default class MessagingEvent<TMessage extends unknown = unknown> {
 
 	/**
 	 * Sends a message to a specific server
-	 * @param jobId The game.JobId of the target server
-	 * @param message The message to send
+	 * @param serverJobId The game.JobId of the target server
+	 * @param sendData The message to send
 	 */
-	public SendToServer(jobId: string, message: TMessage) {
-		this.sendToAllServersOrQueue({ jobId, message });
+	public SendToServer(serverJobId: string, sendData: TMessage) {
+		this.sendToAllServersOrQueue({ jobId: serverJobId, message: sendData });
 	}
 
 	/**
 	 * Sends a message to all servers
-	 * @param message The message to send
+	 * @param sendData The message to send
 	 */
-	public SendToAllServers(message: TMessage) {
-		this.sendToAllServersOrQueue(message);
+	public SendToAllServers(sendData: TMessage) {
+		this.sendToAllServersOrQueue(sendData);
 	}
 
 	/**
 	 * Connects a function to a global event
 	 * @param handler The message handler
 	 */
-	public Connect(handler: (message: TMessage, time: number) => void) {
-		const limit = MessagingEvent.GetSubscriptionLimit();
+	public Connect(handler: (recievedData: TMessage, timestampSent: number) => void) {
+		const limit = ExperienceBroadcastEvent.GetSubscriptionLimit();
 		if (globalSubscriptionCounter >= limit) {
 			error(`[rbx-net] Exceeded Subscription limit of ${limit}!`);
 		}
 
 		globalSubscriptionCounter++;
-		return MessagingService.SubscribeAsync(this.name, (data, sent) => {
-			const recieved = { Data: data, Sent: sent };
+		return MessagingService.SubscribeAsync(this.name, (message) => {
+			const recieved = message;
 			const { Sent } = recieved;
 
 			if (isJobTargetMessage(recieved)) {
