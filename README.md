@@ -1,6 +1,6 @@
 <img src="logo.png" align="right"/>
 
-<h1>RbxNet v3.0</h1>
+<h1>RbxNet</h1>
 <h3>Advanced multi-language networking framework for Roblox.</h3>
 
 <a href="https://www.npmjs.com/package/@rbxts/net"><img src="https://badge.fury.io/js/@rbxts%2Fnet.svg" alt="npm version" height="18"></a>
