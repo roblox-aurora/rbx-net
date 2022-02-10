@@ -144,6 +144,7 @@ namespace NetDefinitions {
 	 *
 	 * @hidden Experimental API
 	 * @deprecated Not yet official API, could be changed or removed.
+	 * @internal
 	 */
 	export function EXPERIMENTAL_ExperienceReplicatedEvent<ServerArgs extends readonly unknown[] = unknown[]>() {
 		return {
