@@ -25,6 +25,22 @@ RbxNet is a definition-based _networking framework_ for Roblox, built in TypeScr
 
 [Available Here](https://rbxnet.australis.dev/)
 
+# Extensions
+
+## Libraries
+Listed here are libraries based around, or useful to RbxNet.
+
+| Library                                                    | Languages | Description                                                                                   |
+|------------------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------|
+| [EncryptedNet](https://github.com/boatbomber/EncryptedNet) | Luau      | Authenticated encryption of Roblox networking with ECDH key exchanges and ChaCha20 ciphering. |
+
+## Tools
+Listed here are tools that are useful to RbxNet.
+
+| Tools                                                                     | Type                 | Description                                                                 |
+|-------------------------------------------------------------------------------|----------------------|-----------------------------------------------------------------------------|
+| [rbxts-transform-guid](https://github.com/roblox-aurora/rbxts-transform-guid) | TypeScript Transformer | Generates compile-time GUIDs for Enums. Useful for compile-time remote ids. |
+
 # More Help & Links
 
 [Australis OSS Community](https://discord.gg/SvUcvTRjPZ)
