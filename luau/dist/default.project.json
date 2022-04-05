@@ -1,7 +1,7 @@
 {
-    "name": "Net",
+    "name": "net",
     "tree": {
-      "$path": "dist"
+      "$path": "."
     }
   }
   
