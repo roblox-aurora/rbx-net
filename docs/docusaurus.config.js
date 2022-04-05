@@ -98,7 +98,7 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.json"),
-          lastVersion: "2.1.x",
+          lastVersion: "current",
           versions: {
             current: {
               label: require("../package.json").version,
