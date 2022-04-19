@@ -39,6 +39,7 @@ Get-ChildItem $build/dist/*.d.ts -Recurse | ForEach-Object { Remove-Item $_ }
 
 # cp -r dist/* out
 Copy-Item -Recurse dist/* $build
+Move-Item -Path $build/init.lua $build/dist/init.lua -Force
 
 # Generate Artefacts
 New-Item -ItemType Directory -Force -Path artefacts

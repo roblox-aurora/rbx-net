@@ -2,7 +2,11 @@
 --[[
     Luau entry-point for RbxNet
 ]]
-
+local TS = require(script.TS.RuntimeLib)
+local NetServerContext = TS.import(script, script, "server")
+local NetClientContext = TS.import(script, script, "client")
+local NetDefinitions = TS.import(script, script, "definitions").default
+local NetMiddleware = TS.import(script, script, "middleware").NetMiddleware
 export type ServerToClientEventDefinition = {
     __nominal_ServerToClientEventDefinition: nil
 }
@@ -128,5 +132,14 @@ export type Net = {
     Middleware: NetNamespaceMiddleware,
 }
 
-local Net = require(script.dist) :: Net
+
+local Net = {
+    CreateDefinitions = function(declarations, configuration)
+        return NetDefinitions.Create(declarations, configuration)
+    end,
+    Middleware = NetMiddleware,
+    Definitions = NetDefinitions,
+    DIST = "Luau"
+} :: Net
+
 return Net
