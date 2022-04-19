@@ -55,7 +55,7 @@ return Remotes
 
 How would we approach using this to actually be able to send messages between the server and client?
 
-## Usage from the server
+## Usage
 <Tabs defaultValue={DEFAULT_VALUE} groupId={GROUP} values={TABS}>
   <TabItem value="ts">
 
@@ -68,6 +68,16 @@ import Remotes from "shared/remotes";
 
 ```lua title="src/server/main.server.lua"
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+    
+Remotes.Server:Get("PlayerEquipItem"):Connect(function(player: Player, text: string)
+    print("Received "..text.." from "..player.Name)
+end)
+```
+
+```lua title="src/client/test.client.lua"
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
+    
+Remotes.Client:Get("PlayerEquipItem"):SendToServer("Hey!")
 ```
 
   </TabItem>
