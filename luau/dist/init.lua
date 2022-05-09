@@ -13,9 +13,6 @@ export type ServerToClientEventDefinition = {
 export type ClientToServerEventDefinition = {
     __nominal_ClientToServerEventDefinition: nil
 }
-export type ServerFunctionDefinition = {
-    __nominal_ServerFunctionDefinition: nil
-}
 export type ServerAsyncFunctionDefinition = {
     __nominal_ServerAsyncFunctionDefinition: nil
 }
@@ -78,10 +75,6 @@ export type ClientAsyncCaller = {
     GetCallTimeout: (self: ClientAsyncCallback) -> ()
 }
 
-export type ClientCaller = {
-    CallServer: (self: ClientCaller, ...any) -> (),
-}
-
 -- Server Signals ---
 export type ServerListenerEvent = {
     Connect: (self: ServerListenerEvent, ...any) -> RBXScriptConnection
@@ -108,7 +101,6 @@ export type ServerAsyncCaller = {
 
 type RemoteDefinition = ServerToClientEventDefinition
     | ClientToServerEventDefinition
-    | ServerFunctionDefinition
     | ServerAsyncFunctionDefinition
     | ClientAsyncFunctionDefinition
 
@@ -117,7 +109,6 @@ type RemoteDefinition = ServerToClientEventDefinition
 type NetNamespaceDefinitions = {
     ServerToClientEvent: () -> ServerToClientEventDefinition,
     ClientToServerEvent: (mw: Array<NetMiddleware>?) -> ClientToServerEventDefinition,
-    ServerFunction: (mw: Array<NetMiddleware>?) -> ServerFunctionDefinition,
     ServerAsyncFunction: (mw: Array<NetMiddleware>?) -> ServerAsyncFunctionDefinition,
     ClientAsyncFunction: () -> ClientAsyncFunctionDefinition,
 }
@@ -127,7 +118,7 @@ type NetServerDefinition = {
 }
 
 type NetClientDefinition = {
-    Get: (self: NetClientDefinition, id: string) -> ClientSenderEvent | ClientListenerEvent | ClientAsyncCallback | ClientAsyncCaller | ClientCaller
+    Get: (self: NetClientDefinition, id: string) -> ClientSenderEvent | ClientListenerEvent | ClientAsyncCallback | ClientAsyncCaller
 }
 
 export type NetDefinition = {
