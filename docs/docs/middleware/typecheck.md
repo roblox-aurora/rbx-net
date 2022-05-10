@@ -14,7 +14,7 @@ If you want to ensure the types you're recieving from the client _are_ the types
 
 This middleware just takes type checking functions.
 
-## Using a library like `t`
+## Using a library like [`t`](https://github.com/osyrisrblx/t)
 
 The type checking middleware is created as such:
 
@@ -28,8 +28,31 @@ Net.Middleware.TypeCheck(t.string)
  <TabItem value="luau">
 
 ```lua
-Net.Middleware.TypeCheck(t.string)
+local t = require(ReplicatedStorage.Libs.t)
+  
+local Remotes = Net.CreateDefinitions({
+    Click = Net.Definitions.ClientToServerEvent({
+        Net.Middleware.TypeChecking(t.Vector3, t.string)
+    })
+})
 ```
+  or
+```lua
+local function typeCheckString(check: any)
+    return typeof(check) == "string"
+end
+
+local function typeCheckVector3(check: any)
+    return typeof(check) == "Vector3"
+end
+
+local Remotes = Net.CreateDefinitions({
+    Click = Net.Definitions.ClientToServerEvent({
+        Net.Middleware.TypeChecking(typeCheckVector3, typeCheckString)
+    })
+})
+```
+
 
  </TabItem>
 </Tabs>

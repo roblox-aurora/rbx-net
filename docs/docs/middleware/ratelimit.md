@@ -57,7 +57,7 @@ const Remotes = Net.Definitions.Create({
 local Remotes = Net.Definitions.Create({
     Example = Net.Definitions.AsyncFunction({
         Net.Middleware.RateLimit({
-            MaxRequestsPerMinute: 1
+            MaxRequestsPerMinute = 1
         })
     })
 })
@@ -111,7 +111,7 @@ end
 local Remotes = Net.Definitions.Create({
     Example = Net.Definitions.AsyncFunction({
         Net.Middleware.RateLimit({
-            MaxRequestsPerMinute: 1,
+            MaxRequestsPerMinute = 1,
             ErrorHandler = analyticRateLimitError
         })
     })
