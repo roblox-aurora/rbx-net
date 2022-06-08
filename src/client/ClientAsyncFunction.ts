@@ -115,7 +115,7 @@ export default class ClientAsyncFunction<
 			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
 				const [eventId, data] = recvArgs;
 
-				if (typeIs(eventId, "string") && data !== undefined) {
+				if (typeIs(eventId, "string")) {
 					if (eventId === id) {
 						connection.Disconnect();
 						resolve(data as CallReturnType);

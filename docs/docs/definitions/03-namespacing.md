@@ -1,7 +1,7 @@
 ---
 id: namespacing
-title: Using namespaces
-sidebar_label: Namespacing
+title: Scoping with namespaces
+sidebar_label: Scoping with namespaces
 slug: /definitions/namespacing
 ---
 import Code, { DEFAULT_VALUE, GROUP, TABS } from '@site/src/components/Code'
