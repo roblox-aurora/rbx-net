@@ -15,7 +15,7 @@ Then, in your `wally.toml` file for your project, put under `dependencies`:
 # ...
 [dependencies]
 # ...
-Net = "vorlias/net@3.0.0"
+Net = "vorlias/net@3.0.1"
 ```
 
 Then run 
