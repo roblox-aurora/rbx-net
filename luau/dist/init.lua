@@ -112,9 +112,13 @@ type RemoteDefinition = ServerToClientEventDefinition
     | ServerAsyncFunctionDefinition
     | ClientAsyncFunctionDefinition
 
-    export type RemoteDefinitions = {[string]: RemoteDefinition}
+export type RemoteDefinitions = {[string]: RemoteDefinition}
 
 type NetNamespaceDefinitions = {
+    Namespace: (definitions: {[string]: ServerToClientEventDefinition
+    | ClientToServerEventDefinition
+    | ServerAsyncFunctionDefinition
+    | ClientAsyncFunctionDefinition}) -> {RemoteDefinition},
     ServerToClientEvent: () -> ServerToClientEventDefinition,
     ClientToServerEvent: (mw: Array<NetMiddleware>?) -> ClientToServerEventDefinition,
     ServerFunction: (mw: Array<NetMiddleware>?) -> ServerFunctionDefinition,
@@ -123,10 +127,20 @@ type NetNamespaceDefinitions = {
 }
 
 type NetServerDefinition = {
-    Get: (self: NetServerDefinition, id: string) -> ServerSenderEvent | ServerListenerEvent | ServerAsyncCallback | ServerAsyncCaller
+    Get: (self: NetServerDefinition, id: string) -> ServerSenderEvent | ServerListenerEvent | ServerAsyncCallback | ServerAsyncCaller,
+    GetNamespace: (self: NetServerDefinition, group: string) -> NetServerDefinitions,
+}
+
+type NetServerDefinitions = {
+    Get: (self: NetServerDefinitions, id: string) -> ServerSenderEvent | ServerListenerEvent | ServerAsyncCallback | ServerAsyncCaller
 }
 
 type NetClientDefinition = {
+    Get: (self: NetClientDefinition, id: string) -> ClientSenderEvent | ClientListenerEvent | ClientAsyncCallback | ClientAsyncCaller | ClientCaller,
+    GetNamespace: (self: NetServerDefinition, group: string) -> NetServerDefinitions,
+}
+
+type NetClientDefinitions = {
     Get: (self: NetClientDefinition, id: string) -> ClientSenderEvent | ClientListenerEvent | ClientAsyncCallback | ClientAsyncCaller | ClientCaller
 }
 
