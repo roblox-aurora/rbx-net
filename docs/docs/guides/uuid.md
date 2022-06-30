@@ -25,7 +25,7 @@ Once installed, you will need to configure it in your tsconfig.json under `plugi
         "plugins": [
             // ...
             {
-				"transform": "rbxts-transform-env",
+				"transform": "rbxts-transform-guid",
 				"EXPERIMENTAL_JSDocConstEnumUUID": true
 			}
         ]
