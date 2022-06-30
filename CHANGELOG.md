@@ -2,7 +2,7 @@
 - Fixes a bug where returning `undefined`/`nil` would not return on async functions (https://github.com/roblox-aurora/rbx-net/commit/e125d70bea067609a43a8d48ec2b8169003d48fd)
 ## 3.0.2
 - Fixes namespaced remotes not being generated correctly at runtime (https://github.com/roblox-aurora/rbx-net/issues/67)
-## 3.0.1
+## 3.0.1 (Luau-only release)
 - Fixed a bug with the Luau version of Net where it would sync incorrectly and crash Rojo.
 # 3.0.0
 - Added `ExperienceBroadcastEvent` - For broadcasting events between servers in your experience. This can be used for global things like cross-server chats, server browsers and announcements.
