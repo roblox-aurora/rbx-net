@@ -1,5 +1,4 @@
 import Net from "@rbxts/net";
-import t from "@rbxts/t";
 import { $print } from "rbxts-transform-debug";
 
 // type $GuidTree<K extends string, T> = { readonly [P in keyof T]: `guid@${K}:${P & string}` };
