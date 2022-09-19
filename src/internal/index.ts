@@ -1,4 +1,3 @@
-import { $env, $ifEnv } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
 
@@ -86,11 +85,6 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 
 // const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
 const location = script.Parent!;
-
-$ifEnv("NODE_ENV", "development", () => {
-	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
-});
-
 const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 /**
  * Errors with variables formatted in a message
@@ -205,10 +199,6 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(
 
 		remote.Name = name;
 		remote.Parent = remoteFolder;
-
-		$ifEnv("NODE_ENV", "development", () => {
-			print("[rbx-net-dev] Registered remote", remote.GetFullName(), "under", remoteType);
-		});
 
 		onCreate?.(remote as RemoteTypes[K]);
 		return remote as RemoteTypes[K];

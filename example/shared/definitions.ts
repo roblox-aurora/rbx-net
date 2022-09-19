@@ -44,6 +44,7 @@ const Remotes = Create(
 				$print("call from", player, "via", remote, ...data);
 			}),
 		],
+		ServerRuntimeHashRemotes: true,
 	},
 );
 
