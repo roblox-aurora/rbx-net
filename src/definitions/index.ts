@@ -17,6 +17,7 @@ import {
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
+import { GenericSerializer, NetSerializer, ClassSerializer, SerializerMethods } from "../serialization";
 
 export interface DefinitionConfiguration {
 	/**
@@ -45,6 +46,11 @@ export interface DefinitionConfiguration {
 	 * @default true
 	 */
 	readonly ClientGetShouldYield?: boolean;
+
+	/**
+	 * Define top-level argument serialization
+	 */
+	readonly Serializers?: GenericSerializer[];
 }
 
 namespace NetDefinitions {
