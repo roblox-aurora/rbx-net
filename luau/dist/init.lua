@@ -61,7 +61,8 @@ type NetNamespaceMiddleware = {
 
 --- Client Signals --
 export type ClientListenerEvent = {
-	Connect: (self: ClientListenerEvent, ...any) -> RBXScriptConnection,
+	Connect: (self: ClientListenerEvent, ...unknown) -> RBXScriptConnection,
+	Predict: (self: ServerListenerEvent, ...unknown) -> (),
 }
 
 export type ClientSenderEvent = {
@@ -85,6 +86,7 @@ export type ClientCaller = {
 -- Server Signals ---
 export type ServerListenerEvent = {
 	Connect: (self: ServerListenerEvent, ...any) -> RBXScriptConnection,
+	Predict: (self: ServerListenerEvent, player: Player, ...unknown) -> (),
 }
 
 export type ServerSenderEvent = {
@@ -129,6 +131,7 @@ type NetNamespaceDefinitions = {
 	ServerFunction: (mw: Array<NetMiddleware>?) -> ServerFunctionDefinition,
 	ServerAsyncFunction: (mw: Array<NetMiddleware>?) -> ServerAsyncFunctionDefinition,
 	ClientAsyncFunction: () -> ClientAsyncFunctionDefinition,
+	BidirectionalEvent: () -> ServerToClientEventDefinition & ClientToServerEventDefinition,
 }
 
 type NetServerDefinition = {
