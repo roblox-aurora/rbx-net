@@ -13,6 +13,13 @@ export interface ServerListenerEvent<CallArguments extends ReadonlyArray<unknown
 	 * @param callback The callback function
 	 */
 	Connect(callback: (player: Player, ...args: CallArguments) => void): Readonly<NetServerSignalConnection>;
+
+	/**
+	 * Invokes the callback as the given player
+	 * @param player The player to invoke the callback for
+	 * @param args The arguments to pass to the callback
+	 */
+	Predict(player: Player, ...args: CallArguments): void;
 }
 
 /**
@@ -86,6 +93,10 @@ export default class ServerEvent<
 		if (!IS_RUNNING) return;
 
 		this.instance.FireAllClients(...args);
+	}
+
+	public Predict(player: Player, ...args: ConnectArgs): void {
+		this.connection.Invoke(player, ...args);
 	}
 
 	/**

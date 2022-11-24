@@ -9,6 +9,12 @@ export interface ClientListenerEvent<CallArguments extends ReadonlyArray<unknown
 	 * @param callback The callback function
 	 */
 	Connect(callback: (...args: CallArguments) => void): RBXScriptConnection;
+
+	/**
+	 * Fires a client event
+	 * @param args The arguments to pass to the client event
+	 */
+	Predict(...args: CallArguments): void;
 }
 
 /**
@@ -53,6 +59,10 @@ class ClientEvent<
 
 	public Connect(callback: (...args: ConnectArgs) => void): RBXScriptConnection {
 		return this.instance.OnClientEvent.Connect(callback);
+	}
+
+	public Predict(...args: ConnectArgs): void {
+		throw `TODO`;
 	}
 }
 

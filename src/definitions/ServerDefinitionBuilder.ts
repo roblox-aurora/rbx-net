@@ -17,12 +17,14 @@ import {
 	DeclarationLike,
 	DeclarationNamespaceLike,
 	FilterServerDeclarations,
+	ServerToClientEventDeclaration,
 } from "./Types";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import { DefinitionConfiguration } from ".";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
+import { ClientEventDeclarationKeys } from "./ClientDefinitionBuilder";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 

@@ -4,6 +4,7 @@ export interface NetServerSignalConnection {
 	/** @internal */
 	readonly RBXSignal: RBXScriptConnection;
 	Connected: boolean;
+	Callback: (player: Player, ...args: unknown[]) => void;
 	Disconnect(this: NetServerSignalConnection): void;
 }
 
@@ -33,6 +34,13 @@ export class NetServerScriptSignal<
 	}
 
 	/**
+	 * @internal
+	 */
+	public Invoke(player: Player, ...args: unknown[]) {
+		this.connectionRefs.forEach((connection) => connection.Callback(player, ...args));
+	}
+
+	/**
 	 * Establishes a function to be called whenever the event is raised. Returns a RBXScriptConnection object associated with the connection.
 	 * @param callback — The function to be called whenever the event is fired.
 	 */
@@ -49,6 +57,7 @@ export class NetServerScriptSignal<
 			NetSignal: this,
 			RBXSignal: connection,
 			Connected: connection.Connected,
+			Callback: callback,
 			Disconnect() {
 				const idx = this.NetSignal.connections.findIndex((f) => f === ref);
 				if (idx !== -1) {
