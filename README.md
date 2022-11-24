@@ -4,7 +4,7 @@
 <h3>Advanced multi-language networking framework for Roblox.</h3>
 
 <a href="https://www.npmjs.com/package/@rbxts/net"><img src="https://badge.fury.io/js/@rbxts%2Fnet.svg" alt="npm version" height="18"></a>
-<a href="https://wally.run/package/vorlias/net"><img src="https://img.shields.io/badge/wally%20package-3.0.3-red" height="18"/></a>
+<a href="https://wally.run/package/vorlias/net"><img src="https://img.shields.io/badge/wally%20package-3.0.4-red" height="18"/></a>
 
 ---
 
