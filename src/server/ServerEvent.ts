@@ -1,5 +1,13 @@
 import { NetMiddleware, NextCaller } from "../middleware";
-import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
+import {
+	createMockRemote,
+	findOrCreateRemote,
+	IS_CLIENT,
+	IS_PLUGIN,
+	IS_RUNNING,
+	IS_STUDIO,
+	NetManagedInstance,
+} from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
 import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
@@ -66,7 +74,8 @@ export default class ServerEvent<
 	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
 		super(middlewares);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
-		this.instance = findOrCreateRemote("RemoteEvent", name);
+		this.instance =
+			IS_STUDIO && !IS_PLUGIN ? createMockRemote("RemoteEvent", name) : findOrCreateRemote("RemoteEvent", name);
 		this.connection = new NetServerScriptSignal(this.instance.OnServerEvent, this.instance);
 	}
 

@@ -1,6 +1,7 @@
 import { $env, $ifEnv } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
+import { MockInstance, MockRemoteEvent, MockRemoteFunction } from "./mock/mock";
 
 const HttpService = game.GetService("HttpService");
 const runService = game.GetService("RunService");
@@ -29,6 +30,13 @@ export const IS_SERVER = !runService.IsRunning() || runService.IsServer();
 /** @internal */
 export const IS_CLIENT = runService.IsRunning() && runService.IsClient();
 
+/** @internal */
+export const IS_STUDIO = !runService.IsRunning();
+
+/** @internal */
+export const IS_PLUGIN = script.FindFirstAncestorOfClass("Plugin") !== undefined;
+
+/** @internal */
 export const IS_RUNNING = runService.IsRunning();
 
 /** @internal */
@@ -84,14 +92,13 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 	}
 }
 
-// const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
-const location = script.Parent!;
+const location = IS_PLUGIN ? game.GetService("ReplicatedStorage") : script.Parent!;
 
 $ifEnv("NODE_ENV", "development", () => {
 	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
 });
 
-const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
+const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME);
 /**
  * Errors with variables formatted in a message
  * @param message The message
@@ -157,15 +164,55 @@ export function findRemote<K extends keyof RemoteTypes>(remoteType: K, name: str
 	}
 
 	throw `Invalid Remote Access`;
+	``;
+}
+
+const mockRemoteCache = new Map<string, RemoteEvent | RemoteFunction>();
+
+/** @internal */
+export function findMockRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] | undefined {
+	const remote = mockRemoteCache.get(`${remoteType}~${name}`);
+	if (!remote) {
+		throw `Could not find Remote of type ${remoteType} called "${name}"`;
+	} else {
+		return remote as RemoteTypes[K] | undefined;
+	}
 }
 
 /** @internal */
 export function getRemoteOrThrow<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] {
-	const existing = findRemote(remoteType, name);
+	const existing = IS_STUDIO && !IS_PLUGIN ? findMockRemote(remoteType, name) : findRemote(remoteType, name);
 	if (existing) {
 		return existing;
 	} else {
 		throw `Could not find Remote of type ${remoteType} called "${name}"`;
+	}
+}
+
+export function createMockRemote<K extends keyof RemoteTypes>(
+	remoteType: K,
+	name: string,
+	onCreate?: (instance: RemoteTypes[K]) => void,
+) {
+	const existing = mockRemoteCache.get(`${remoteType}~${name}`);
+	if (existing) {
+		return (existing as unknown) as RemoteTypes[K];
+	} else {
+		let remote: RemoteEvent | RemoteFunction;
+
+		if (remoteType === "RemoteEvent" || remoteType === "AsyncRemoteFunction") {
+			remote = (new MockRemoteEvent() as unknown) as RemoteEvent;
+		} else if (remoteType === "RemoteFunction") {
+			remote = (new MockRemoteFunction() as unknown) as RemoteFunction;
+		} else {
+			throw `Not yet implemented`;
+		}
+
+		remote.Name = name;
+		mockRemoteCache.set(`${remoteType}~${name}`, remote);
+
+		onCreate?.(remote as RemoteTypes[K]);
+		return remote as RemoteTypes[K];
 	}
 }
 

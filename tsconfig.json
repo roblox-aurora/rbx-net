@@ -12,6 +12,7 @@
 		"strict": true,
 		"target": "ESNext",
 		"typeRoots": ["node_modules/@rbxts"],
+		"types": ["@rbxts/types/plugin"],
 		"rootDir": "src",
 		"outDir": "out",
 		"removeComments": false,
