@@ -3,19 +3,19 @@
  *
  * I will admit, this is a lot of type spaghetti. It makes the definitions work good though. :D
  */
-import { oneOf } from "../internal/validator";
-import ClientAsyncFunction, { ClientAsyncCallback, ClientAsyncCaller } from "../client/ClientAsyncFunction";
-import ClientEvent, { ClientListenerEvent, ClientSenderEvent } from "../client/ClientEvent";
-import ClientFunction from "../client/ClientFunction";
-import { MiddlewareOverload } from "../middleware";
-import ServerAsyncFunction, { ServerAsyncCallback, ServerAsyncCaller } from "../server/ServerAsyncFunction";
-import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/ServerEvent";
-import ServerFunction from "../server/ServerFunction";
-import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
-import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
-import { NamespaceBuilder } from "./NamespaceBuilder";
-import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
-import ServerMessagingEvent from "../server/ServerMessagingEvent";
+import { oneOf } from "../../internal/validator";
+import ClientAsyncFunction, { ClientAsyncCallback, ClientAsyncCaller } from "../../client/ClientAsyncFunction";
+import ClientEvent, { ClientListenerEvent, ClientSenderEvent } from "../../client/ClientEvent";
+import ClientFunction from "../../client/ClientFunction";
+import { MiddlewareOverload } from "../../middleware";
+import ServerAsyncFunction, { ServerAsyncCallback, ServerAsyncCaller } from "../../server/ServerAsyncFunction";
+import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../../server/ServerEvent";
+import ServerFunction from "../../server/ServerFunction";
+import { ClientDefinitionBuilder } from "../ClientDefinitionBuilder";
+import { ServerDefinitionBuilder } from "../ServerDefinitionBuilder";
+import { NamespaceBuilder } from "../NamespaceBuilder";
+import ExperienceBroadcastEvent from "../../messaging/ExperienceBroadcastEvent";
+import ServerMessagingEvent from "../../server/ServerMessagingEvent";
 
 export interface FunctionDeclarationLike {
 	/**
@@ -342,3 +342,5 @@ export const DeclarationTypeCheck = oneOf<DeclarationLike["Type"] | DeclarationN
 	"Messaging",
 	"ExperienceEvent",
 );
+
+export type { ServerEventConnectFunction, ServerEventDeclarationKeys } from "./ServerEvents";

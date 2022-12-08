@@ -1,7 +1,7 @@
 import { NetGlobalMiddleware } from "../middleware";
 import { $dbg, $nameof, $print } from "rbxts-transform-debug";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
-import ServerEvent from "../server/ServerEvent";
+import ServerEvent, { ServerSenderEvent } from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
 import {
 	AsyncServerFunctionDeclaration,
@@ -18,36 +18,18 @@ import {
 	DeclarationNamespaceLike,
 	FilterServerDeclarations,
 	ServerToClientEventDeclaration,
+	ServerEventConnectFunction,
+	ServerEventDeclarationKeys,
 } from "./Types";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
 import { InferDefinition } from "./NamespaceBuilder";
 import { DefinitionConfiguration } from ".";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
-import { ClientEventDeclarationKeys } from "./ClientDefinitionBuilder";
+import { ServerFunctionCallbackFunction, ServerFunctionDeclarationKeys } from "./Types/ServerFunctions";
+import { ClientEventDeclarationKeys, GetClientEventParams } from "./Types/ClientEvents";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
-
-// Tidy up all the types here.
-type ServerEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
-	FilterServerDeclarations<T>,
-	ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
-> &
-	string;
-
-type ServerEventConnectFunction<T extends RemoteDeclarations, K extends keyof T> = InferServerConnect<
-	Extract<T[K], ClientToServerEventDeclaration<any> | BidirectionalEventDeclaration<any, any>>
->;
-
-type ServerFunctionDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
-	FilterServerDeclarations<T>,
-	AsyncServerFunctionDeclaration<any, any>
-> &
-	string;
-
-type ServerFunctionCallbackFunction<T extends RemoteDeclarations, K extends keyof T> = InferServerCallback<
-	Extract<T[K], AsyncServerFunctionDeclaration<any, any>>
->;
 
 type RemoteDeclarationDict<T extends RemoteDeclarations> =
 	| Record<keyof FilterServerDeclarations<T> & string, DeclarationLike>
@@ -306,5 +288,60 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	public OnFunction<K extends ServerFunctionDeclarationKeys<T>>(name: K, fn: ServerFunctionCallbackFunction<T, K>) {
 		const result = this.Get(name) as InferServerRemote<AsyncServerFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
+	}
+
+	/**
+	 * Invokes the given event for all players
+	 * @param name The name of the remote
+	 * @param args The arguments to pass to this event
+	 *
+	 * Shortcut for:
+	 * ```ts
+	 * Declaration.Server.Create(name).SendToAllPlayers(...args)
+	 * ```
+	 */
+	public SendToAllPlayers<K extends ClientEventDeclarationKeys<T>>(name: K, ...args: GetClientEventParams<T[K]>) {
+		const event = this.Get(name as never) as ServerSenderEvent<GetClientEventParams<T[K]>>;
+		event.SendToAllPlayers(...args);
+	}
+
+	/**
+	 * Invokes the given event for the given player
+	 * @param name The name of the remote
+	 * @param player The player to invoke the event for
+	 * @param args The arguments to pass to this event
+	 *
+	 * Shortcut for:
+	 * ```ts
+	 * Declaration.Server.Create(name).SendToPlayer(player, ...args)
+	 * ```
+	 */
+	public SendToPlayer<K extends ClientEventDeclarationKeys<T>>(
+		name: K,
+		player: Player,
+		...args: GetClientEventParams<T[K]>
+	) {
+		const event = this.Get(name as never) as ServerSenderEvent<GetClientEventParams<T[K]>>;
+		event.SendToPlayer(player, ...args);
+	}
+
+	/**
+	 * Invokes the given event for the given players
+	 * @param name The name of the remote
+	 * @param players The players to invoke the event for
+	 * @param args The arguments to pass to this event
+	 *
+	 * Shortcut for:
+	 * ```ts
+	 * Declaration.Server.Create(name).SendToPLayers(players, ...args)
+	 * ```
+	 */
+	public SendToPlayers<K extends ClientEventDeclarationKeys<T>>(
+		name: K,
+		players: Player[],
+		...args: GetClientEventParams<T[K]>
+	) {
+		const event = this.Get(name as never) as ServerSenderEvent<GetClientEventParams<T[K]>>;
+		event.SendToPlayers(players, ...args);
 	}
 }

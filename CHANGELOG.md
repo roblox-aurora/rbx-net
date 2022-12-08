@@ -1,3 +1,10 @@
+## 3.1.0
+### Server event changes
+- Add `ServerListenerEvent.Predict` - this can be used to invoke an event listener as the given player.
+
+### Server definitions changes
+- Added `ServerDefinitionBuilder.SendToPlayer`, `ServerDefinitionBuilder.SendToPlayers`, `ServerDefinitionBuilder.SendToAllPlayers` - These, like `OnEvent` and `OnFunction` are shortcut functions.
+
 ## 3.0.3
 - Fixes a bug where returning `undefined`/`nil` would not return on async functions (https://github.com/roblox-aurora/rbx-net/commit/e125d70bea067609a43a8d48ec2b8169003d48fd)
 ## 3.0.2

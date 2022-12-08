@@ -21,12 +21,6 @@ import {
 	FilterServerDeclarations,
 } from "./Types";
 
-export type ClientEventDeclarationKeys<T extends RemoteDeclarations> = keyof DeclarationsOf<
-	FilterClientDeclarations<T>,
-	ServerToClientEventDeclaration<any> | BidirectionalEventDeclaration<any, any>
-> &
-	string;
-
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
 const shouldYield = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, boolean>();
