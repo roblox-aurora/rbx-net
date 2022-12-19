@@ -130,7 +130,7 @@ namespace Net {
 	/**
 	 * The version of RbxNet
 	 */
-	export const VERSION = $NODE_ENV === "production" ? PKG_VERSION : `DEV ${DIST})} ${PKG_VERSION}`;
+	export const VERSION = PKG_VERSION;
 
 	/**
 	 * Built-in middlewares
@@ -152,9 +152,5 @@ namespace Net {
 		return Definitions.Create(declarations, configuration);
 	}
 }
-
-$ifEnv("NODE_ENV", "development", () => {
-	$print(`Net ${Net.DIST} ${Net.VERSION}`);
-});
 
 export = Net;

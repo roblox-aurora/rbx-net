@@ -45,6 +45,12 @@ export interface DefinitionConfiguration {
 	 * @default true
 	 */
 	readonly ClientGetShouldYield?: boolean;
+
+	/**
+	 * Runs a runtime remote hashing algorithm
+	 * @default false
+	 */
+	readonly ServerRuntimeHashRemotes?: boolean;
 }
 
 namespace NetDefinitions {

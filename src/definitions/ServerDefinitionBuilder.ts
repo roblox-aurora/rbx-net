@@ -26,6 +26,7 @@ import { InferDefinition } from "./NamespaceBuilder";
 import { DefinitionConfiguration } from ".";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
+import { hmac, sha256 } from "../internal/hash";
 import { ServerFunctionCallbackFunction, ServerFunctionDeclarationKeys } from "./Types/ServerFunctions";
 import { ClientEventDeclarationKeys, GetClientEventParams } from "./Types/ClientEvents";
 const CollectionService = game.GetService("CollectionService");
@@ -43,6 +44,12 @@ const remoteFunctionCache = new Map<string, ServerFunction>();
 const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
 const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
+const Workspace = game.GetService("Workspace");
+const salt = sha256(`${game.JobId}@${game.PlaceId}${Workspace.GetServerTimeNow() - Workspace.DistributedGameTime}`);
+function transformName(name: string) {
+	return hmac(sha256, salt, name).upper();
+}
+
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
@@ -55,12 +62,6 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		} = config;
 
 		declarationMap.set(this, declarations);
-		$dbg(declarations, (value, source) => {
-			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
-			for (const [name, va] of pairs(value)) {
-				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
-			}
-		});
 
 		// We only run remote creation on the server
 		if (RunService.IsServer() && AutoGenerateServerRemotes) {
@@ -79,7 +80,10 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 * The generated remote id is based off the current namespace.
 		 */
 
-		const namespacedId = this.namespace !== NAMESPACE_ROOT ? [this.namespace, id].join(NAMESPACE_SEPARATOR) : id;
+		let namespacedId = this.namespace !== NAMESPACE_ROOT ? [this.namespace, id].join(NAMESPACE_SEPARATOR) : id;
+		if (this.config.ServerRuntimeHashRemotes) {
+			namespacedId = transformName(namespacedId);
+		}
 
 		if (declaration.Type === "Function") {
 			let func: ServerFunction;
@@ -173,15 +177,15 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
 		for (const [id, declaration] of pairs(declarations)) {
-			switch (declaration.Type) {
+			switch ((declaration as DeclarationLike | DeclarationNamespaceLike).Type) {
 				case "Event":
 				case "AsyncFunction":
 				case "Function":
 				case "Messaging":
-					this._CreateOrGetInstance(id, declaration);
+					this._CreateOrGetInstance(id as string, declaration as DeclarationLike);
 					break;
 				case "Namespace":
-					this.GetNamespace(id);
+					this.GetNamespace(id as ExtractKeys<T, DeclarationNamespaceLike> & string);
 					break;
 			}
 		}

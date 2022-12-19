@@ -1,9 +1,7 @@
-import { $env, $ifEnv } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
-import { MockInstance, MockRemoteEvent, MockRemoteFunction } from "./mock/mock";
+import { MockRemoteEvent, MockRemoteFunction } from "./mock/mock";
 
-const HttpService = game.GetService("HttpService");
 const runService = game.GetService("RunService");
 const collectionService = game.GetService("CollectionService");
 
@@ -93,10 +91,6 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 }
 
 const location = IS_PLUGIN ? game.GetService("ReplicatedStorage") : script.Parent!;
-
-$ifEnv("NODE_ENV", "development", () => {
-	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
-});
 
 const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME);
 /**
@@ -252,10 +246,6 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(
 
 		remote.Name = name;
 		remote.Parent = remoteFolder;
-
-		$ifEnv("NODE_ENV", "development", () => {
-			print("[rbx-net-dev] Registered remote", remote.GetFullName(), "under", remoteType);
-		});
 
 		onCreate?.(remote as RemoteTypes[K]);
 		return remote as RemoteTypes[K];

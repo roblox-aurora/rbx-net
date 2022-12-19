@@ -4,6 +4,7 @@ import ClientAsyncFunction from "../client/ClientAsyncFunction";
 import ClientEvent from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
 import { getGlobalRemote, NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
+import { sha256, hmac } from "../internal/hash";
 import { InferDefinition } from "./NamespaceBuilder";
 import {
 	AsyncClientFunctionDeclaration,
@@ -24,6 +25,12 @@ import {
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
 const shouldYield = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, boolean>();
+
+const Workspace = game.GetService("Workspace");
+const salt = sha256(`${game.JobId}@${game.PlaceId}${Workspace.GetServerTimeNow() - Workspace.DistributedGameTime}`);
+function transformName(name: string) {
+	return hmac(sha256, salt, name).upper();
+}
 
 export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	public constructor(
@@ -83,6 +90,10 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 
 		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
+
+		if (this.configuration?.ServerRuntimeHashRemotes) {
+			remoteId = transformName(remoteId) as K;
+		}
 
 		if (item.Type === "Function") {
 			return new ClientFunction(remoteId) as InferClientRemote<T[K]>;
