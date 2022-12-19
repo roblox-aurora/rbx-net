@@ -42,8 +42,15 @@ const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
 const Workspace = game.GetService("Workspace");
 const salt = sha256(`${game.JobId}@${game.PlaceId}${Workspace.GetServerTimeNow() - Workspace.DistributedGameTime}`);
+const nameTransformCache = new Map<string, string>();
 function transformName(name: string) {
-	return hmac(sha256, salt, name).upper();
+	let nameTransformed = nameTransformCache.get(name);
+	if (!nameTransformed) {
+		nameTransformed = hmac(sha256, salt, name).upper();
+		nameTransformCache.set(name, nameTransformed);
+	}
+
+	return nameTransformed;
 }
 
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
