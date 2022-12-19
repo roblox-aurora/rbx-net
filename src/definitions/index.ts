@@ -49,8 +49,9 @@ export interface DefinitionConfiguration {
 	/**
 	 * Runs a runtime remote hashing algorithm
 	 * @default false
+	 * @deprecated Experimental feature
 	 */
-	readonly ServerRuntimeHashRemotes?: boolean;
+	readonly ServerRuntimeHashing?: boolean;
 }
 
 namespace NetDefinitions {

@@ -81,7 +81,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 */
 
 		let namespacedId = this.namespace !== NAMESPACE_ROOT ? [this.namespace, id].join(NAMESPACE_SEPARATOR) : id;
-		if (this.config.ServerRuntimeHashRemotes) {
+		if (this.config.ServerRuntimeHashing) {
 			namespacedId = transformName(namespacedId);
 		}
 
