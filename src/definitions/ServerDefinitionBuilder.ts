@@ -1,5 +1,5 @@
 import { NetGlobalMiddleware } from "../middleware";
-import { $dbg, $nameof, $print } from "rbxts-transform-debug";
+import { $nameof, $print } from "rbxts-transform-debug";
 import ServerAsyncFunction from "../server/ServerAsyncFunction";
 import ServerEvent, { ServerSenderEvent } from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
@@ -7,17 +7,13 @@ import {
 	AsyncServerFunctionDeclaration,
 	BidirectionalEventDeclaration,
 	ClientToServerEventDeclaration,
-	DeclarationsOf,
 	FilterGroups,
 	NamespaceDeclaration,
-	InferServerCallback,
-	InferServerConnect,
 	InferServerRemote,
 	RemoteDeclarations,
 	DeclarationLike,
 	DeclarationNamespaceLike,
 	FilterServerDeclarations,
-	ServerToClientEventDeclaration,
 	ServerEventConnectFunction,
 	ServerEventDeclarationKeys,
 } from "./Types";
@@ -81,7 +77,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 */
 
 		let namespacedId = this.namespace !== NAMESPACE_ROOT ? [this.namespace, id].join(NAMESPACE_SEPARATOR) : id;
-		if (this.config.ServerRuntimeHashing) {
+		if (this.config.ServerRuntimeIdHashing) {
 			namespacedId = transformName(namespacedId);
 		}
 

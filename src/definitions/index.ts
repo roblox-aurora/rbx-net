@@ -47,11 +47,12 @@ export interface DefinitionConfiguration {
 	readonly ClientGetShouldYield?: boolean;
 
 	/**
-	 * Runs a runtime remote hashing algorithm
+	 * Runs a runtime remote hashing algorithm on remote instance names - adds an extra layer to prevent basic exploits using the instances' names
+	 * 
+	 * - NOTE: This does run some hashing functions, which may impact device performances. RbxNet caches this where possible.
 	 * @default false
-	 * @deprecated Experimental feature
 	 */
-	readonly ServerRuntimeHashing?: boolean;
+	readonly ServerRuntimeIdHashing?: boolean;
 }
 
 namespace NetDefinitions {
@@ -71,9 +72,12 @@ namespace NetDefinitions {
 	 * @param declarations
 	 */
 	export function Create<T extends RemoteDeclarations>(declarations: T, configuration?: DefinitionConfiguration) {
+		// Configuration is read-only after used in declarations - should not be modified at runtime.
 		configuration ??= {};
+		table.freeze(configuration);
 
 		validateDeclarations(declarations);
+
 		return identity<DefinitionsCreateResult<T>>({
 			Server: new ServerDefinitionBuilder<T>(declarations, configuration),
 			Client: new ClientDefinitionBuilder<T>(declarations, configuration),

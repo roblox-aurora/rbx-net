@@ -91,7 +91,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
 
-		if (this.configuration?.ServerRuntimeHashing) {
+		if (this.configuration?.ServerRuntimeIdHashing) {
 			remoteId = transformName(remoteId) as K;
 		}
 

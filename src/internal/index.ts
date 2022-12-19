@@ -100,10 +100,9 @@ const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME);
  */
 export function errorft(message: string, vars: { [name: string]: unknown }): never {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+	[message] = message.gsub("{([%w_][%w%d_]*)}", ((token: string) => {
 		return vars[token] ?? token;
-	});
+	}) as never);
 
 	error(message, 2);
 }
@@ -120,10 +119,9 @@ export function warnOnce(message: string) {
 
 export function format(message: string, vars: { [name: string]: unknown }) {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+	[message] = message.gsub("{([%w_][%w%d_]*)}", ((token: string) => {
 		return vars[token] ?? token;
-	});
+	}) as never);
 	return message;
 }
 

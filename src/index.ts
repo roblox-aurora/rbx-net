@@ -2,8 +2,8 @@ import * as NetServerContext from "./server";
 import * as NetClientContext from "./client";
 import NetDefinitions, { DefinitionConfiguration } from "./definitions";
 import { NetMiddleware } from "./middleware";
-import { $env, $ifEnv, $NODE_ENV } from "rbxts-transform-env";
-import { $print } from "rbxts-transform-debug";
+import { $env, $NODE_ENV } from "rbxts-transform-env";
+import { $package, $print } from "rbxts-transform-debug";
 import {
 	ClientBuildResult,
 	DefinitionsCreateResult,
@@ -126,11 +126,11 @@ namespace Net {
 			: never;
 	}
 
-	export const DIST = $env<string>("TYPE", "TS");
+	export const DIST = $env.string("TYPE", "TS");
 	/**
 	 * The version of RbxNet
 	 */
-	export const VERSION = PKG_VERSION;
+	export const VERSION = $package.version;
 
 	/**
 	 * Built-in middlewares
