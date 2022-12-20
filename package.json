@@ -1,52 +1,54 @@
 {
-  "name": "@rbxts/net",
-  "version": "3.2.0",
-  "description": "",
-  "main": "out/init.lua",
-  "scripts": {
-    "preinstall": "npm run build:dev",
-    "prepublishOnly": "npm run build",
-    "yalc": "npm run build && yalc push",
-    "build": "cross-env NODE_ENV=production rbxtsc",
-    "build:luau": "cross-env NODE_ENV=production TYPE=Luau rbxtsc --verbose --type=model --rojo=\"luau/build.project.json\"",
-    "build:docs": "cd docs && npm run build",
-    "start:docs": "cd docs && yarn start",
-    "build:dev": "cross-env NODE_ENV=development rbxtsc --verbose",
-    "watch:dev": "cross-env NODE_ENV=development rbxtsc -w --verbose",
-    "build:rbxmx": "npm run build:luau && rojo build luau/build.project.json -o luau.net.rbxmx",
-    "build:example": "cross-env NODE_ENV=development rbxtsc --type=game -p ./example -i ./include",
-    "watch:example": "cross-env NODE_ENV=development TYPE=TestTS rbxtsc -w --type=game -p ./example -i ./include",
-    "serve:example": "rojo serve ./example/default.project.json --port 34567",
-    "dev:example": "concurrently npm:watch:example npm:serve:example"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/roblox-aurora/rbx-net.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/roblox-aurora/rbx-net/issues"
-  },
-  "homepage": "https://github.com/roblox-aurora/rbx-net#readme",
-  "types": "out/index.d.ts",
-  "devDependencies": {
-    "@rbxts/compiler-types": "^2.0.4-types.1",
-    "@rbxts/t": "^1.3.5",
-    "@rbxts/types": "^1.0.651",
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.46.1",
-    "concurrently": "^6.0.0",
-    "cross-env": "^7.0.3",
-    "eslint": "^8.30.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-roblox-ts": "0.0.35",
-    "prettier": "^2.8.1",
-    "rbxts-transform-debug": "~2.0.3",
-    "rbxts-transform-env": "~2.0.4",
-    "roblox-ts": "~2.0.4",
-    "typescript": "~4.8.4"
-  }
+	"name": "@rbxts/net",
+	"version": "3.2.0-alpha.1",
+	"description": "",
+	"main": "out/init.lua",
+	"scripts": {
+		"prepare": "npm run build",
+		"yalc": "npm run build && yalc push",
+		"build": "cross-env NODE_ENV=production rbxtsc",
+		"build:luau": "cross-env NODE_ENV=production TYPE=Luau rbxtsc --verbose --type=model --rojo=\"luau/build.project.json\"",
+		"build:docs": "cd docs && npm run build",
+		"start:docs": "cd docs && yarn start",
+		"build:dev": "cross-env NODE_ENV=development rbxtsc --verbose",
+		"watch:dev": "cross-env NODE_ENV=development rbxtsc -w --verbose",
+		"build:rbxmx": "npm run build:luau && rojo build luau/build.project.json -o luau.net.rbxmx",
+		"build:example": "cross-env NODE_ENV=development rbxtsc --type=game -p ./example -i ./include",
+		"watch:example": "cross-env NODE_ENV=development TYPE=TestTS rbxtsc -w --type=game -p ./example -i ./include",
+		"serve:example": "rojo serve ./example/default.project.json --port 34567",
+		"dev:example": "concurrently npm:watch:example npm:serve:example"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/roblox-aurora/rbx-net.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/roblox-aurora/rbx-net/issues"
+	},
+	"publishConfig": {
+		"tag": "alpha"
+	},
+	"homepage": "https://github.com/roblox-aurora/rbx-net#readme",
+	"types": "out/index.d.ts",
+	"devDependencies": {
+		"@rbxts/compiler-types": "^2.0.4-types.1",
+		"@rbxts/t": "^1.3.5",
+		"@rbxts/types": "^1.0.651",
+		"@typescript-eslint/eslint-plugin": "^5.46.1",
+		"@typescript-eslint/parser": "^5.46.1",
+		"concurrently": "^6.0.0",
+		"cross-env": "^7.0.3",
+		"eslint": "^8.30.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-roblox-ts": "0.0.35",
+		"prettier": "^2.8.1",
+		"rbxts-transform-debug": "~2.0.3",
+		"rbxts-transform-env": "~2.0.4",
+		"roblox-ts": "~2.0.4",
+		"typescript": "~4.8.4"
+	}
 }
