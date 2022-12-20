@@ -128,6 +128,10 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 		remoteId =
 			this.namespace !== NAMESPACE_ROOT ? ([this.namespace, remoteId].join(NAMESPACE_SEPARATOR) as K) : remoteId;
 
+		if (this.configuration?.ServerRuntimeIdHashing) {
+			remoteId = transformName(remoteId) as K;
+		}
+
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 
 		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
@@ -157,7 +161,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 */
 	async OnEvent<
-		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, ServerToClientEventDeclaration<unknown[]>> & string
+		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, ServerToClientEventDeclaration<unknown[]>> & string,
 	>(name: K, fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<unknown[]>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<ServerToClientEventDeclaration<any>>;
 		return result.Connect(fn);
@@ -177,7 +181,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * ```
 	 */
 	async OnFunction<
-		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, AsyncClientFunctionDeclaration<any, any>> & string
+		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, AsyncClientFunctionDeclaration<any, any>> & string,
 	>(name: K, fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>) {
 		const result = (await this.WaitFor(name)) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);

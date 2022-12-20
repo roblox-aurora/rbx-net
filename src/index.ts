@@ -126,7 +126,7 @@ namespace Net {
 			: never;
 	}
 
-	export const DIST = $env.string("TYPE", "TS");
+	export const DIST = $NODE_ENV === "production" ? $env.string("TYPE", "TS") : `DEV`;
 	/**
 	 * The version of RbxNet
 	 */

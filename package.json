@@ -4,9 +4,10 @@
   "description": "",
   "main": "out/init.lua",
   "scripts": {
-    "prepare": "npm run build",
+    "preinstall": "npm run build:dev",
+    "prepublishOnly": "npm run build",
     "yalc": "npm run build && yalc push",
-    "build": "cross-env NODE_ENV=production rbxtsc --verbose",
+    "build": "cross-env NODE_ENV=production rbxtsc",
     "build:luau": "cross-env NODE_ENV=production TYPE=Luau rbxtsc --verbose --type=model --rojo=\"luau/build.project.json\"",
     "build:docs": "cd docs && npm run build",
     "start:docs": "cd docs && yarn start",

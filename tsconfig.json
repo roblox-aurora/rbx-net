@@ -15,7 +15,7 @@
     "types": ["@rbxts/types/plugin"],
     "rootDir": "src",
     "outDir": "out",
-    "removeComments": false,
+    "removeComments": true,
     "stripInternal": true,
     "declaration": true,
 	"moduleDetection": "force",
