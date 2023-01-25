@@ -139,7 +139,7 @@ export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: 
 		// If not, poll until timeout
 		let elapsed = 0;
 		while (elapsed < timeout) {
-			elapsed += runService.Heartbeat.Wait();
+			[elapsed] += runService.Heartbeat.Wait();
 			result = findRemote(remoteType, name);
 			if (result) {
 				resolve(result);
