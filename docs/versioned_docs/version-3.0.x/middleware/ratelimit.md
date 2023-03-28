@@ -40,15 +40,7 @@ Then you pass it to a constructor for a server object, or a definition:
 <Tabs defaultValue={DEFAULT_VALUE} groupId={GROUP} values={TABS}>
  <TabItem value="ts">
 
-```ts title="Object"
-const Example = new Net.Server.AsyncFunction("Example", [
-    Net.Middleware.RateLimit({
-        MaxRequestsPerMinute: 1
-    })
-])
-```
-
-```ts title="Definition"
+```ts
 const Remotes = Net.Definitions.Create({
     Example: Net.Definitions.AsyncFunction([
         Net.Middleware.RateLimit({
@@ -61,19 +53,11 @@ const Remotes = Net.Definitions.Create({
  </TabItem>
  <TabItem value="luau">
 
-```lua title="Object"
-local Example = Net.Server.AsyncFunction.new("Example", {
-    Net.Middleware.RateLimit({
-        MaxRequestsPerMinute = 1
-    })
-})
-```
-
-```lua title="Definition"
+```lua
 local Remotes = Net.Definitions.Create({
     Example = Net.Definitions.AsyncFunction({
         Net.Middleware.RateLimit({
-            MaxRequestsPerMinute: 1
+            MaxRequestsPerMinute = 1
         })
     })
 })
@@ -103,16 +87,7 @@ function analyticRateLimitError(error: RateLimitError) {
 }
 ```
 
-```ts title="Object"
-const Example = new Net.Server.AsyncFunction("Example", [
-    Net.Middleware.RateLimit({
-        MaxRequestsPerMinute: 1,
-        ErrorHandler: analyticRateLimitError
-    })
-])
-```
-
-```ts title="Definition"
+```ts
 const Remotes = Net.Definitions.Create({
     Example: Net.Definitions.AsyncFunction([
         Net.Middleware.RateLimit({
@@ -132,20 +107,11 @@ local function analyticRateLimitError(error)
 end
 ```
 
-```lua title="Object"
-local Example = Net.Server.AsyncFunction.new("Example", {
-    Net.Middleware.RateLimit({
-        MaxRequestsPerMinute = 1,
-        ErrorHandler = analyticRateLimitError
-    })
-})
-```
-
-```lua title="Definition"
+```lua
 local Remotes = Net.Definitions.Create({
     Example = Net.Definitions.AsyncFunction({
         Net.Middleware.RateLimit({
-            MaxRequestsPerMinute: 1,
+            MaxRequestsPerMinute = 1,
             ErrorHandler = analyticRateLimitError
         })
     })

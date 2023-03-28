@@ -52,43 +52,7 @@ module.exports = {
     },
     footer: {
       style: "dark",
-      links: [
-        // {
-        //   title: 'Docs',
-        //   items: [
-        //     {
-        //       label: 'Style Guide',
-        //       to: 'docs/',
-        //     },
-        //     {
-        //       label: 'Second Doc',
-        //       to: 'docs/doc2/',
-        //     },
-        //   ],
-        // },
-        // {
-        //   title: 'Community',
-        //   items: [
-        //     {
-        //       label: 'Discord',
-        //       href: 'https://discordapp.com/invite/docusaurus',
-        //     },
-        //   ],
-        // },
-        // {
-        //   title: 'More',
-        //   items: [
-        //     {
-        //       label: 'Blog',
-        //       to: 'blog',
-        //     },
-        //     {
-        //       label: 'GitHub',
-        //       href: 'https://github.com/roblox-aurora/rbx-net',
-        //     },
-        //   ],
-        // },
-      ],
+      links: [],
       copyright: `Copyright © ${new Date().getFullYear()} Jonathan Holmes`,
     },
   },
@@ -98,19 +62,19 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.json"),
-          lastVersion: "current",
+          lastVersion: "3.0.x",
           versions: {
             current: {
               label: require("../package.json").version,
-              path: "3.0"
+              path: "3.1",
+            },
+            "3.0.x": {
+              label: "3.0.4",
+              path: "3.0",
             },
             "2.1.x": {
               label: "2.1.5",
               path: "2.1",
-            },
-            "2.0.x": {
-              label: "2.0.0",
-              path: "2.0",
             }
           },
           // Please change this to your repo.
