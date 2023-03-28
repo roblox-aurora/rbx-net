@@ -1,3 +1,6 @@
+## 3.0.6
+- Fixes (https://github.com/roblox-aurora/rbx-net/pull/84) `Client:Get(remoteId) causing delays`
+
 ## 3.0.4 (Luau-only release)
 - Fixes type issues (https://github.com/roblox-aurora/rbx-net/issues/82) - `Namespace`, `OnEvent`, `OnFunction`
 
