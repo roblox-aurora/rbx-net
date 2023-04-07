@@ -157,7 +157,7 @@ class ServerAsyncFunction<
 					const [eventId, data] = recvArgs;
 
 					if (typeIs(eventId, "string") && data !== undefined) {
-						if (player === player && eventId === id) {
+						if (player === fromPlayer && eventId === id) {
 							connection.Disconnect();
 							resolve(data as CallReturnType);
 						}
