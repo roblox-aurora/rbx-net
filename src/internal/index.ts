@@ -129,18 +129,25 @@ export function format(message: string, vars: { [name: string]: unknown }) {
 /** @internal */
 export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: string, timeout: number) {
 	return Promise.defer<RemoteTypes[K]>((resolve, reject) => {
-		let i = 0;
-		let result: RemoteTypes[K] | undefined;
-		do {
-			const [step] = runService.Heartbeat.Wait();
-			i += step;
-			result = findRemote(remoteType, name);
-		} while (i < timeout && !result);
+		// First, check if remote already exists
+		let result: RemoteTypes[K] | undefined = findRemote(remoteType, name);
 		if (result) {
 			resolve(result);
-		} else {
-			reject(`Timed out while waiting for ${remoteType} '${name}' after ${timeout} seconds.`);
+			return;
 		}
+
+		// If not, poll until timeout
+		let elapsed = 0;
+		while (elapsed < timeout) {
+			elapsed += runService.Heartbeat.Wait()[0];
+			result = findRemote(remoteType, name);
+			if (result) {
+				resolve(result);
+				return;
+			}
+		}
+
+		reject(`Timed out while waiting for ${remoteType} '${name}' after ${elapsed} seconds.`);
 	});
 }
 
