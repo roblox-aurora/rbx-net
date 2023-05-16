@@ -43,6 +43,10 @@ const remoteFunctionCache = new Map<string, ServerFunction>();
 const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
 const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
+type DeclarationIterator<T extends RemoteDeclarations> = IterableFunction<
+	LuaTuple<[keyof RemoteDeclarationDict<T>, DeclarationLike | DeclarationNamespaceLike]>
+>;
+
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
 export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
@@ -55,12 +59,6 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		} = config;
 
 		declarationMap.set(this, declarations);
-		$dbg(declarations, (value, source) => {
-			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
-			for (const [name, va] of pairs(value)) {
-				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
-			}
-		});
 
 		// We only run remote creation on the server
 		if (RunService.IsServer() && AutoGenerateServerRemotes) {
@@ -170,9 +168,8 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 */
 
 		$print("Running remote prefetch for", this.namespace);
-
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
-		for (const [id, declaration] of pairs(declarations)) {
+		for (const [id, declaration] of pairs(declarations) as DeclarationIterator<T>) {
 			switch (declaration.Type) {
 				case "Event":
 				case "AsyncFunction":

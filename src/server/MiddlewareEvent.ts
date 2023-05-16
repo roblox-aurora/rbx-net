@@ -1,4 +1,3 @@
-import { $ifEnv } from "rbxts-transform-env";
 import { NetGlobalMiddleware, NetMiddleware, NextCaller } from "../middleware";
 
 /** @internal */
@@ -19,26 +18,22 @@ abstract class MiddlewareEvent {
 		callback: (player: Player, ...args: A) => R,
 	) {
 		const { middlewares } = this;
-		try {
-			assert(
-				typeIs(middlewares, "table"),
-				"The middleware argument should be an array of middlewares not a " + typeOf(middlewares),
-			);
+		assert(
+			typeIs(middlewares, "table"),
+			"The middleware argument should be an array of middlewares not a " + typeOf(middlewares),
+		);
 
-			if (middlewares.size() > 0) {
-				let callbackFn = callback as NextCaller<R>;
+		if (middlewares.size() > 0) {
+			let callbackFn = callback as NextCaller<R>;
 
-				// Run through each middleware
-				for (const middleware of middlewares) {
-					callbackFn = middleware(callbackFn, this) as NextCaller<R>;
-				}
-
-				return callbackFn;
-			} else {
-				return callback;
+			// Run through each middleware
+			for (const middleware of middlewares) {
+				callbackFn = middleware(callbackFn, this) as NextCaller<R>;
 			}
-		} catch (e) {
-			warn("[rbx-net] " + tostring(e));
+
+			return callbackFn;
+		} else {
+			return callback;
 		}
 	}
 }

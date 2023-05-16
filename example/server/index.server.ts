@@ -9,7 +9,7 @@ const testEvents = Remotes.Server.GetNamespace("TestingEvents");
 testFunctions.OnFunction("CallServerAndAddNumbers", (_, a, b) => a + b);
 testEvents.OnEvent("PrintMessage", print);
 const testLegacy = Remotes.Server.GetNamespace("Legacy").Create("LegacyFunction");
-const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
+const testLegacy2 = Remotes.Server.GetNamespace("Legacy").Get("LegacyFunction");
 
 testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);
 
@@ -23,8 +23,12 @@ type TestNamespaceAsClientRemotes = Net.Util.GetClientRemotes<NamespaceTest>;
 
 Remotes.Server.Get("Srv").Connect((message) => {});
 
-Remotes.Server.GetNamespace("TestingFunctions").OnFunction("CallServerAndAddNumbers", async () => {
-	return 10;
-});
+type _ = defined;
+Remotes.Server.GetNamespace("TestingFunctions").OnFunction(
+	"CallServerAndAddNumbers",
+	async (_: _, a: number, b: number) => {
+		return a + b;
+	},
+);
 
-testEvents.Get("PrintMessage").Predict(undefined!, "Test");
+testEvents.Get("PrintMessage").Predict(undefined!, "Test predict message");

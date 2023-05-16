@@ -10,6 +10,6 @@ add.CallServerAsync(10, 10).then((result) => {
 	if (result === 20) {
 		print("RESULT IS 20");
 	} else {
-		error("RESULT IS WRONG");
+		error("RESULT IS WRONG, got " + tostring(result));
 	}
 });

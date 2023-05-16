@@ -1,18 +1,19 @@
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+import {
+	ServerAsyncListener,
+	AsyncSendRequest,
+	AsyncSendResponse,
+	AsyncResponseArgs,
+	RequestType,
+	ServerListenerDelegate,
+	ServerAsyncRemoteCallback,
+} from "../internal/async";
 const CollectionService = game.GetService("CollectionService");
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
-
-type AsyncEventArgs = [eventId: string, data: unknown];
-
-function isEventArgs(value: unknown[]): value is AsyncEventArgs {
-	if (value.size() < 2) return false;
-	const [eventId, data] = value;
-	return typeIs(eventId, "string") && typeIs(data, "table");
-}
 
 export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
 	/**
@@ -60,7 +61,7 @@ class ServerAsyncFunction<
 	>
 	extends MiddlewareEvent
 	implements ServerAsyncCallback<CallbackArgs, CallbackReturnType>, ServerAsyncCaller<CallArgs, CallReturnType> {
-	private instance: RemoteEvent<Callback>;
+	private instance: RemoteEvent<AsyncSendResponse<CallbackReturnType> | AsyncSendRequest<CallArgs>>;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
@@ -114,29 +115,45 @@ class ServerAsyncFunction<
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnServerEvent.Connect(async (player, ...args: Array<unknown>) => {
-			if (isEventArgs(args)) {
-				const [eventId, data] = args;
+		const listener: ServerAsyncListener<CallbackArgs> = (player, ...args) => {
+			const [eventId, reqType, data] = args;
+			if (reqType === RequestType.ClientToServerRequest) {
+				const result = this._processMiddleware<CallbackArgs, R>(callback)?.(player, ...data) as
+					| CallbackReturnType
+					| Promise<CallbackReturnType>;
 
-				const result: unknown | Promise<unknown> = this._processMiddleware<CallbackArgs, R>(callback)?.(
-					player,
-					...(data as CallbackArgs),
-				);
 				if (Promise.is(result)) {
 					result
 						.then((promiseResult) => {
-							this.instance.FireClient(player, eventId, promiseResult);
+							this.instance.FireClient(player, eventId, RequestType.ServerToClientResponse, {
+								type: "Ok",
+								value: promiseResult,
+							});
 						})
 						.catch((err: string) => {
 							warn("[rbx-net] Failed to send response to client: " + err);
+							this.instance.FireClient(player, eventId, RequestType.ServerToClientResponse, {
+								type: "Err",
+								err: "Promise in ServerAsyncFunction callback rejected",
+							});
 						});
 				} else {
-					this.instance.FireClient(player, eventId, result);
+					this.instance.FireClient(player, eventId, RequestType.ServerToClientResponse, {
+						type: "Ok",
+						value: result,
+					});
 				}
-			} else {
-				warn("[rbx-net-async] Recieved message without eventId");
 			}
-		});
+
+			// if (isEventArgs(args)) {
+			// 	const [eventId, data] = args;
+
+			// } else {
+			// 	warn("[rbx-net-async] Recieved message without eventId");
+			// }
+		};
+
+		this.connector = this.instance.OnServerEvent.Connect(listener as Callback);
 	}
 
 	/**
@@ -148,22 +165,30 @@ class ServerAsyncFunction<
 	 */
 	public async CallPlayerAsync(player: Player, ...args: CallArgs): Promise<CallReturnType> {
 		const id = HttpService.GenerateGUID(false);
-		this.instance.FireClient(player, id, { ...args });
+		this.instance.FireClient(player, id, RequestType.ServerToClientRequest, { ...args });
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
-			const connection = this.instance.OnServerEvent.Connect(
-				(fromPlayer: Player, ...recvArgs: Array<unknown>) => {
-					const [eventId, data] = recvArgs;
 
-					if (typeIs(eventId, "string") && data !== undefined) {
-						if (player === player && eventId === id) {
-							connection.Disconnect();
-							resolve(data as CallReturnType);
-						}
+			// eslint-disable-next-line prefer-const
+			let connection: RBXScriptConnection;
+
+			const responseDelegate: ServerListenerDelegate<
+				Parameters<ServerAsyncRemoteCallback<CallbackArgs, CallReturnType>>
+			> = (fromPlayer, ...args) => {
+				const [eventId, reqType, data] = args;
+
+				if (reqType === RequestType.ClientToServerResponse && eventId === id && fromPlayer === player) {
+					connection.Disconnect();
+					if (data.type === "Ok") {
+						resolve(data.value);
+					} else {
+						reject(data.err);
 					}
-				},
-			);
+				}
+			};
+
+			connection = this.instance.OnServerEvent.Connect(responseDelegate as Callback);
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
 			do {

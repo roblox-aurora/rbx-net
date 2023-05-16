@@ -1,4 +1,14 @@
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
+import {
+	ServerAsyncListener,
+	AsyncSendRequest,
+	AsyncSendResponse,
+	ClientAsyncListener,
+	RequestType,
+	ClientAsyncRemoteCallback,
+	ServerListenerDelegate,
+	ClientListenerDelegate,
+} from "../internal/async";
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
@@ -45,7 +55,7 @@ export default class ClientAsyncFunction<
 	CallReturnType = unknown,
 	CallbackReturnType = unknown
 > implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
-	private instance: RemoteEvent;
+	private instance: RemoteEvent<AsyncSendResponse<CallbackReturnType> | AsyncSendRequest<CallArgs>>;
 	private timeout = 60;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
@@ -81,25 +91,37 @@ export default class ClientAsyncFunction<
 			this.connector = undefined;
 		}
 
-		this.connector = this.instance.OnClientEvent.Connect(async (...args: CallbackArgs) => {
+		const listener: ClientAsyncListener<CallbackArgs> = (...args) => {
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
-				const result: unknown | Promise<unknown> = callback(...(data as CallbackArgs));
+				const result = callback(...data) as CallbackReturnType | Promise<CallbackReturnType>;
 				if (Promise.is(result)) {
 					result
 						.then((promiseResult) => {
-							this.instance.FireServer(eventId, promiseResult);
+							this.instance.FireServer(eventId, RequestType.ClientToServerResponse, {
+								type: "Ok",
+								value: promiseResult,
+							});
 						})
 						.catch((err: string) => {
 							warn("[rbx-net] Failed to send response to server: " + err);
+							this.instance.FireServer(eventId, RequestType.ClientToServerResponse, {
+								type: "Err",
+								err: "Promise in ServerAsyncFunction callback rejected",
+							});
 						});
 				} else {
-					this.instance.FireServer(eventId, result);
+					this.instance.FireServer(eventId, RequestType.ClientToServerResponse, {
+						type: "Ok",
+						value: result,
+					});
 				}
 			} else {
 				warn("Recieved message without eventId");
 			}
-		});
+		};
+
+		this.connector = this.instance.OnClientEvent.Connect(listener as Callback);
 	}
 
 	public async CallServerAsync(...args: CallArgs): Promise<CallReturnType> {
@@ -108,20 +130,27 @@ export default class ClientAsyncFunction<
 		}
 
 		const id = HttpService.GenerateGUID(false);
-		this.instance.FireServer(id, { ...args });
+		this.instance.FireServer(id, RequestType.ClientToServerRequest, { ...args });
 
 		return new Promise((resolve, reject) => {
 			const startTime = tick();
-			const connection = this.instance.OnClientEvent.Connect((...recvArgs: Array<unknown>) => {
-				const [eventId, data] = recvArgs;
 
-				if (typeIs(eventId, "string")) {
-					if (eventId === id) {
-						connection.Disconnect();
-						resolve(data as CallReturnType);
+			const responseDelegate: ClientListenerDelegate<
+				Parameters<ClientAsyncRemoteCallback<CallbackArgs, CallReturnType>>
+			> = (...args) => {
+				const [eventId, reqType, data] = args;
+
+				if (reqType === RequestType.ServerToClientResponse && eventId === id) {
+					connection.Disconnect();
+					if (data.type === "Ok") {
+						resolve(data.value);
+					} else {
+						reject(data.err);
 					}
 				}
-			});
+			};
+
+			const connection = this.instance.OnClientEvent.Connect(responseDelegate as Callback);
 			this.listeners.set(id, { connection, timeout: this.timeout });
 
 			let warned = false;

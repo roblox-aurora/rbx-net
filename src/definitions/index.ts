@@ -27,6 +27,11 @@ export interface DefinitionConfiguration {
 	readonly ServerGlobalMiddleware?: NetGlobalMiddleware[];
 
 	/**
+	 * The static location for the generated remotes - by default it's under `ReplicatedStorage._NetManaged.{VERSION}`
+	 */
+	readonly StaticRemotePath?: Instance;
+
+	/**
 	 * Whether or not the server remotes are automatically generated
 	 *
 	 * This will default to `true` if the top-level definition, or the value of the parent namespace.

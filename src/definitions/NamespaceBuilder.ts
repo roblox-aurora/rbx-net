@@ -1,6 +1,5 @@
-import { $dbg, $print } from "rbxts-transform-debug";
+import { $print } from "rbxts-transform-debug";
 import { DefinitionConfiguration } from ".";
-import { NetGlobalMiddleware } from "../middleware";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { NamespaceDeclaration, RemoteDeclarations } from "./Types";
@@ -22,12 +21,6 @@ export interface NamespaceConfiguration
 export class NamespaceBuilder<N extends RemoteDeclarations> {
 	public constructor(declarations: N, private config?: NamespaceConfiguration) {
 		declarationMap.set(this, declarations);
-		$dbg(declarations, (value, source) => {
-			print(`[${source.file}:${source.lineNumber}]`, "== Namespace Declarations ==");
-			for (const [name, va] of pairs(value)) {
-				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
-			}
-		});
 	}
 
 	/** @internal */
@@ -42,14 +35,14 @@ export class NamespaceBuilder<N extends RemoteDeclarations> {
 
 	/** @internal */
 	_BuildServerDefinition(configuration: NamespaceConfiguration, namespace?: string): ServerDefinitionBuilder<N> {
-		assert(RunService.IsServer());
+		assert(RunService.IsServer(), "Attempted to index server remotes from client");
 		$print("Building server definition", declarationMap.get(this)!);
 		return new ServerDefinitionBuilder<N>(declarationMap.get(this) as N, configuration, namespace);
 	}
 
 	/** @internal */
 	_BuildClientDefinition(configuration: NamespaceConfiguration, namespace?: string): ClientDefinitionBuilder<N> {
-		assert(RunService.IsClient());
+		assert(RunService.IsClient(), "Attempted to index client remotes from server");
 		$print("Building client definition", declarationMap.get(this)!);
 		return new ClientDefinitionBuilder<N>(declarationMap.get(this) as N, configuration, namespace);
 	}

@@ -1,4 +1,5 @@
-import { $env, $ifEnv } from "rbxts-transform-env";
+import { $package } from "rbxts-transform-debug";
+import { $env } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
 
@@ -56,7 +57,7 @@ export class NetMiddlewareEvent implements NetManagedInstance {
 	}
 }
 
-const REMOTES_FOLDER_NAME = "_NetManaged";
+const REMOTES_FOLDER_NAME = ".RbxNetManaged";
 
 /** @internal */
 export const enum TagId {
@@ -72,34 +73,60 @@ export const enum TagId {
 /** @internal */
 export const ServerTickFunctions = new Array<() => void>();
 
-/** @internal */
-export function findOrCreateFolder(parent: Instance, name: string): Folder {
-	let folder = parent.FindFirstChild(name) as Folder;
-	if (folder) {
-		return folder;
-	} else {
-		folder = new Instance("Folder", parent);
-		folder.Name = name;
-		return folder;
+export function findOrCreatePath(parent: Instance, ...path: string[]): Folder {
+	assert(path.size() > 0, "Path cannot be empty");
+
+	while (path.size() > 0) {
+		const nextItem = path.shift();
+		if (nextItem !== undefined) {
+			let folder = parent.FindFirstChild(nextItem);
+			if (!folder) {
+				folder = new Instance("Folder", parent);
+				folder.Name = nextItem;
+			}
+
+			parent = folder;
+		} else {
+			break;
+		}
 	}
+
+	return parent as Folder;
 }
+
+// /** @internal */
+// export function findOrCreateFolder(parent: Instance, name: string): Folder {
+// 	let folder = parent.FindFirstChild(name) as Folder;
+// 	if (folder) {
+// 		return folder;
+// 	} else {
+// 		folder = new Instance("Folder", parent);
+// 		folder.Name = name;
+// 		return folder;
+// 	}
+// }
 
 // const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
 const location = script.Parent!;
 
-$ifEnv("NODE_ENV", "development", () => {
-	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
-});
+// Since apparently this is still not a type?
+declare global {
+	interface String {
+		gsub(
+			this: string,
+			pattern: string,
+			repl: (...tokens: string[]) => string | number,
+			n?: number | undefined,
+		): LuaTuple<[string, number]>;
+	}
+}
 
-const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 /**
  * Errors with variables formatted in a message
  * @param message The message
  * @param vars variables to pass to the error message
  */
-export function errorft(message: string, vars: { [name: string]: unknown }): never {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
+export function errorft(message: string, vars: { [name: string]: string | number }): never {
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
 		return vars[token] ?? token;
 	});
@@ -117,9 +144,7 @@ export function warnOnce(message: string) {
 	warn(`[rbx-net] ${message}`);
 }
 
-export function format(message: string, vars: { [name: string]: unknown }) {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
+export function format(message: string, vars: { [name: string]: string | number }) {
 	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
 		return vars[token] ?? token;
 	});
@@ -176,11 +201,57 @@ export function getRemoteOrThrow<K extends keyof RemoteTypes>(remoteType: K, nam
 	}
 }
 
+const version = $package.version;
+let staticPath: Folder | undefined;
+
+/**
+ * Generates a hash code from a string
+ * @param str The string to generate a hash code from
+ * @returns The hash code of the given string
+ */
+function hashCode(str: string): number {
+	let hash = 0;
+	if (str.size() === 0) {
+		return hash;
+	}
+	for (let i = 0; i < str.size(); i++) {
+		const [char] = string.byte(string.sub(str, i + 1, i + 1));
+		hash = (hash << 5) - hash + char;
+		hash = hash & hash;
+	}
+	return math.abs(hash);
+}
+
+const workspace = game.GetService("Workspace");
+
+/**
+ * @internal
+ */
+function getStaticPath(): Folder {
+	if (staticPath) {
+		return staticPath;
+	} else {
+		const [M, m] = version.split(".");
+		staticPath = findOrCreatePath(
+			game.GetService("ReplicatedStorage"),
+			REMOTES_FOLDER_NAME,
+			runService.IsStudio()
+				? [M, m].join(".")
+				: string.format(
+						"%.12x",
+						hashCode([M, m].join(".")) * (workspace.GetServerTimeNow() - workspace.DistributedGameTime),
+				  ),
+		);
+		return staticPath;
+	}
+}
+
 /** @internal */
 export function findOrCreateRemote<K extends keyof RemoteTypes>(
 	remoteType: K,
 	name: string,
 	onCreate?: (instance: RemoteTypes[K]) => void,
+	parentTo = getStaticPath(),
 ): RemoteTypes[K] {
 	const existing = findRemote(remoteType, name);
 	if (existing) {
@@ -208,14 +279,10 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(
 			collectionService.AddTag(remote, TagId.LegacyFunction);
 		} else {
 			throw `Invalid Remote Type: ${remoteType}`;
-		} // stfu
+		}
 
 		remote.Name = name;
-		remote.Parent = remoteFolder;
-
-		$ifEnv("NODE_ENV", "development", () => {
-			print("[rbx-net-dev] Registered remote", remote.GetFullName(), "under", remoteType);
-		});
+		remote.Parent = parentTo;
 
 		onCreate?.(remote as RemoteTypes[K]);
 		return remote as RemoteTypes[K];
