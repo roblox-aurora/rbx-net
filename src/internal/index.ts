@@ -136,8 +136,17 @@ export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: 
 			return;
 		}
 
-		// If not, poll until timeout
-		let elapsed = 0;
+		// If not, wait for remote
+		const searchStart = os.clock();
+		const remote = remoteFolder.WaitForChild(name, timeout) as RemoteTypes[K] | undefined;
+		const remoteTypeTag = getTagFromRemoteType(remoteType);
+		if (remote && collectionService.GetTags(remote).includes(remoteTypeTag)) {
+			resolve(remote);
+			return;
+		}
+
+		// If result is not correct remote type, poll until correct remote is added
+		let elapsed = os.clock() - searchStart;
 		while (elapsed < timeout) {
 			elapsed += runService.Heartbeat.Wait()[0];
 			result = findRemote(remoteType, name);
@@ -153,16 +162,20 @@ export function waitForRemote<K extends keyof RemoteTypes>(remoteType: K, name: 
 
 /** @internal */
 export function findRemote<K extends keyof RemoteTypes>(remoteType: K, name: string): RemoteTypes[K] | undefined {
-	if (remoteType === "AsyncRemoteFunction") {
-		return collectionService.GetTagged(TagId.Async).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
-	} else if (remoteType === "RemoteEvent") {
-		return collectionService.GetTagged(TagId.Event).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
-	} else if (remoteType === "RemoteFunction") {
-		return collectionService.GetTagged(TagId.LegacyFunction).find((f) => f.Name === name) as
-			| RemoteTypes[K]
-			| undefined;
-	}
+	const tag = getTagFromRemoteType(remoteType);
+	return collectionService.GetTagged(tag).find((f) => f.Name === name) as RemoteTypes[K] | undefined;
+}
 
+/** @internal */
+export function getTagFromRemoteType<K extends keyof RemoteTypes>(remoteType: K): string {
+	switch (remoteType) {
+		case "AsyncRemoteFunction":
+			return TagId.Async;
+		case "RemoteEvent":
+			return TagId.Event;
+		case "RemoteFunction":
+			return TagId.LegacyFunction;
+	}
 	throw `Invalid Remote Access`;
 }
 
