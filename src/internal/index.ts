@@ -1,4 +1,4 @@
-import { $env, $ifEnv } from "rbxts-transform-env";
+import { $env } from "rbxts-transform-env";
 import MiddlewareEvent from "../server/MiddlewareEvent";
 import MiddlewareFunction from "../server/MiddlewareFunction";
 
@@ -86,11 +86,6 @@ export function findOrCreateFolder(parent: Instance, name: string): Folder {
 
 // const dist = $env<"TS" | "Luau" | "TestTS">("TYPE", "TS");
 const location = script.Parent!;
-
-$ifEnv("NODE_ENV", "development", () => {
-	print("[rbx-net-dev] Set dist location to ", location.GetFullName());
-});
-
 const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findOrCreateFolder(replicatedStorage, REMOTES_FOLDER_NAME);
 /**
  * Errors with variables formatted in a message
@@ -98,11 +93,9 @@ const remoteFolder = findOrCreateFolder(location, REMOTES_FOLDER_NAME); // findO
  * @param vars variables to pass to the error message
  */
 export function errorft(message: string, vars: { [name: string]: unknown }): never {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+	[message] = message.gsub("{([%w_][%w%d_]*)}", ((token: string) => {
 		return vars[token] ?? token;
-	});
+	}) as never);
 
 	error(message, 2);
 }
@@ -118,11 +111,9 @@ export function warnOnce(message: string) {
 }
 
 export function format(message: string, vars: { [name: string]: unknown }) {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	[message] = message.gsub("{([%w_][%w%d_]*)}", (token: string) => {
+	[message] = message.gsub("{([%w_][%w%d_]*)}", ((token: string) => {
 		return vars[token] ?? token;
-	});
+	}) as never);
 	return message;
 }
 
@@ -225,10 +216,6 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(
 
 		remote.Name = name;
 		remote.Parent = remoteFolder;
-
-		$ifEnv("NODE_ENV", "development", () => {
-			print("[rbx-net-dev] Registered remote", remote.GetFullName(), "under", remoteType);
-		});
 
 		onCreate?.(remote as RemoteTypes[K]);
 		return remote as RemoteTypes[K];

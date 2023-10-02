@@ -1,4 +1,3 @@
-import { $ifEnv } from "rbxts-transform-env";
 import { NetGlobalMiddleware, NetMiddleware, NextCaller } from "../middleware";
 
 /** @internal */

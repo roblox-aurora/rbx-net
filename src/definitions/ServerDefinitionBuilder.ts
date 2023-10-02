@@ -71,12 +71,6 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		} = config;
 
 		declarationMap.set(this, declarations);
-		$dbg(declarations, (value, source) => {
-			print(`[${source.file}:${source.lineNumber}]`, "== Server Declarations ==");
-			for (const [name, va] of pairs(value)) {
-				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
-			}
-		});
 
 		// We only run remote creation on the server
 		if (RunService.IsServer() && AutoGenerateServerRemotes) {
@@ -111,7 +105,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
 				remoteFunctionCache.set(namespacedId, func);
 
-				this.globalMiddleware?.forEach((mw) => func._use(mw));
+				this.globalMiddleware?.forEach(mw => func._use(mw));
 				return func;
 			}
 		} else if (declaration.Type === "AsyncFunction") {
@@ -130,7 +124,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				remoteAsyncFunctionCache.set(namespacedId, asyncFunction);
 			}
 
-			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
+			this.globalMiddleware?.forEach(mw => asyncFunction._use(mw));
 			return asyncFunction;
 		} else if (declaration.Type === "Event") {
 			let event: ServerEvent;
@@ -148,7 +142,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				remoteEventCache.set(namespacedId, event);
 			}
 
-			this.globalMiddleware?.forEach((mw) => event._use(mw));
+			this.globalMiddleware?.forEach(mw => event._use(mw));
 			return event;
 		} else if (declaration.Type === "Messaging") {
 			let event: ExperienceBroadcastEvent;
@@ -188,7 +182,9 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		$print("Running remote prefetch for", this.namespace);
 
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
-		for (const [id, declaration] of pairs(declarations)) {
+		for (const [id, declaration] of (pairs(declarations) as unknown) as IterableFunction<
+			[keyof RemoteDeclarationDict<T>, RemoteDeclarationDict<T>[keyof RemoteDeclarationDict<T>]]
+		>) {
 			switch (declaration.Type) {
 				case "Event":
 				case "AsyncFunction":

@@ -17,6 +17,7 @@
 		"removeComments": false,
 		"stripInternal": true,
 		"declaration": true,
+		"moduleDetection": "force",
 		"plugins": [
 			{
 				"transform": "rbxts-transform-env",

@@ -9,12 +9,10 @@
 	},
 	"plugins": [
 		"@typescript-eslint",
-		"roblox-ts",
 		"prettier"
 	],
 	"extends": [
 		"plugin:@typescript-eslint/recommended",
-		"plugin:roblox-ts/recommended",
 		"prettier/@typescript-eslint",
 		"plugin:prettier/recommended"
 	],

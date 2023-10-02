@@ -1,3 +1,6 @@
+## 4.0.0
+- Definitions rework
+
 ## 3.0.6
 - Fixes (https://github.com/roblox-aurora/rbx-net/pull/84) `Client:Get(remoteId) causing delays`
 
