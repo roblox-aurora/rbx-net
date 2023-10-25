@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
+import { MiddlewareOverload, NetGlobalMiddleware, createTypeChecker } from "../middleware";
 import {
 	FunctionDeclaration,
 	RemoteDeclarations,
@@ -17,6 +17,9 @@ import {
 import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
 import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
 import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
+import { AsyncFunctionBuilder } from "./remotes/AsyncFunctionBuilder";
+import { EventBuilder } from "./remotes/EventBuilder";
+import { DefinitionBuilder } from "./remotes/DefinitionBuilder";
 
 export interface DefinitionConfiguration {
 	/**
@@ -63,14 +66,30 @@ namespace NetDefinitions {
 	 * @description https://docs.vorlias.com/rbx-net/docs/3.0/definitions#definitions-oh-my
 	 * @param declarations
 	 */
-	export function Create<T extends RemoteDeclarations>(declarations: T, configuration?: DefinitionConfiguration) {
-		configuration ??= {};
+	export function Create<T extends RemoteDeclarations>(
+		declarations: T,
+		configuration?: DefinitionConfiguration,
+	): DefinitionsCreateResult<T>;
+	/**
+	 * Creates definitions using the new net definitions builder
+	 *
+	 * @version 4.0
+	 */
+	export function Create(): DefinitionBuilder;
+	export function Create(
+		declarations?: RemoteDeclarations,
+		configuration?: DefinitionConfiguration,
+	): DefinitionsCreateResult<RemoteDeclarations> | DefinitionBuilder {
+		if (declarations !== undefined) {
+			configuration ??= {};
+			return new DefinitionBuilder().Add(declarations).SetConfiguration(configuration).ToModel();
+		} else {
+			return new DefinitionBuilder();
+		}
+	}
 
-		validateDeclarations(declarations);
-		return identity<DefinitionsCreateResult<T>>({
-			Server: new ServerDefinitionBuilder<T>(declarations, configuration),
-			Client: new ClientDefinitionBuilder<T>(declarations, configuration),
-		});
+	export function Define() {
+		return new DefinitionBuilder();
 	}
 
 	/**
@@ -87,6 +106,8 @@ namespace NetDefinitions {
 	 * ```
 	 *
 	 * This is useful for categorizing remotes by feature.
+	 *
+	 * @deprecated Use {@link Create}()
 	 */
 	export function Namespace<T extends RemoteDeclarations>(declarations: T, configuration?: NamespaceConfiguration) {
 		return {
@@ -101,19 +122,43 @@ namespace NetDefinitions {
 	 * `Client` [`Calls`] -> `Server` [`Recieves Call`]
 	 * ... (asynchronously) ...
 	 * `Server` [`Responds to Call`] -> `Client` [`Recieves Response`]
+	 *
+	 * @deprecated Use `AsyncFunction`
 	 */
 	export function ServerAsyncFunction<
 		ServerFunction extends (...args: any[]) => unknown = (...args: unknown[]) => unknown
 	>(mw?: MiddlewareOverload<Parameters<ServerFunction>>) {
-		return {
-			Type: "AsyncFunction",
-			ServerMiddleware: mw,
-		} as AsyncServerFunctionDeclaration<Parameters<ServerFunction>, ReturnType<ServerFunction>>;
+		const funBuilder = new AsyncFunctionBuilder();
+		if (mw) {
+			funBuilder.WithServerCallbackMiddleware(...mw);
+		} else {
+			funBuilder.Unsafe(); // consider this unsafe...
+		}
+
+		return funBuilder.OnServer();
 	}
 
 	/**
-	 * @version 3.0
+	 * Create an async function
 	 *
+	 * @returns
+	 * @version 4.0
+	 */
+	export function AsyncFunction() {
+		return new AsyncFunctionBuilder();
+	}
+
+	/**
+	 * Create a one-way event
+	 *
+	 * @returns
+	 * @version 4.0
+	 */
+	export function Event() {
+		return new EventBuilder();
+	}
+
+	/**
 	 * **_Note_: This uses {@link MessagingService}, and thus is subject to those quotas/limits.**
 	 *
 	 * **_Note_: Unlike other definitions in Net, this is only available on the server.**
@@ -126,6 +171,7 @@ namespace NetDefinitions {
 	 *
 	 * `Source Server [`Broadcasts`] -> `Target Server` [`Recieves Broadcast`]
 	 *
+	 * @version 3.0
 	 */
 	export function ExperienceBroadcastEvent<ServerArgs extends defined = defined>() {
 		return {

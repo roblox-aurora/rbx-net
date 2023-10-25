@@ -1,5 +1,5 @@
 import NetDefinitions, { DefinitionConfiguration } from "./definitions";
-import { NetMiddleware } from "./middleware";
+import { NetMiddleware, ServerCallbackMiddleware } from "./middleware";
 import { $env, $NODE_ENV } from "rbxts-transform-env";
 import {
 	ClientBuildResult,
@@ -124,19 +124,15 @@ namespace Net {
 	export const Middleware = NetMiddleware;
 	/**
 	 * Middleware function type for Net
+	 * @deprecated
 	 */
-	export type Middleware = NetMiddleware;
+	export type Middleware = ServerCallbackMiddleware;
 
 	/**
 	 * Short-hand for `Net.Definitions.Create`
 	 * @see {@link Definitions.Create}
 	 */
-	export function CreateDefinitions<T extends RemoteDeclarations>(
-		declarations: T,
-		configuration?: DefinitionConfiguration,
-	) {
-		return Definitions.Create(declarations, configuration);
-	}
+	export const CreateDefinitions = Definitions.Create;
 }
 
 export = Net;

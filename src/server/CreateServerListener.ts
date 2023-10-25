@@ -1,8 +1,8 @@
 import ServerEventV2 from "./ServerEvent";
-import { NetMiddleware } from "../middleware";
+import { ServerCallbackMiddleware } from "../middleware";
 
 type MiddlewareOverload = [
-	middleware: Array<NetMiddleware<any>>,
+	middleware: Array<ServerCallbackMiddleware<any>>,
 	callback: (player: Player, ...args: Array<unknown>) => void,
 ];
 type CreateServerListenerOverloads = [callback: (player: Player, ...args: Array<unknown>) => void] | MiddlewareOverload;
@@ -20,12 +20,12 @@ export default function createServerListener<T extends Array<unknown>>(
 ): RBXScriptConnection;
 export default function createServerListener<M0 extends Array<unknown>>(
 	id: string,
-	middleware: [NetMiddleware<M0>],
+	middleware: [ServerCallbackMiddleware<M0>],
 	callback: (player: Player, ...args: M0) => void,
 ): RBXScriptConnection;
 export default function createServerListener<M0 extends Array<unknown>, M1 extends Array<unknown>>(
 	id: string,
-	middleware: [NetMiddleware<M0>, NetMiddleware<M1, M0>],
+	middleware: [ServerCallbackMiddleware<M0>, ServerCallbackMiddleware<M1, M0>],
 	callback: (player: Player, ...args: M1) => void,
 ): RBXScriptConnection;
 export default function createServerListener<
@@ -34,14 +34,14 @@ export default function createServerListener<
 	M2 extends Array<unknown>
 >(
 	id: string,
-	middleware: [NetMiddleware<M0>, NetMiddleware<M1, M0>, NetMiddleware<M2, M1>],
+	middleware: [ServerCallbackMiddleware<M0>, ServerCallbackMiddleware<M1, M0>, ServerCallbackMiddleware<M2, M1>],
 	callback: (player: Player, ...args: M2) => void,
 ): RBXScriptConnection;
 export default function createServerListener(id: string, ...args: CreateServerListenerOverloads) {
 	let event: ServerEventV2;
 	if (isMiddlewareArgument(args)) {
 		const [middleware, connect] = args;
-		event = new ServerEventV2(id, middleware as [NetMiddleware<any>]);
+		event = new ServerEventV2(id, middleware as [ServerCallbackMiddleware<any>]);
 		return event.Connect(connect);
 	} else {
 		const [connect] = args;

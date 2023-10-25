@@ -7,20 +7,53 @@ export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unkn
 
 export type MiddlewareOverload<T extends readonly unknown[]> =
 	| []
-	| [NetMiddleware<T>]
-	| [NetMiddleware, NetMiddleware<T>]
-	| [NetMiddleware, NetMiddleware, NetMiddleware<T>]
-	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>]
-	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>]
-	| [NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware, NetMiddleware<T>];
+	| [ServerCallbackMiddleware<T>]
+	| [ServerCallbackMiddleware, ServerCallbackMiddleware<T>]
+	| [ServerCallbackMiddleware, ServerCallbackMiddleware, ServerCallbackMiddleware<T>]
+	| [ServerCallbackMiddleware, ServerCallbackMiddleware, ServerCallbackMiddleware, ServerCallbackMiddleware<T>]
+	| [
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware<T>,
+	  ]
+	| [
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware,
+			ServerCallbackMiddleware<T>,
+	  ];
 
-export type NetMiddleware<
+export type ServerCallbackMiddleware<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	Ret = void
+> = (
+	next: (player: Player, ...args: CallArguments) => Ret,
+	event: NetManagedInstance,
+) => (sender: Player, ...args: PreviousCallArguments) => Ret | NetMiddleware.Skip;
+
+export type ClientCallbackMiddleware<
+	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	Ret = void
+> = (
+	next: (...args: CallArguments) => Ret,
+	event: NetManagedInstance,
+) => (...args: PreviousCallArguments) => Ret | NetMiddleware.Skip;
+
+export type ServerInvokeMiddleware<
+	CallArguments extends ReadonlyArray<unknown> = unknown[],
 	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>
 > = (
 	next: (player: Player, ...args: CallArguments) => void,
 	event: NetManagedInstance,
-) => (sender: Player, ...args: PreviousCallArguments) => void;
+) => (player: Player, ...args: PreviousCallArguments) => NetMiddleware.Skip | void;
+
+export type NetMiddleware = ServerCallbackMiddleware;
 
 export type NetGlobalMiddleware = (
 	next: (player: Readonly<Player>, ...args: readonly unknown[]) => void,
@@ -32,6 +65,11 @@ export interface ReadonlyGlobalMiddlewareArgs {
 }
 
 export namespace NetMiddleware {
+	export interface Skip {
+		readonly __nominal_Middleware_Skip: unique symbol;
+	}
+	export const Skip = {} as Skip;
+
 	export const RateLimit = createRateLimiter;
 	export const Logging = createLoggerMiddleware;
 

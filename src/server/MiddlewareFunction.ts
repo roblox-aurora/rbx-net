@@ -1,4 +1,4 @@
-import { NetGlobalMiddleware, NetMiddleware, NextCaller } from "../middleware";
+import { NetGlobalMiddleware, ServerCallbackMiddleware, NextCaller } from "../middleware";
 import { MiddlewareList, MutableMiddlewareList } from "./MiddlewareEvent";
 
 abstract class MiddlewareFunction {

@@ -1,15 +1,18 @@
 import { NetManagedInstance } from "../../internal";
-import { NetMiddleware } from "..";
+import { ServerCallbackMiddleware } from "..";
 
 type CheckLike<T> = (value: unknown) => value is T;
 type InferValue<T> = T extends CheckLike<infer A> ? A : never;
+
 type Convert<T> = { [K in keyof T]: InferValue<T[K]> };
+type ToCheck<T> = { [K in keyof T]: CheckLike<T[K]> };
+
 export interface TypeCheckerOptions {
 	ErrorHandler?: ErrorHandler;
 }
 
-export interface NetTypeCheckerMiddleware<T extends Array<unknown>> extends NetMiddleware<Convert<T>> {
-	WithErrorHandler(errorHandler: ErrorHandler): NetMiddleware<Convert<T>>;
+export interface NetTypeCheckerMiddleware<T extends Array<unknown>> extends ServerCallbackMiddleware<Convert<T>> {
+	WithErrorHandler(errorHandler: ErrorHandler): ServerCallbackMiddleware<Convert<T>>;
 }
 
 export interface TypeChecking {

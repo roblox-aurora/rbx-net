@@ -1,4 +1,4 @@
-import { NetMiddleware, NextCaller } from "../middleware";
+import { ServerCallbackMiddleware, NextCaller } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
@@ -98,7 +98,7 @@ export default class ServerEvent<
 		const Players = game.GetService("Players");
 
 		if (typeIs(blacklist, "Instance")) {
-			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
+			const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
 			for (const player of otherPlayers) {
 				this.instance.FireClient(player, ...(args as CallArgs));
 			}

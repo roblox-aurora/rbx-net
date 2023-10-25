@@ -1,10 +1,10 @@
 import { format, IS_SERVER, NetManagedInstance, RequestCounter, ServerTickFunctions } from "../../internal";
 import throttler from "./throttle";
-import { NetMiddleware } from "../../middleware";
+import { ServerCallbackMiddleware } from "../../middleware";
 
 const throttles = new Map<NetManagedInstance, RequestCounter>();
 
-type RateLimitMiddleware = NetMiddleware<any, Array<unknown>>;
+type RateLimitMiddleware = ServerCallbackMiddleware<any, Array<unknown>>;
 
 export interface RateLimitError {
 	Message: string;

@@ -11,7 +11,7 @@ const declarationMap = new WeakMap<NamespaceBuilder<RemoteDeclarations>, RemoteD
 
 export type ToServerBuilder<T> = T extends NamespaceBuilder<infer A> ? ServerDefinitionBuilder<A> : never;
 export type ToClientBuilder<T> = T extends NamespaceBuilder<infer A> ? ClientDefinitionBuilder<A> : never;
-export type InferDefinition<T> = T extends NamespaceDeclaration<infer R> ? R : never;
+export type InferDefinition<T> = T extends NamespaceDeclaration<infer R> ? R : {};
 
 export interface NamespaceConfiguration
 	extends Omit<DefinitionConfiguration, "ServerGlobalMiddleware" | "ClientGetShouldYield"> {}
@@ -22,12 +22,6 @@ export interface NamespaceConfiguration
 export class NamespaceBuilder<N extends RemoteDeclarations> {
 	public constructor(declarations: N, private config?: NamespaceConfiguration) {
 		declarationMap.set(this, declarations);
-		$dbg(declarations, (value, source) => {
-			print(`[${source.file}:${source.lineNumber}]`, "== Namespace Declarations ==");
-			for (const [name, va] of pairs(value)) {
-				print(`[${source.file}:${source.lineNumber}]`, name, va.Type);
-			}
-		});
 	}
 
 	/** @internal */

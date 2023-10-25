@@ -1,5 +1,5 @@
-import { NetMiddleware } from "../../middleware";
+import { ServerCallbackMiddleware } from "../../middleware";
 import { LoggingOptions } from "./types";
 
-declare const createLoggerMiddleware: (options?: LoggingOptions) => NetMiddleware;
+declare const createLoggerMiddleware: (options?: LoggingOptions) => ServerCallbackMiddleware;
 export = createLoggerMiddleware;

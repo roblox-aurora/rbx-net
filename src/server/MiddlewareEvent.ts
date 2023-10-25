@@ -1,8 +1,8 @@
-import { NetGlobalMiddleware, NetMiddleware, NextCaller } from "../middleware";
+import { NetGlobalMiddleware, ServerCallbackMiddleware, NextCaller } from "../middleware";
 
 /** @internal */
-export type MutableMiddlewareList = Array<NetMiddleware<Array<unknown>>>;
-export type MiddlewareList = ReadonlyArray<NetMiddleware<ReadonlyArray<unknown>>>;
+export type MutableMiddlewareList = Array<ServerCallbackMiddleware<Array<unknown>>>;
+export type MiddlewareList = ReadonlyArray<ServerCallbackMiddleware<ReadonlyArray<unknown>>>;
 abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 
