@@ -1,8 +1,8 @@
-import { NetGlobalMiddleware } from "../middleware";
+import { NetGlobalMiddleware } from "../../middleware";
 import { $dbg, $nameof, $print } from "rbxts-transform-debug";
-import ServerAsyncFunction from "../server/ServerAsyncFunction";
-import ServerEvent from "../server/ServerEvent";
-import ServerFunction from "../server/ServerFunction";
+import ServerAsyncFunction from "../../server/ServerAsyncFunction";
+import ServerEvent from "../../server/ServerEvent";
+import ServerFunction from "../../server/ServerFunction";
 import {
 	AsyncServerFunctionDeclaration,
 	BidirectionalEventDeclaration,
@@ -17,12 +17,12 @@ import {
 	DeclarationLike,
 	DeclarationNamespaceLike,
 	FilterServerDeclarations,
-} from "./Types";
-import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../internal";
-import { InferDefinition } from "./NamespaceBuilder";
-import { DefinitionConfiguration } from ".";
-import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
-import ServerMessagingEvent from "../server/ServerMessagingEvent";
+} from "../Types";
+import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../../internal";
+import { InferDefinition } from "./NamespaceDefinitions";
+import { DefinitionConfiguration } from "..";
+import ExperienceBroadcastEvent from "../../messaging/ExperienceBroadcastEvent";
+import ServerMessagingEvent from "../../server/ServerMessagingEvent";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 
@@ -52,7 +52,7 @@ type RemoteDeclarationDict<T extends RemoteDeclarations> =
 	| Record<keyof FilterGroups<T> & string, DeclarationNamespaceLike>;
 
 // Keep the declarations fully isolated
-const declarationMap = new WeakMap<ServerDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
+const declarationMap = new WeakMap<ServerDefinitions<RemoteDeclarations>, RemoteDeclarations>();
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
@@ -61,7 +61,7 @@ const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
-export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
+export class ServerDefinitions<T extends RemoteDeclarations> {
 	private globalMiddleware?: NetGlobalMiddleware[];
 
 	public constructor(declarations: T, private config: ServerDefinitionConfig, private namespace = NAMESPACE_ROOT) {
@@ -201,7 +201,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 	/** @internal */
 	public toString() {
-		return `[${$nameof(ServerDefinitionBuilder)}]`;
+		return `[${$nameof(ServerDefinitions)}]`;
 	}
 
 	/**
@@ -224,17 +224,17 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 
 	/**
 	 * Gets the specified group as a definition builder
-	 * @param namespaceId The name of the group
+	 * @param id The name of the group
 	 *
 	 * ```ts
-	 * const FeatureA = Remotes.Server.Group("FeatureA");
+	 * const FeatureA = Remotes.Server.GetNamespace("FeatureA");
 	 * const FeatureAEvent = FeatureA.Get("FeatureAEvent");
 	 * ```
 	 *
 	 */
 	public GetNamespace<K extends keyof FilterGroups<T> & string>(
 		namespaceId: K,
-	): ServerDefinitionBuilder<InferDefinition<T[K]>> {
+	): ServerDefinitions<InferDefinition<T[K]>> {
 		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
@@ -248,28 +248,44 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 	/**
 	 * Fetches the remote object with the specified id in this namespace.
 	 *
-	 * @param remoteId The remote id
+	 * @param id The remote id
 	 * @returns The server-side remote object
 	 *
 	 * @see {@link OnEvent}, {@link OnFunction} for nicer alternatives for event/callback handling.
 	 */
-	public Get<K extends keyof FilterServerDeclarations<T> & string>(remoteId: K): InferServerRemote<T[K]> {
-		const item = declarationMap.get(this)![remoteId];
-		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
+	public Get<K extends keyof FilterServerDeclarations<T> & string>(id: K): InferServerRemote<T[K]>;
+
+	/**
+	 * Gets the specified group as a definition builder
+	 * @param id The name of the group
+	 *
+	 * ```ts
+	 * const FeatureA = Remotes.Server.Get("FeatureA");
+	 * const FeatureAEvent = FeatureA.Get("FeatureAEvent");
+	 * ```
+	 *
+	 */
+	public Get<K extends keyof FilterGroups<T> & string>(id: K): ServerDefinitions<InferDefinition<T[K]>>;
+
+	public Get<K extends (keyof FilterServerDeclarations<T> | keyof FilterGroups<T>) & string>(id: K) {
+		const item = declarationMap.get(this)![id];
+		assert(item && item.Type, `'${id}' is not defined in this definition.`);
 		if (
 			item.Type === "Function" ||
 			item.Type === "AsyncFunction" ||
 			item.Type === "Event" ||
 			item.Type === "Messaging"
 		) {
-			if (remoteAsyncFunctionCache.has(remoteId)) {
-				$print(`Fetch cached copy of ${remoteId}`);
-				return remoteAsyncFunctionCache.get(remoteId)! as InferServerRemote<T[K]>;
+			if (remoteAsyncFunctionCache.has(id)) {
+				$print(`Fetch cached copy of ${id}`);
+				return remoteAsyncFunctionCache.get(id)! as InferServerRemote<T[K]>;
 			} else {
-				return this._CreateOrGetInstance(remoteId, item) as InferServerRemote<T[K]>;
+				return this._CreateOrGetInstance(id, item) as InferServerRemote<T[K]>;
 			}
+		} else if (item.Type === "Namespace") {
+			return this.GetNamespace(id as keyof FilterGroups<T> & string);
 		} else {
-			throw `Invalid type for ${remoteId}`;
+			throw `Invalid type for ${id}`;
 		}
 	}
 

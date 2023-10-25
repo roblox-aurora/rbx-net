@@ -2,6 +2,8 @@ import Net from "@rbxts/net";
 import t from "@rbxts/t";
 import { $print } from "rbxts-transform-debug";
 import { NetMiddleware } from "./middleware";
+import { types } from "./validation";
+import { RemoteBuilder, Serializable, Serialized } from "./definitions/Classes/RemoteBuilders/RemoteBuilder";
 
 // type $GuidTree<K extends string, T> = { readonly [P in keyof T]: `guid@${K}:${P & string}` };
 // declare function $guids<K extends string, T extends Record<string, true>>(namespace: K, values: T): $GuidTree<K, T>;
@@ -66,36 +68,17 @@ const Remotes = Create(
 
 const BuilderRemotes = Net.Definitions.Create()
 	// Create a namespacae using an object model
-	.AddNamespace("ExampleNamespaceObject", {
-		ExampleEvent: Net.Definitions.Event().EnsureArguments(t.string).OnServer(), // Event for server taht takes
+	.AddNamespace("test", {
+		x: Net.Definitions.AsyncFunction().OnServer(),
+		y: Net.Definitions.Event().OnClient(),
+		z: Net.Definitions.Create()
+			.Add({
+				a: Net.Definitions.AsyncFunction().OnServer(),
+			})
+			.ToNamespace(),
 	})
-	// Create a namespace using another builder + object model
-	.AddNamespace(
-		"ExampleNamespaceUsingInnerBuilder",
-		Net.Definitions.Create().Add({
-			// Example object-like
-			ExampleAsyncFunction: Net.Definitions.AsyncFunction().OnClient(),
-		}),
-	)
-	// Create a namespace with a builder functionally
-	.AddNamespace(
-		"ExampleNamespaceUsingFunctionalBuilder",
-		builder => {
-			// You can add remotes one by one functionally like this
-			return builder
-				.AddClientRemote("ClientRemoteName", Net.Definitions.AsyncFunction())
-				.AddServerRemote("ServerRemoteName", Net.Definitions.Event());
-		}, // add a client remote using a function
-	)
-	// Of course like our inner builder, we can use 'Add' here.
-	.Add({
-		ExampleBaseRemote: Net.Definitions.AsyncFunction().OnServer(),
-		// Can add a created definition as a namespace to an object model
-		ToNamespaceBehaviour: Net.Definitions.Create().ToNamespace(),
-	})
-	.AddServerRemote("NamedBaseServerRemoteFunction", Net.Definitions.AsyncFunction())
-	.AddClientRemote("NamedBaseClientRemoteEvent", Net.Definitions.Event())
-	.Build();
+	.AddServerRemote("test2", Net.Definitions.AsyncFunction())
+	.Build().Server;
 
 Remotes.Server.Get("Test4Event");
 

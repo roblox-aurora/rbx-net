@@ -11,11 +11,17 @@ import { MiddlewareOverload } from "../middleware";
 import ServerAsyncFunction, { ServerAsyncCallback, ServerAsyncCaller } from "../server/ServerAsyncFunction";
 import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
-import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
-import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
-import { NamespaceBuilder } from "./NamespaceBuilder";
+import { ClientDefinitions } from "./Classes/ClientDefinitions";
+import { ServerDefinitions } from "./Classes/ServerDefinitions";
+import { NamespaceDefinitions } from "./Classes/NamespaceDefinitions";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
+
+export type Identity<T> = T extends object
+	? {} & {
+			[P in keyof T]: T[P];
+	  }
+	: T;
 
 export interface FunctionDeclarationLike {
 	/**
@@ -60,6 +66,9 @@ export interface EventDeclarationLike {
 
 	/** @internal */
 	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+
+	/** @internal */
+	readonly Unreliable: boolean;
 }
 
 export interface AsyncFunctionDeclarationLike {
@@ -84,18 +93,18 @@ export interface FunctionDeclaration<T extends readonly unknown[], R extends unk
 /**
  * The DefinitionBuilders type
  */
-export interface DefinitionsCreateResult<T extends RemoteDeclarations> {
+export interface GeneratedDefinitions<T extends RemoteDeclarations> {
 	/**
 	 * The server namespace for this definitions file, which allows manipulating remotes from the server
 	 * @server
 	 */
-	readonly Server: ServerDefinitionBuilder<T>;
+	readonly Server: ServerDefinitions<T>;
 
 	/**
 	 * The client namespace for this definitions file, which allows manipulating remotes from the client
 	 * @client
 	 */
-	readonly Client: ClientDefinitionBuilder<T>;
+	readonly Client: ClientDefinitions<T>;
 }
 
 export type InferGroupDeclaration<T> = T extends DeclarationNamespaceLike ? T["Definitions"] : {};
@@ -230,7 +239,7 @@ export interface DeclarationNamespaceLike {
 	/** @internal */
 	readonly Type: "Namespace";
 	/** @internal */
-	readonly Definitions: NamespaceBuilder<RemoteDeclarations>;
+	readonly Definitions: NamespaceDefinitions<RemoteDeclarations>;
 }
 
 /**
@@ -243,7 +252,7 @@ export interface NamespaceDeclaration<T extends RemoteDeclarations> extends Decl
 	/** @internal */
 	readonly Type: "Namespace";
 	/** @internal */
-	readonly Definitions: NamespaceBuilder<T>;
+	readonly Definitions: NamespaceDefinitions<T>;
 }
 export type DeclarationLike =
 	| FunctionDeclarationLike

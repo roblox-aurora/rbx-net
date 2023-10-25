@@ -3,7 +3,7 @@ import { MiddlewareOverload, NetGlobalMiddleware, createTypeChecker } from "../m
 import {
 	FunctionDeclaration,
 	RemoteDeclarations,
-	DefinitionsCreateResult,
+	GeneratedDefinitions,
 	NamespaceDeclaration,
 	ServerToClientEventDeclaration,
 	ClientToServerEventDeclaration,
@@ -14,12 +14,12 @@ import {
 	ExperienceBroadcastEventDeclaration,
 	ExperienceReplicatingEventDeclaration,
 } from "./Types";
-import { ServerDefinitionBuilder } from "./ServerDefinitionBuilder";
-import { ClientDefinitionBuilder } from "./ClientDefinitionBuilder";
-import { NamespaceBuilder, NamespaceConfiguration } from "./NamespaceBuilder";
-import { AsyncFunctionBuilder } from "./remotes/AsyncFunctionBuilder";
-import { EventBuilder } from "./remotes/EventBuilder";
-import { DefinitionBuilder } from "./remotes/DefinitionBuilder";
+import { ServerDefinitions } from "./Classes/ServerDefinitions";
+import { ClientDefinitions } from "./Classes/ClientDefinitions";
+import { NamespaceDefinitions, NamespaceConfiguration } from "./Classes/NamespaceDefinitions";
+import { AsyncFunctionBuilder } from "./Classes/RemoteBuilders/AsyncFunctionBuilder";
+import { EventBuilder } from "./Classes/RemoteBuilders/EventBuilder";
+import { DefinitionBuilder } from "./Classes/RemoteBuilders/DefinitionBuilder";
 
 export interface DefinitionConfiguration {
 	/**
@@ -69,7 +69,7 @@ namespace NetDefinitions {
 	export function Create<T extends RemoteDeclarations>(
 		declarations: T,
 		configuration?: DefinitionConfiguration,
-	): DefinitionsCreateResult<T>;
+	): GeneratedDefinitions<T>;
 	/**
 	 * Creates definitions using the new net definitions builder
 	 *
@@ -79,10 +79,10 @@ namespace NetDefinitions {
 	export function Create(
 		declarations?: RemoteDeclarations,
 		configuration?: DefinitionConfiguration,
-	): DefinitionsCreateResult<RemoteDeclarations> | DefinitionBuilder {
+	): GeneratedDefinitions<RemoteDeclarations> | DefinitionBuilder {
 		if (declarations !== undefined) {
 			configuration ??= {};
-			return new DefinitionBuilder().Add(declarations).SetConfiguration(configuration).ToModel();
+			return new DefinitionBuilder().Add(declarations).SetConfiguration(configuration).Build();
 		} else {
 			return new DefinitionBuilder();
 		}
@@ -112,7 +112,7 @@ namespace NetDefinitions {
 	export function Namespace<T extends RemoteDeclarations>(declarations: T, configuration?: NamespaceConfiguration) {
 		return {
 			Type: "Namespace",
-			Definitions: new NamespaceBuilder(declarations, configuration),
+			Definitions: new NamespaceDefinitions(declarations, configuration),
 		} as NamespaceDeclaration<T>;
 	}
 

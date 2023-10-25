@@ -1,4 +1,4 @@
-import { ClientCallbackMiddleware, ServerCallbackMiddleware, ServerInvokeMiddleware } from "../../middleware";
+import { ClientCallbackMiddleware, ServerCallbackMiddleware, ServerInvokeMiddleware } from "../../../middleware";
 
 export type CheckLike<T> = (value: unknown) => value is T;
 export abstract class RemoteBuilder<TServer extends object, TClient extends object> {
@@ -16,10 +16,10 @@ export interface Serialized<T extends string> {
 }
 
 export interface Serializable<T> {
-	serialize(): T;
+	Serialize(): T;
 }
 
 export interface SerializeClass<TClass extends unknown, TSerialized extends Serialized<string>> {
 	new (): Serializable<TSerialized>;
-	deserialize(ser: TSerialized): TClass;
+	Deserialize(ser: TSerialized): TClass;
 }

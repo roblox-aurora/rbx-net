@@ -1,11 +1,11 @@
-import { ServerCallbackMiddleware, createTypeChecker } from "../../middleware";
-import createRateLimiter, { RateLimitOptions } from "../../middleware/RateLimitMiddleware";
-import { ToCheck } from "../../middleware/TypeCheckMiddleware/types";
+import { ServerCallbackMiddleware, createTypeChecker } from "../../../middleware";
+import createRateLimiter, { RateLimitOptions } from "../../../middleware/RateLimitMiddleware";
+import { ToCheck } from "../../../middleware/TypeCheckMiddleware/types";
 import {
 	BidirectionalEventDeclaration,
 	ClientToServerEventDeclaration,
 	ServerToClientEventDeclaration,
-} from "../Types";
+} from "../../Types";
 import { RemoteBuilder } from "./RemoteBuilder";
 
 export class EventBuilder<

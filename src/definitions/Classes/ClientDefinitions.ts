@@ -1,10 +1,10 @@
 import { $nameof, $print } from "rbxts-transform-debug";
-import { DefinitionConfiguration } from ".";
-import ClientAsyncFunction from "../client/ClientAsyncFunction";
-import ClientEvent from "../client/ClientEvent";
-import ClientFunction from "../client/ClientFunction";
-import { getGlobalRemote, NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../internal";
-import { InferDefinition } from "./NamespaceBuilder";
+import { DefinitionConfiguration } from "..";
+import ClientAsyncFunction from "../../client/ClientAsyncFunction";
+import ClientEvent from "../../client/ClientEvent";
+import ClientFunction from "../../client/ClientFunction";
+import { getGlobalRemote, NAMESPACE_ROOT, NAMESPACE_SEPARATOR } from "../../internal";
+import { InferDefinition } from "./NamespaceDefinitions";
 import {
 	AsyncClientFunctionDeclaration,
 	DeclarationsOf,
@@ -16,13 +16,13 @@ import {
 	RemoteDeclarations,
 	ServerToClientEventDeclaration,
 	FilterClientDeclarations,
-} from "./Types";
+} from "../Types";
 
 // Keep the declarations fully isolated
-const declarationMap = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, RemoteDeclarations>();
-const shouldYield = new WeakMap<ClientDefinitionBuilder<RemoteDeclarations>, boolean>();
+const declarationMap = new WeakMap<ClientDefinitions<RemoteDeclarations>, RemoteDeclarations>();
+const shouldYield = new WeakMap<ClientDefinitions<RemoteDeclarations>, boolean>();
 
-export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
+export class ClientDefinitions<T extends RemoteDeclarations> {
 	public constructor(
 		declarations: T,
 		private configuration?: DefinitionConfiguration,
@@ -34,7 +34,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 	/** @internal */
 	public toString() {
-		return `[${$nameof(ClientDefinitionBuilder)}]`;
+		return `[${$nameof(ClientDefinitions)}]`;
 	}
 
 	/**
@@ -60,9 +60,7 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 	 * Gets the specified remote declaration group (or sub group) in which namespaced remotes can be accessed
 	 * @param namespaceId The group name
 	 */
-	GetNamespace<K extends keyof FilterGroups<T> & string>(
-		namespaceId: K,
-	): ClientDefinitionBuilder<InferDefinition<T[K]>> {
+	GetNamespace<K extends keyof FilterGroups<T> & string>(namespaceId: K): ClientDefinitions<InferDefinition<T[K]>> {
 		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
