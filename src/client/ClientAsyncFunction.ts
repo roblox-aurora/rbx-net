@@ -1,3 +1,4 @@
+import { DefinitionConfiguration } from "../definitions";
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
 
 const HttpService = game.GetService("HttpService");
@@ -50,7 +51,7 @@ export default class ClientAsyncFunction<
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
 
-	constructor(private name: string) {
+	constructor(private name: string, private configuration: DefinitionConfiguration) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
@@ -59,10 +60,10 @@ export default class ClientAsyncFunction<
 		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		ServerReturnType = unknown
-	>(name: string) {
-		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async (resolve) => {
+	>(name: string, configuration: DefinitionConfiguration) {
+		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async resolve => {
 			await waitForRemote("AsyncRemoteFunction", name, 60);
-			resolve(new ClientAsyncFunction(name));
+			resolve(new ClientAsyncFunction(name, configuration));
 		});
 	}
 
@@ -81,13 +82,18 @@ export default class ClientAsyncFunction<
 			this.connector = undefined;
 		}
 
+		const remoteId = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
 		this.connector = this.instance.OnClientEvent.Connect(async (...args: CallbackArgs) => {
+			if (microprofile) debug.profilebegin(`Net: ${remoteId}`);
+
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
 				const result: unknown | Promise<unknown> = callback(...(data as CallbackArgs));
 				if (Promise.is(result)) {
 					result
-						.then((promiseResult) => {
+						.then(promiseResult => {
 							this.instance.FireServer(eventId, promiseResult);
 						})
 						.catch((err: string) => {
@@ -99,6 +105,8 @@ export default class ClientAsyncFunction<
 			} else {
 				warn("Recieved message without eventId");
 			}
+
+			if (microprofile) debug.profileend();
 		});
 	}
 

@@ -4,6 +4,7 @@ import ExperienceBroadcastEvent, {
 } from "../messaging/ExperienceBroadcastEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
+import { DefinitionConfiguration } from "../definitions";
 const Players = game.GetService("Players");
 
 export interface IMessage<TArgs> {
@@ -34,12 +35,12 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	private readonly event: ExperienceBroadcastEvent<IMessage<TArgs>>;
 	private readonly eventHandler: RBXScriptConnection;
 
-	constructor(name: string) {
-		this.instance = new ServerEvent(getGlobalRemote(name));
+	constructor(name: string, config: DefinitionConfiguration) {
+		this.instance = new ServerEvent(getGlobalRemote(name), undefined, config);
 		this.event = new ExperienceBroadcastEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
-		this.eventHandler = this.event.Connect((message) => {
+		this.eventHandler = this.event.Connect(message => {
 			if (isTargetedSubscriptionMessage(message)) {
 				this.recievedMessage(message.Data);
 			} else {

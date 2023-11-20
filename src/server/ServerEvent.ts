@@ -3,6 +3,7 @@ import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from ".
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
 import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
+import { DefinitionConfiguration } from "../definitions";
 
 /**
  * Interface for server listening events
@@ -56,7 +57,11 @@ export default class ServerEvent<
 	private instance: RemoteEvent;
 	private connection;
 
-	public constructor(name: string, middlewares: MiddlewareOverload<ConnectArgs> = []) {
+	public constructor(
+		name: string,
+		middlewares: MiddlewareOverload<ConnectArgs> = [],
+		private configuration: DefinitionConfiguration,
+	) {
 		super(middlewares);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
 		this.instance = findOrCreateRemote("RemoteEvent", name);
@@ -73,8 +78,13 @@ export default class ServerEvent<
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): Readonly<NetServerSignalConnection> {
+		const remoteId = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
 		return this.connection.Connect((player, ...args) => {
+			if (microprofile) debug.profilebegin(`Net: ${remoteId}`);
 			this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
+			if (microprofile) debug.profileend();
 		});
 	}
 
@@ -98,7 +108,7 @@ export default class ServerEvent<
 		const Players = game.GetService("Players");
 
 		if (typeIs(blacklist, "Instance")) {
-			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
+			const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
 			for (const player of otherPlayers) {
 				this.instance.FireClient(player, ...(args as CallArgs));
 			}

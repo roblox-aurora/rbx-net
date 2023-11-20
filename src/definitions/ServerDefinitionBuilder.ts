@@ -96,6 +96,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 		 */
 
 		const namespacedId = this.namespace !== NAMESPACE_ROOT ? [this.namespace, id].join(NAMESPACE_SEPARATOR) : id;
+		const config = this.config;
 
 		if (declaration.Type === "Function") {
 			let func: ServerFunction;
@@ -104,14 +105,14 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				return remoteFunctionCache.get(namespacedId)!;
 			} else {
 				if (declaration.ServerMiddleware) {
-					func = new ServerFunction(namespacedId, declaration.ServerMiddleware);
+					func = new ServerFunction(namespacedId, declaration.ServerMiddleware, config);
 				} else {
-					func = new ServerFunction(namespacedId);
+					func = new ServerFunction(namespacedId, undefined, config);
 				}
 				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
 				remoteFunctionCache.set(namespacedId, func);
 
-				this.globalMiddleware?.forEach((mw) => func._use(mw));
+				this.globalMiddleware?.forEach(mw => func._use(mw));
 				return func;
 			}
 		} else if (declaration.Type === "AsyncFunction") {
@@ -122,15 +123,15 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				return remoteAsyncFunctionCache.get(namespacedId)!;
 			} else {
 				if (declaration.ServerMiddleware) {
-					asyncFunction = new ServerAsyncFunction(namespacedId, declaration.ServerMiddleware);
+					asyncFunction = new ServerAsyncFunction(namespacedId, declaration.ServerMiddleware, config);
 				} else {
-					asyncFunction = new ServerAsyncFunction(namespacedId);
+					asyncFunction = new ServerAsyncFunction(namespacedId, undefined, config);
 				}
 				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
 				remoteAsyncFunctionCache.set(namespacedId, asyncFunction);
 			}
 
-			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
+			this.globalMiddleware?.forEach(mw => asyncFunction._use(mw));
 			return asyncFunction;
 		} else if (declaration.Type === "Event") {
 			let event: ServerEvent;
@@ -140,15 +141,15 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 				return remoteEventCache.get(namespacedId)!;
 			} else {
 				if (declaration.ServerMiddleware) {
-					event = new ServerEvent(namespacedId, declaration.ServerMiddleware);
+					event = new ServerEvent(namespacedId, declaration.ServerMiddleware, config);
 				} else {
-					event = new ServerEvent(namespacedId);
+					event = new ServerEvent(namespacedId, undefined, config);
 				}
 				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
 				remoteEventCache.set(namespacedId, event);
 			}
 
-			this.globalMiddleware?.forEach((mw) => event._use(mw));
+			this.globalMiddleware?.forEach(mw => event._use(mw));
 			return event;
 		} else if (declaration.Type === "Messaging") {
 			let event: ExperienceBroadcastEvent;
@@ -165,7 +166,7 @@ export class ServerDefinitionBuilder<T extends RemoteDeclarations> {
 			if (messagingServerEventCache.has(namespacedId)) {
 				return messagingServerEventCache.get(namespacedId)!;
 			} else {
-				event = new ServerMessagingEvent(namespacedId);
+				event = new ServerMessagingEvent(namespacedId, config);
 				messagingServerEventCache.set(namespacedId, event);
 			}
 			return event;

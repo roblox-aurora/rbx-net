@@ -45,6 +45,11 @@ export interface DefinitionConfiguration {
 	 * @default true
 	 */
 	readonly ClientGetShouldYield?: boolean;
+
+	/**
+	 * Add a microprofiler debug label to each callback
+	 */
+	readonly MicroprofileCallbacks?: boolean;
 }
 
 namespace NetDefinitions {

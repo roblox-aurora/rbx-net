@@ -81,14 +81,16 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
 
+		const config = this.configuration ?? {};
+
 		if (item.Type === "Function") {
-			return new ClientFunction(remoteId) as InferClientRemote<T[K]>;
+			return new ClientFunction(remoteId, config) as InferClientRemote<T[K]>;
 		} else if (item.Type === "Event") {
-			return new ClientEvent(remoteId) as InferClientRemote<T[K]>;
+			return new ClientEvent(remoteId, config) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
-			return new ClientAsyncFunction(remoteId) as InferClientRemote<T[K]>;
+			return new ClientAsyncFunction(remoteId, config) as InferClientRemote<T[K]>;
 		} else if (item.Type === "ExperienceEvent") {
-			return new ClientEvent(getGlobalRemote(remoteId)) as InferClientRemote<T[K]>;
+			return new ClientEvent(getGlobalRemote(remoteId), config) as InferClientRemote<T[K]>;
 		}
 
 		throw `Type '${item.Type}' is not a valid client remote object type`;
@@ -111,14 +113,16 @@ export class ClientDefinitionBuilder<T extends RemoteDeclarations> {
 
 		$print(`WaitFor(${remoteId}) {${item.Type}~'${remoteId}'}`);
 
+		const config = this.configuration ?? {};
+
 		if (item.Type === "Function") {
-			return ClientFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
+			return ClientFunction.Wait(remoteId, config) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "Event") {
-			return ClientEvent.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
+			return ClientEvent.Wait(remoteId, config) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "AsyncFunction") {
-			return ClientAsyncFunction.Wait(remoteId) as Promise<InferClientRemote<T[K]>>;
+			return ClientAsyncFunction.Wait(remoteId, config) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "ExperienceEvent") {
-			return ClientEvent.Wait(getGlobalRemote(remoteId)) as Promise<InferClientRemote<T[K]>>;
+			return ClientEvent.Wait(getGlobalRemote(remoteId), config) as Promise<InferClientRemote<T[K]>>;
 		}
 
 		throw `Type '${item.Type}' is not a valid client remote object type`;

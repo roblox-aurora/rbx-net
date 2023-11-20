@@ -1,20 +1,22 @@
+import { DefinitionConfiguration } from "../definitions";
 import { getRemoteOrThrow, IS_SERVER, TagId, waitForRemote } from "../internal";
 const CollectionService = game.GetService("CollectionService");
 
 export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, ServerReturnType = unknown> {
 	private instance: RemoteFunction;
 
-	constructor(private name: string) {
+	constructor(private name: string, private configuration: DefinitionConfiguration) {
 		this.instance = getRemoteOrThrow("RemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientFunction on the Server!");
 	}
 
 	public static Wait<CallArgs extends ReadonlyArray<unknown> = Array<unknown>, ServerReturnType = unknown>(
 		name: string,
+		configuration: DefinitionConfiguration,
 	) {
 		return Promise.defer<ClientFunction<CallArgs, ServerReturnType>>(async (resolve) => {
 			await waitForRemote("RemoteFunction", name, 60);
-			resolve(new ClientFunction(name));
+			resolve(new ClientFunction(name, configuration));
 		});
 	}
 

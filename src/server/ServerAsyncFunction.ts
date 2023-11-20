@@ -1,6 +1,7 @@
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
+import { DefinitionConfiguration } from "../definitions";
 const CollectionService = game.GetService("CollectionService");
 
 const HttpService = game.GetService("HttpService");
@@ -76,11 +77,9 @@ class ServerAsyncFunction<
 		return this.instance;
 	}
 
-	constructor(name: string);
-	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs>);
-	constructor(name: string, middlewares: MiddlewareList = []) {
+	constructor(name: string, middlewares: MiddlewareList = [], private configuration: DefinitionConfiguration) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
+		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, instance => {
 			// Default connection
 			this.defaultHook = instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
 			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
@@ -114,7 +113,11 @@ class ServerAsyncFunction<
 			this.connector = undefined;
 		}
 
+		const remoteId = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
 		this.connector = this.instance.OnServerEvent.Connect(async (player, ...args: Array<unknown>) => {
+			if (microprofile) debug.profilebegin(`Net: ${remoteId}`);
 			if (isEventArgs(args)) {
 				const [eventId, data] = args;
 
@@ -124,7 +127,7 @@ class ServerAsyncFunction<
 				);
 				if (Promise.is(result)) {
 					result
-						.then((promiseResult) => {
+						.then(promiseResult => {
 							this.instance.FireClient(player, eventId, promiseResult);
 						})
 						.catch((err: string) => {
@@ -136,6 +139,7 @@ class ServerAsyncFunction<
 			} else {
 				warn("[rbx-net-async] Recieved message without eventId");
 			}
+			if (microprofile) debug.profileend();
 		});
 	}
 

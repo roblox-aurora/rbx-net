@@ -41,11 +41,11 @@ export default function createServerListener(id: string, ...args: CreateServerLi
 	let event: ServerEventV2;
 	if (isMiddlewareArgument(args)) {
 		const [middleware, connect] = args;
-		event = new ServerEventV2(id, middleware as [NetMiddleware<any>]);
+		event = new ServerEventV2(id, middleware as [NetMiddleware<any>], {});
 		return event.Connect(connect);
 	} else {
 		const [connect] = args;
-		event = new ServerEventV2(id);
+		event = new ServerEventV2(id, undefined, {});
 		return event.Connect(connect);
 	}
 }

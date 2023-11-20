@@ -2,6 +2,7 @@ import { MiddlewareOverload } from "../middleware";
 import { findOrCreateRemote, IS_SERVER, TagId } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
+import { DefinitionConfiguration } from "../definitions";
 const CollectionService = game.GetService("CollectionService");
 
 export default class ServerFunction<
@@ -16,7 +17,7 @@ export default class ServerFunction<
 		return undefined;
 	};
 
-	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs> = []) {
+	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs> = [], private configuration: DefinitionConfiguration) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
 			// Default listener

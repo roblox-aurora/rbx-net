@@ -1,3 +1,4 @@
+import { DefinitionConfiguration } from "../definitions";
 import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 
 /**
@@ -27,7 +28,7 @@ class ClientEvent<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
 > implements ClientListenerEvent<ConnectArgs>, ClientSenderEvent<CallArguments> {
 	private instance: RemoteEvent;
-	public constructor(name: string) {
+	public constructor(name: string, private configuration: DefinitionConfiguration) {
 		this.instance = getRemoteOrThrow("RemoteEvent", name);
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
 	}
@@ -40,10 +41,10 @@ class ClientEvent<
 	public static Wait<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArguments extends ReadonlyArray<unknown> = Array<unknown>
-	>(name: string) {
-		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async (resolve) => {
+	>(name: string, configuration: DefinitionConfiguration) {
+		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async resolve => {
 			await waitForRemote("RemoteEvent", name, 60);
-			resolve(new ClientEvent(name));
+			resolve(new ClientEvent(name, configuration));
 		});
 	}
 
@@ -52,7 +53,18 @@ class ClientEvent<
 	}
 
 	public Connect(callback: (...args: ConnectArgs) => void): RBXScriptConnection {
-		return this.instance.OnClientEvent.Connect(callback);
+		const remoteId = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
+		if (microprofile) {
+			return this.instance.OnClientEvent.Connect((...args) => {
+				debug.profilebegin(`Net: ${remoteId}`);
+				callback(...((args as unknown) as ConnectArgs));
+				debug.profileend();
+			});
+		} else {
+			return this.instance.OnClientEvent.Connect(callback);
+		}
 	}
 }
 
