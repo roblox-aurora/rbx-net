@@ -3,7 +3,7 @@ import { MiddlewareOverload, NetGlobalMiddleware, createTypeChecker } from "../m
 import {
 	FunctionDeclaration,
 	RemoteDeclarations,
-	GeneratedDefinitions,
+	RemoteContexts,
 	NamespaceDeclaration,
 	ServerToClientEventDeclaration,
 	ClientToServerEventDeclaration,
@@ -14,9 +14,9 @@ import {
 	ExperienceBroadcastEventDeclaration,
 	ExperienceReplicatingEventDeclaration,
 } from "./Types";
-import { ServerDefinitions } from "./Classes/ServerDefinitions";
-import { ClientDefinitions } from "./Classes/ClientDefinitions";
-import { NamespaceDefinitions, NamespaceConfiguration } from "./Classes/NamespaceDefinitions";
+import { ServerRemoteContext } from "./Classes/ServerRemoteContext";
+import { ClientRemoteContext } from "./Classes/ClientRemoteContext";
+import { NamespaceGenerator, NamespaceConfiguration } from "./Classes/NamespaceGenerator";
 import { AsyncFunctionBuilder } from "./Classes/RemoteBuilders/AsyncFunctionBuilder";
 import { EventBuilder } from "./Classes/RemoteBuilders/EventBuilder";
 import { DefinitionBuilder } from "./Classes/RemoteBuilders/DefinitionBuilder";
@@ -52,16 +52,6 @@ export interface DefinitionConfiguration {
 
 namespace NetDefinitions {
 	/**
-	 * Validates the specified declarations to ensure they're valid before usage
-	 * @param declarations The declarations
-	 */
-	function validateDeclarations(declarations: RemoteDeclarations) {
-		for (const [, declaration] of pairs(declarations)) {
-			assert(DeclarationTypeCheck.check(declaration.Type), DeclarationTypeCheck.errorMessage);
-		}
-	}
-
-	/**
 	 * Creates definitions for Remote instances that can be used on both the client and server.
 	 * @description https://docs.vorlias.com/rbx-net/docs/3.0/definitions#definitions-oh-my
 	 * @param declarations
@@ -69,7 +59,7 @@ namespace NetDefinitions {
 	export function Create<T extends RemoteDeclarations>(
 		declarations: T,
 		configuration?: DefinitionConfiguration,
-	): GeneratedDefinitions<T>;
+	): RemoteContexts<T>;
 	/**
 	 * Creates definitions using the new net definitions builder
 	 *
@@ -79,17 +69,13 @@ namespace NetDefinitions {
 	export function Create(
 		declarations?: RemoteDeclarations,
 		configuration?: DefinitionConfiguration,
-	): GeneratedDefinitions<RemoteDeclarations> | DefinitionBuilder {
+	): RemoteContexts<RemoteDeclarations> | DefinitionBuilder {
 		if (declarations !== undefined) {
 			configuration ??= {};
 			return new DefinitionBuilder().Add(declarations).SetConfiguration(configuration).Build();
 		} else {
 			return new DefinitionBuilder();
 		}
-	}
-
-	export function Define() {
-		return new DefinitionBuilder();
 	}
 
 	/**
@@ -110,10 +96,10 @@ namespace NetDefinitions {
 	 * @deprecated Use {@link Create}()
 	 */
 	export function Namespace<T extends RemoteDeclarations>(declarations: T, configuration?: NamespaceConfiguration) {
-		return {
-			Type: "Namespace",
-			Definitions: new NamespaceDefinitions(declarations, configuration),
-		} as NamespaceDeclaration<T>;
+		return new DefinitionBuilder()
+			.Add(declarations)
+			.SetConfiguration(configuration ?? {})
+			.ToNamespace();
 	}
 
 	/**
@@ -123,7 +109,7 @@ namespace NetDefinitions {
 	 * ... (asynchronously) ...
 	 * `Server` [`Responds to Call`] -> `Client` [`Recieves Response`]
 	 *
-	 * @deprecated Use `AsyncFunction`
+	 * @deprecated
 	 */
 	export function ServerAsyncFunction<
 		ServerFunction extends (...args: any[]) => unknown = (...args: unknown[]) => unknown
@@ -131,11 +117,12 @@ namespace NetDefinitions {
 		const funBuilder = new AsyncFunctionBuilder();
 		if (mw) {
 			funBuilder.WithServerCallbackMiddleware(...mw);
-		} else {
-			funBuilder.Unsafe(); // consider this unsafe...
 		}
 
-		return funBuilder.OnServer();
+		return funBuilder.OnServer() as AsyncServerFunctionDeclaration<
+			Parameters<ServerFunction>,
+			ReturnType<ServerFunction>
+		>;
 	}
 
 	/**
@@ -204,19 +191,25 @@ namespace NetDefinitions {
 	 * `Server` [`Calls`] -> `Client` [`Recieves Call`]
 	 * ... (asynchronously) ...
 	 * `Client` [`Responds to Call`] -> `Server` [`Recieves Response`]
+	 *
+	 * @deprecated
 	 */
 	export function ClientAsyncFunction<
 		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
 	>() {
-		return {
-			Type: "AsyncFunction",
-		} as AsyncClientFunctionDeclaration<Parameters<ClientFunction>, ReturnType<ClientFunction>>;
+		const funBuilder = new AsyncFunctionBuilder();
+		return funBuilder.OnClient() as AsyncClientFunctionDeclaration<
+			Parameters<ClientFunction>,
+			ReturnType<ClientFunction>
+		>;
 	}
 
 	/**
 	 * Defines a regular function in which strictly the client can call the server synchronously
 	 *
 	 * (Synchronous) `Client` [`Calls`, `Recieves Response`] <- (yields for response) -> `Server` [`Recieves Call`, `Responds`]
+	 *
+	 * @deprecated
 	 */
 	export function ServerFunction<ServerFunction extends (...args: any[]) => any>(
 		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
@@ -236,12 +229,11 @@ namespace NetDefinitions {
 	 *
 	 * On the server, this will give an event that can use `SendToPlayer`, `SendToAllPlayers`, `SendToAllPlayersExcept`
 	 *
+	 * @deprecated
 	 */
 	export function ServerToClientEvent<ServerArgs extends readonly unknown[] = unknown[]>() {
-		return {
-			ServerMiddleware: [],
-			Type: "Event",
-		} as ServerToClientEventDeclaration<ServerArgs>;
+		const builder = new EventBuilder<ServerArgs>();
+		return builder.OnServer() as ServerToClientEventDeclaration<ServerArgs>;
 	}
 
 	/**
@@ -254,6 +246,8 @@ namespace NetDefinitions {
 	 * On the server, this will give an event that can use `Connect`.
 	 *
 	 * @param mw The middleware of this event.
+	 *
+	 * @deprecated
 	 */
 	export function ClientToServerEvent<
 		ClientArgs extends readonly unknown[] = unknown[]
@@ -264,10 +258,12 @@ namespace NetDefinitions {
 	export function ClientToServerEvent<ClientArgs extends readonly unknown[] = unknown[]>(
 		mw?: MiddlewareOverload<ClientArgs>,
 	) {
-		return {
-			Type: "Event",
-			ServerMiddleware: mw,
-		} as ClientToServerEventDeclaration<ClientArgs>;
+		const builder = new EventBuilder<ClientArgs>();
+		if (mw !== undefined) {
+			builder.WithServerCallbackMiddleware(...(mw as never[]));
+		}
+
+		return builder.OnClient() as ClientToServerEventDeclaration<ClientArgs>;
 	}
 
 	/**
@@ -276,6 +272,7 @@ namespace NetDefinitions {
 	 * This should only be required in rare use cases where `ClientToServerEvent` or `ServerToClientEvent` is not sufficient.
 	 *
 	 * Check to see if {@link ServerAsyncFunction} is more sufficient for your use case.
+	 * @deprecated
 	 */
 	export function BidirectionalEvent<
 		ServerConnect extends readonly unknown[] = unknown[],

@@ -1,13 +1,7 @@
-import { ClientDefinitions } from "../ClientDefinitions";
-import { NamespaceDefinitions, NamespaceConfiguration } from "../NamespaceDefinitions";
-import { ServerDefinitions, ServerDefinitionConfig } from "../ServerDefinitions";
-import {
-	DeclarationTypeCheck,
-	GeneratedDefinitions,
-	Identity,
-	NamespaceDeclaration,
-	RemoteDeclarations,
-} from "../../Types";
+import { ClientRemoteContext } from "../ClientRemoteContext";
+import { NamespaceGenerator, NamespaceConfiguration } from "../NamespaceGenerator";
+import { ServerRemoteContext, ServerDefinitionConfig } from "../ServerRemoteContext";
+import { DeclarationTypeCheck, RemoteContexts, Identity, NamespaceDeclaration, RemoteDeclarations } from "../../Types";
 import { RemoteBuilder, Serializable, Serialized } from "./RemoteBuilder";
 import { AsyncFunctionBuilder } from "./AsyncFunctionBuilder";
 
@@ -78,7 +72,7 @@ export class DefinitionBuilder<TDeclarations extends RemoteDeclarations = {}> {
 			...this.declarations,
 			[namespace]: {
 				Type: "Namespace",
-				Definitions: new NamespaceDefinitions(definitions, { ...this.configuration, ...scopeConfiguration }),
+				Namespace: new NamespaceGenerator(definitions, { ...this.configuration, ...scopeConfiguration }),
 			},
 		};
 
@@ -95,7 +89,7 @@ export class DefinitionBuilder<TDeclarations extends RemoteDeclarations = {}> {
 		return (this as unknown) as DefinitionBuilder<MergeIdentity<TDeclarations, TAddDeclarations>>;
 	}
 
-	public AddServerRemote<TName extends string, TServer extends object>(
+	public AddServerOwned<TName extends string, TServer extends object>(
 		id: Exclude<TName, keyof TDeclarations>,
 		remoteDefinition: RemoteBuilder<TServer, any>,
 	): DefinitionBuilder<MergeIdentity<Named<TName, TServer>, TDeclarations>> {
@@ -131,7 +125,7 @@ export class DefinitionBuilder<TDeclarations extends RemoteDeclarations = {}> {
 	// 	>;
 	// }
 
-	public AddClientRemote<TName extends string, TClient extends object>(
+	public AddClientOwned<TName extends string, TClient extends object>(
 		id: Exclude<TName, keyof TDeclarations>,
 		remoteDefinition: RemoteBuilder<any, TClient>,
 	): DefinitionBuilder<MergeIdentity<Named<TName, TClient>, TDeclarations>> {
@@ -151,15 +145,15 @@ export class DefinitionBuilder<TDeclarations extends RemoteDeclarations = {}> {
 	public ToNamespace(): NamespaceDeclaration<TDeclarations> {
 		return {
 			Type: "Namespace",
-			Definitions: new NamespaceDefinitions(this.declarations, this.configuration),
+			Namespace: new NamespaceGenerator(this.declarations, this.configuration),
 		} as NamespaceDeclaration<TDeclarations>;
 	}
 
 	public Build() {
 		validateDeclarations(this.declarations);
-		return identity<GeneratedDefinitions<TDeclarations>>({
-			Server: new ServerDefinitions<TDeclarations>(this.declarations, this.configuration),
-			Client: new ClientDefinitions<TDeclarations>(this.declarations, this.configuration),
+		return identity<RemoteContexts<TDeclarations>>({
+			Server: new ServerRemoteContext<TDeclarations>(this.declarations, this.configuration),
+			Client: new ClientRemoteContext<TDeclarations>(this.declarations, this.configuration),
 		});
 	}
 }

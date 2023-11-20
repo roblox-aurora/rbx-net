@@ -1,7 +1,8 @@
-import { ServerCallbackMiddleware, createTypeChecker } from "../../../middleware";
+import { ClientCallbackMiddleware, ServerCallbackMiddleware, createTypeChecker } from "../../../middleware";
 import createRateLimiter, { RateLimitOptions } from "../../../middleware/RateLimitMiddleware";
 import { ToCheck } from "../../../middleware/TypeCheckMiddleware/types";
 import { ClientToServerEventDeclaration, ServerToClientEventDeclaration } from "../../Types";
+import { AsyncFunctionBuilder } from "./AsyncFunctionBuilder";
 import { RemoteBuilder } from "./RemoteBuilder";
 
 export class EventBuilder<TParams extends readonly unknown[] = unknown[]> extends RemoteBuilder<
@@ -14,6 +15,12 @@ export class EventBuilder<TParams extends readonly unknown[] = unknown[]> extend
 		return this.WithServerCallbackMiddleware(createTypeChecker(...typeChecks) as never) as EventBuilder<T>;
 	}
 
+	public ReturnsAsync() {
+		const builder = new AsyncFunctionBuilder<TParams, unknown>();
+		builder.serverCallbackMiddleware = this.serverCallbackMiddleware;
+		return builder;
+	}
+
 	/**
 	 * TODO: Enable when released
 	 *
@@ -23,6 +30,15 @@ export class EventBuilder<TParams extends readonly unknown[] = unknown[]> extend
 	public SetUnreliable(unreliable: boolean) {
 		this.useUnreliable = unreliable;
 		return this;
+	}
+
+	public WithClientCallbackMiddleware<TNewParams extends readonly unknown[] = TParams>(
+		...middlewares: readonly ClientCallbackMiddleware<TNewParams, TParams>[]
+	): EventBuilder<TNewParams> {
+		for (const middleware of middlewares) {
+			this.clientCallbackMiddleware.push(middleware as never);
+		}
+		return this as never;
 	}
 
 	public WithServerCallbackMiddleware<TNewParams extends readonly unknown[] = TParams>(

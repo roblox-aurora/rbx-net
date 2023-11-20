@@ -3,7 +3,7 @@ import { NetMiddleware, ServerCallbackMiddleware } from "./middleware";
 import { $env, $NODE_ENV } from "rbxts-transform-env";
 import {
 	ClientBuildResult,
-	GeneratedDefinitions,
+	RemoteContexts,
 	FilterClientDeclarations,
 	FilterGroups,
 	FilterServerDeclarations,
@@ -68,9 +68,11 @@ namespace Net {
 		 * type RemoteDefinitions = Net.Util.GetDeclarationDefinitions<typeof Remotes>;
 		 * ```
 		 */
-		export type GetDeclarationDefinitions<
-			T extends GeneratedDefinitions<RemoteDeclarations>
-		> = T extends GeneratedDefinitions<infer U> ? U : never;
+		export type GetDeclarationDefinitions<T extends RemoteContexts<RemoteDeclarations>> = T extends RemoteContexts<
+			infer U
+		>
+			? U
+			: never;
 
 		/**
 		 * Gets the keys for each remote item in a definition
@@ -79,7 +81,7 @@ namespace Net {
 		 * type RemoteIds = Net.Util.GetRemoteKeys<typeof Remotes>;
 		 * ```
 		 */
-		export type GetClientRemoteKeys<T extends GeneratedDefinitions<any>> = T extends GeneratedDefinitions<infer A>
+		export type GetClientRemoteKeys<T extends RemoteContexts<any>> = T extends RemoteContexts<infer A>
 			? keyof FilterClientDeclarations<A>
 			: never;
 
@@ -90,7 +92,7 @@ namespace Net {
 		 * type RemoteIds = Net.Util.GetRemoteKeys<typeof Remotes>;
 		 * ```
 		 */
-		export type GetServerRemoteKeys<T extends GeneratedDefinitions<any>> = T extends GeneratedDefinitions<infer A>
+		export type GetServerRemoteKeys<T extends RemoteContexts<any>> = T extends RemoteContexts<infer A>
 			? keyof FilterServerDeclarations<A>
 			: never;
 
@@ -101,7 +103,7 @@ namespace Net {
 		 * type NamespaceIds = Net.Util.GetNamespaceKeys<typeof Remotes>;
 		 * ```
 		 */
-		export type GetNamespaceKeys<T extends GeneratedDefinitions<any>> = T extends GeneratedDefinitions<infer A>
+		export type GetNamespaceKeys<T extends RemoteContexts<any>> = T extends RemoteContexts<infer A>
 			? keyof FilterGroups<A>
 			: never;
 	}

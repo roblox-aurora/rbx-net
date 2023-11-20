@@ -1,16 +1,16 @@
 import { $dbg, $print } from "rbxts-transform-debug";
 import { DefinitionConfiguration } from "..";
 import { NetGlobalMiddleware } from "../../middleware";
-import { ClientDefinitions } from "./ClientDefinitions";
-import { ServerDefinitions } from "./ServerDefinitions";
+import { ClientRemoteContext } from "./ClientRemoteContext";
+import { ServerRemoteContext } from "./ServerRemoteContext";
 import { NamespaceDeclaration, RemoteDeclarations } from "../Types";
 const RunService = game.GetService("RunService");
 
 // Isolate the definitions since we don't need to access them anywhere else.
-const declarationMap = new WeakMap<NamespaceDefinitions<RemoteDeclarations>, RemoteDeclarations>();
+const declarationMap = new WeakMap<NamespaceGenerator<RemoteDeclarations>, RemoteDeclarations>();
 
-export type ToServerBuilder<T> = T extends NamespaceDefinitions<infer A> ? ServerDefinitions<A> : never;
-export type ToClientBuilder<T> = T extends NamespaceDefinitions<infer A> ? ClientDefinitions<A> : never;
+export type ToServerBuilder<T> = T extends NamespaceGenerator<infer A> ? ServerRemoteContext<A> : never;
+export type ToClientBuilder<T> = T extends NamespaceGenerator<infer A> ? ClientRemoteContext<A> : never;
 export type InferDefinition<T> = T extends NamespaceDeclaration<infer R> ? R : {};
 
 export interface NamespaceConfiguration
@@ -19,7 +19,7 @@ export interface NamespaceConfiguration
 /**
  * A namespace builder. Internally used to construct definition builders
  */
-export class NamespaceDefinitions<N extends RemoteDeclarations> {
+export class NamespaceGenerator<N extends RemoteDeclarations> {
 	public constructor(declarations: N, private config?: NamespaceConfiguration) {
 		declarationMap.set(this, declarations);
 	}
@@ -35,16 +35,16 @@ export class NamespaceDefinitions<N extends RemoteDeclarations> {
 	}
 
 	/** @internal */
-	_BuildServerDefinition(configuration: NamespaceConfiguration, namespace?: string): ServerDefinitions<N> {
+	public _GenerateServerContext(configuration: NamespaceConfiguration, namespace?: string): ServerRemoteContext<N> {
 		assert(RunService.IsServer());
 		$print("Building server definition", declarationMap.get(this)!);
-		return new ServerDefinitions<N>(declarationMap.get(this) as N, configuration, namespace);
+		return new ServerRemoteContext<N>(declarationMap.get(this) as N, configuration, namespace);
 	}
 
 	/** @internal */
-	_BuildClientDefinition(configuration: NamespaceConfiguration, namespace?: string): ClientDefinitions<N> {
+	public _GenerateClientContext(configuration: NamespaceConfiguration, namespace?: string): ClientRemoteContext<N> {
 		assert(RunService.IsClient());
 		$print("Building client definition", declarationMap.get(this)!);
-		return new ClientDefinitions<N>(declarationMap.get(this) as N, configuration, namespace);
+		return new ClientRemoteContext<N>(declarationMap.get(this) as N, configuration, namespace);
 	}
 }

@@ -19,7 +19,7 @@ import {
 	FilterServerDeclarations,
 } from "../Types";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../../internal";
-import { InferDefinition } from "./NamespaceDefinitions";
+import { InferDefinition } from "./NamespaceGenerator";
 import { DefinitionConfiguration } from "..";
 import ExperienceBroadcastEvent from "../../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../../server/ServerMessagingEvent";
@@ -52,7 +52,7 @@ type RemoteDeclarationDict<T extends RemoteDeclarations> =
 	| Record<keyof FilterGroups<T> & string, DeclarationNamespaceLike>;
 
 // Keep the declarations fully isolated
-const declarationMap = new WeakMap<ServerDefinitions<RemoteDeclarations>, RemoteDeclarations>();
+const declarationMap = new WeakMap<ServerRemoteContext<RemoteDeclarations>, RemoteDeclarations>();
 const remoteEventCache = new Map<string, ServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
@@ -61,7 +61,7 @@ const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
 export interface ServerDefinitionConfig extends DefinitionConfiguration {}
 
-export class ServerDefinitions<T extends RemoteDeclarations> {
+export class ServerRemoteContext<T extends RemoteDeclarations> {
 	private globalMiddleware?: NetGlobalMiddleware[];
 
 	public constructor(declarations: T, private config: ServerDefinitionConfig, private namespace = NAMESPACE_ROOT) {
@@ -201,7 +201,7 @@ export class ServerDefinitions<T extends RemoteDeclarations> {
 
 	/** @internal */
 	public toString() {
-		return `[${$nameof(ServerDefinitions)}]`;
+		return `[${$nameof(ServerRemoteContext)}]`;
 	}
 
 	/**
@@ -234,13 +234,13 @@ export class ServerDefinitions<T extends RemoteDeclarations> {
 	 */
 	public GetNamespace<K extends keyof FilterGroups<T> & string>(
 		namespaceId: K,
-	): ServerDefinitions<InferDefinition<T[K]>> {
+	): ServerRemoteContext<InferDefinition<T[K]>> {
 		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		$print(`Fetch Group`, namespaceId);
-		return group.Definitions._BuildServerDefinition(
-			group.Definitions._CombineConfigurations(this.config),
+		return group.Namespace._GenerateServerContext(
+			group.Namespace._CombineConfigurations(this.config),
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}
@@ -265,7 +265,7 @@ export class ServerDefinitions<T extends RemoteDeclarations> {
 	 * ```
 	 *
 	 */
-	public Get<K extends keyof FilterGroups<T> & string>(id: K): ServerDefinitions<InferDefinition<T[K]>>;
+	public Get<K extends keyof FilterGroups<T> & string>(id: K): ServerRemoteContext<InferDefinition<T[K]>>;
 
 	public Get<K extends (keyof FilterServerDeclarations<T> | keyof FilterGroups<T>) & string>(id: K) {
 		const item = declarationMap.get(this)![id];

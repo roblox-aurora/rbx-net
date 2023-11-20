@@ -25,6 +25,8 @@ const {
 	EXPERIMENTAL_ExperienceReplicatedEvent,
 } = Net.Definitions;
 
+Net.Definitions.Namespace({});
+
 const Remotes = Create(
 	{
 		TestStandaloneEvent: ServerToClientEvent<[message2: string]>(),
@@ -70,16 +72,18 @@ const BuilderRemotes = Net.Definitions.Create()
 	// Create a namespacae using an object model
 	.AddNamespace("test", {
 		x: Net.Definitions.AsyncFunction().OnServer(),
-		y: Net.Definitions.Event().OnClient(),
+		y: Net.Definitions.Event().EnsureArguments(t.string).ReturnsAsync<string>().OnClient(),
 		z: Net.Definitions.Create()
 			.Add({
 				a: Net.Definitions.AsyncFunction().OnServer(),
 			})
 			.ToNamespace(),
 	})
-	.AddServerRemote("test2", Net.Definitions.AsyncFunction())
-	.Build().Server;
+	.AddServerOwned("test3", Net.Definitions.Event())
+	.AddServerOwned("test2", Net.Definitions.AsyncFunction().EnsureArguments(t.string).EnsureReturns(t.number))
+	.Build();
 
+BuilderRemotes.Server.GetNamespace("test").Get("x");
 Remotes.Server.Get("Test4Event");
 
 export default Remotes;

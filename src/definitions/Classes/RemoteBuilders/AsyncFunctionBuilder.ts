@@ -15,7 +15,10 @@ export class AsyncFunctionBuilder<
 	TParams extends readonly unknown[] = unknown[],
 	TRet extends unknown = unknown
 > extends RemoteBuilder<AsyncServerFunctionDeclaration<TParams, TRet>, AsyncClientFunctionDeclaration<TParams, TRet>> {
-	public readonly serverCallbackMiddleware = new Array<ServerCallbackMiddleware>();
+	/**
+	 * @internal
+	 */
+	public serverCallbackMiddleware = new Array<ServerCallbackMiddleware>();
 
 	public WithServerCallbackMiddleware<TNewParams extends readonly unknown[] = TParams>(
 		...middlewares: readonly ServerCallbackMiddleware<TNewParams, TParams, TRet>[]
