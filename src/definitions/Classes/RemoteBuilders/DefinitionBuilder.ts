@@ -3,7 +3,7 @@ import { ClientRemoteContext } from "../ClientRemoteContext";
 import { NamespaceGenerator, NamespaceConfiguration } from "../NamespaceGenerator";
 import {
 	ServerRemoteContext,
-	ServerNetworkModelConfig as ServerNetworkModelConfiguration,
+	ServerNetworkModelConfiguration as ServerNetworkModelConfiguration,
 } from "../ServerRemoteContext";
 import {
 	DeclarationTypeCheck,

@@ -4,6 +4,8 @@ import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
 import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
 import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
+import { NetworkModelConfiguration } from "../definitions";
+import { ServerNetworkModelConfiguration } from "../definitions/Classes/ServerRemoteContext";
 
 /**
  * Interface for server listening events
@@ -61,7 +63,7 @@ export default class ServerEvent<
 	public constructor(
 		name: string,
 		middlewares: Array<ServerCallbackMiddleware> = [],
-		private configuration: DefinitionConfiguration,
+		private configuration: ServerNetworkModelConfiguration,
 	) {
 		super(middlewares);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
@@ -79,9 +81,20 @@ export default class ServerEvent<
 	 * @param callback The function fired when the event is invoked by the client
 	 */
 	public Connect(callback: (player: Player, ...args: ConnectArgs) => void): Readonly<NetServerSignalConnection> {
-		return this.connection.Connect((player, ...args) => {
-			this._processMiddleware(callback)?.(player, ...(args as unknown as ConnectArgs));
-		});
+		const id = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
+		if (microprofile) {
+			return this.connection.Connect((player, ...args) => {
+				debug.profilebegin(`NetEvent: ${id}`);
+				this._processMiddleware(callback)?.(player, ...(args as unknown as ConnectArgs));
+				debug.profileend();
+			});
+		} else {
+			return this.connection.Connect((player, ...args) => {
+				this._processMiddleware(callback)?.(player, ...(args as unknown as ConnectArgs));
+			});
+		}
 	}
 
 	/**

@@ -1,6 +1,7 @@
 import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 import { ClientCallbackMiddleware } from "../middleware";
+import { NetworkModelConfiguration } from "../definitions";
 
 /**
  * Interface for client listening events
@@ -34,7 +35,7 @@ class ClientEvent<
 	public constructor(
 		name: string,
 		middleware: Array<ClientCallbackMiddleware> = [],
-		private configuration: DefinitionConfiguration,
+		private configuration: NetworkModelConfiguration,
 	) {
 		this.instance = getRemoteOrThrow("RemoteEvent", name);
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
@@ -60,7 +61,18 @@ class ClientEvent<
 	}
 
 	public Connect(callback: (...args: ConnectArgs) => void): RBXScriptConnection {
-		return this.instance.OnClientEvent.Connect(callback);
+		const id = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
+		if (microprofile) {
+			return this.instance.OnClientEvent.Connect((...args) => {
+				debug.profilebegin(`NetEvent: ${id}`);
+				callback(...(args as unknown as ConnectArgs));
+				debug.profileend();
+			});
+		} else {
+			return this.instance.OnClientEvent.Connect(callback);
+		}
 	}
 }
 

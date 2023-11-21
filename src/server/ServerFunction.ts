@@ -3,6 +3,7 @@ import { findOrCreateRemote, IS_SERVER, TagId } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
 import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
+import { ServerNetworkModelConfiguration } from "../definitions/Classes/ServerRemoteContext";
 const CollectionService = game.GetService("CollectionService");
 
 export default class ServerFunction<
@@ -20,7 +21,7 @@ export default class ServerFunction<
 	public constructor(
 		name: string,
 		middlewares: MiddlewareOverload<CallbackArgs> = [],
-		private configuration: DefinitionConfiguration,
+		private configuration: ServerNetworkModelConfiguration,
 	) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
@@ -40,7 +41,13 @@ export default class ServerFunction<
 		if (CollectionService.HasTag(this.instance, TagId.DefaultFunctionListener)) {
 			CollectionService.RemoveTag(this.instance, TagId.DefaultFunctionListener);
 		}
+
+		const id = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
 		this.instance.OnServerInvoke = (player: Player, ...args: ReadonlyArray<unknown>) => {
+			if (microprofile) debug.profilebegin(`NetFunction: ${id}`);
+
 			const result: Promise<unknown> | unknown = this._processMiddleware<CallbackArgs, R>(callback)?.(
 				player,
 				...(args as CallbackArgs),
@@ -55,6 +62,7 @@ export default class ServerFunction<
 				}
 			}
 
+			if (microprofile) debug.profileend();
 			return result;
 		};
 	}

@@ -26,7 +26,7 @@ const shouldYield = new WeakMap<ClientRemoteContext<RemoteDeclarations>, boolean
 export class ClientRemoteContext<T extends RemoteDeclarations> {
 	public constructor(
 		declarations: T,
-		private configuration?: NetworkModelConfiguration,
+		private configuration: NetworkModelConfiguration,
 		private namespace = NAMESPACE_ROOT,
 	) {
 		declarationMap.set(this, declarations);
@@ -68,7 +68,7 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
 		return group.Namespace._GenerateClientContext(
-			group.Namespace._CombineConfigurations(this.configuration ?? {}),
+			group.Namespace._CombineConfigurations(this.configuration),
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
 		);
 	}
@@ -81,21 +81,15 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 
 		if (item.Type === "Function") {
-			return new ClientFunction(remoteId, this.configuration ?? {}) as InferClientRemote<T[K]>;
+			return new ClientFunction(remoteId, this.configuration) as InferClientRemote<T[K]>;
 		} else if (item.Type === "Event") {
-			return new ClientEvent(remoteId, item.ClientMiddleware, this.configuration ?? {}) as InferClientRemote<
-				T[K]
-			>;
+			return new ClientEvent(remoteId, item.ClientMiddleware, this.configuration) as InferClientRemote<T[K]>;
 		} else if (item.Type === "AsyncFunction") {
-			return new ClientAsyncFunction(
-				remoteId,
-				item.ClientMiddleware,
-				this.configuration ?? {},
-			) as InferClientRemote<T[K]>;
-		} else if (item.Type === "ExperienceEvent") {
-			return new ClientEvent(getGlobalRemote(remoteId), undefined, this.configuration ?? {}) as InferClientRemote<
+			return new ClientAsyncFunction(remoteId, item.ClientMiddleware, this.configuration) as InferClientRemote<
 				T[K]
 			>;
+		} else if (item.Type === "ExperienceEvent") {
+			return new ClientEvent(getGlobalRemote(remoteId), undefined, this.configuration) as InferClientRemote<T[K]>;
 		}
 
 		throw `Type '${item.Type}' is not a valid client remote object type`;
@@ -119,15 +113,13 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 		assert(item && item.Type, `'${remoteId}' is not defined in this definition.`);
 
 		if (item.Type === "Function") {
-			return ClientFunction.Wait(remoteId, this.configuration ?? {}) as Promise<InferClientRemote<T[K]>>;
+			return ClientFunction.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "Event") {
-			return ClientEvent.Wait(remoteId, this.configuration ?? {}) as Promise<InferClientRemote<T[K]>>;
+			return ClientEvent.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "AsyncFunction") {
-			return ClientAsyncFunction.Wait(remoteId, this.configuration ?? {}) as Promise<InferClientRemote<T[K]>>;
+			return ClientAsyncFunction.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "ExperienceEvent") {
-			return ClientEvent.Wait(getGlobalRemote(remoteId), this.configuration ?? {}) as Promise<
-				InferClientRemote<T[K]>
-			>;
+			return ClientEvent.Wait(getGlobalRemote(remoteId), this.configuration) as Promise<InferClientRemote<T[K]>>;
 		}
 
 		throw `Type '${item.Type}' is not a valid client remote object type`;

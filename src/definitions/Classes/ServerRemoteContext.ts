@@ -60,14 +60,14 @@ const remoteFunctionCache = new Map<string, ServerFunction>();
 const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
 const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
-export interface ServerNetworkModelConfig extends NetworkModelConfiguration {}
+export interface ServerNetworkModelConfiguration extends NetworkModelConfiguration {}
 
 export class ServerRemoteContext<T extends RemoteDeclarations> {
 	private globalMiddleware?: Array<NetGlobalMiddleware>;
 
 	public constructor(
 		declarations: T,
-		private config: ServerNetworkModelConfig,
+		private config: ServerNetworkModelConfiguration,
 		private namespace = NAMESPACE_ROOT,
 	) {
 		const {

@@ -1,6 +1,7 @@
 import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
 import { ClientCallbackMiddleware } from "../middleware";
+import { NetworkModelConfiguration } from "../definitions";
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
@@ -57,7 +58,7 @@ export default class ClientAsyncFunction<
 	public constructor(
 		private name: string,
 		middleware: Array<ClientCallbackMiddleware> = [],
-		private configuration: DefinitionConfiguration,
+		private configuration: NetworkModelConfiguration,
 	) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
@@ -89,7 +90,12 @@ export default class ClientAsyncFunction<
 			this.connector = undefined;
 		}
 
+		const id = this.instance.Name;
+		const microprofile = this.configuration.MicroprofileCallbacks;
+
 		this.connector = this.instance.OnClientEvent.Connect(async (...args: CallbackArgs) => {
+			if (microprofile) debug.profilebegin(`NetAsync: ${id}`);
+
 			const [eventId, data] = args;
 			if (typeIs(eventId, "string") && typeIs(data, "table")) {
 				const result: unknown | Promise<unknown> = callback(...(data as CallbackArgs));
@@ -107,6 +113,8 @@ export default class ClientAsyncFunction<
 			} else {
 				warn("Recieved message without eventId");
 			}
+
+			if (microprofile) debug.profileend();
 		});
 	}
 
