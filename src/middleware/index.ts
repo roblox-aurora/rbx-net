@@ -5,7 +5,7 @@ import NetTypeCheckingMiddleware from "./TypeCheckMiddleware";
 
 export type NextCaller<R = void> = (player: defined, ...args: ReadonlyArray<unknown>) => R;
 
-export type MiddlewareOverload<T extends readonly unknown[]> =
+export type MiddlewareOverload<T extends ReadonlyArray<unknown>> =
 	| []
 	| [ServerCallbackMiddleware<T>]
 	| [ServerCallbackMiddleware, ServerCallbackMiddleware<T>]
@@ -30,7 +30,7 @@ export type MiddlewareOverload<T extends readonly unknown[]> =
 export type ServerCallbackMiddleware<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
 	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
-	Ret = void
+	Ret = void,
 > = (
 	next: (player: Player, ...args: CallArguments) => Ret,
 	event: NetManagedInstance,
@@ -39,15 +39,15 @@ export type ServerCallbackMiddleware<
 export type ClientCallbackMiddleware<
 	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
 	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
-	Ret = void
+	Ret = void,
 > = (
 	next: (...args: CallArguments) => Ret,
 	event: NetManagedInstance,
 ) => (...args: PreviousCallArguments) => Ret | NetMiddleware.Skip;
 
 export type ServerInvokeMiddleware<
-	CallArguments extends ReadonlyArray<unknown> = unknown[],
-	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>
+	CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	PreviousCallArguments extends ReadonlyArray<unknown> = Array<unknown>,
 > = (
 	next: (player: Player, ...args: CallArguments) => void,
 	event: NetManagedInstance,
@@ -56,12 +56,12 @@ export type ServerInvokeMiddleware<
 export type NetMiddleware = ServerCallbackMiddleware;
 
 export type NetGlobalMiddleware = (
-	next: (player: Readonly<Player>, ...args: readonly unknown[]) => void,
+	next: (player: Readonly<Player>, ...args: ReadonlyArray<unknown>) => void,
 	event: Readonly<NetManagedInstance>,
-) => (sender: Readonly<Player>, ...args: readonly unknown[]) => void;
+) => (sender: Readonly<Player>, ...args: ReadonlyArray<unknown>) => void;
 
 export interface ReadonlyGlobalMiddlewareArgs {
-	(remoteName: string, remoteData: readonly unknown[], callingPlayer?: Player): void;
+	(remoteName: string, remoteData: ReadonlyArray<unknown>, callingPlayer?: Player): void;
 }
 
 export namespace NetMiddleware {

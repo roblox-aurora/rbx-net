@@ -2,11 +2,12 @@ import { MiddlewareOverload } from "../middleware";
 import { findOrCreateRemote, IS_SERVER, TagId } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
+import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 const CollectionService = game.GetService("CollectionService");
 
 export default class ServerFunction<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	Returns extends unknown = unknown
+	Returns = unknown,
 > extends MiddlewareFunction {
 	private instance: RemoteFunction;
 
@@ -16,7 +17,11 @@ export default class ServerFunction<
 		return undefined;
 	};
 
-	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs> = []) {
+	public constructor(
+		name: string,
+		middlewares: MiddlewareOverload<CallbackArgs> = [],
+		private configuration: DefinitionConfiguration,
+	) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
 			// Default listener

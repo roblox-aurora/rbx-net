@@ -85,14 +85,17 @@ function processMessageQueue() {
  * SubsPerUniverse: 10K
  */
 
-type JobIdMessage<TMessage> = { jobId: string; message: TMessage };
+interface JobIdMessage<TMessage> {
+	jobId: string;
+	message: TMessage;
+}
 
 /**
  * An event that works across all servers
  * @see https://developer.roblox.com/api-reference/class/MessagingService for limits, etc.
  */
-export default class ExperienceBroadcastEvent<TMessage extends unknown = unknown> {
-	constructor(private name: string) {}
+export default class ExperienceBroadcastEvent<TMessage = unknown> {
+	public constructor(private name: string) {}
 
 	/**
 	 * Gets the message limit

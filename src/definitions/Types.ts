@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Types
  *
@@ -7,7 +9,7 @@ import { oneOf } from "../internal/validator";
 import ClientAsyncFunction, { ClientAsyncCallback, ClientAsyncCaller } from "../client/ClientAsyncFunction";
 import ClientEvent, { ClientListenerEvent, ClientSenderEvent } from "../client/ClientEvent";
 import ClientFunction from "../client/ClientFunction";
-import { MiddlewareOverload } from "../middleware";
+import { ClientCallbackMiddleware, MiddlewareOverload, ServerCallbackMiddleware } from "../middleware";
 import ServerAsyncFunction, { ServerAsyncCallback, ServerAsyncCaller } from "../server/ServerAsyncFunction";
 import ServerEvent, { ServerListenerEvent, ServerSenderEvent } from "../server/ServerEvent";
 import ServerFunction from "../server/ServerFunction";
@@ -16,6 +18,7 @@ import { ServerRemoteContext } from "./Classes/ServerRemoteContext";
 import { NamespaceGenerator } from "./Classes/NamespaceGenerator";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
+import { NetDuration } from "../duration";
 
 export type Identity<T> = T extends object
 	? {} & {
@@ -65,10 +68,17 @@ export interface EventDeclarationLike {
 	readonly Type: "Event";
 
 	/** @internal */
-	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+	readonly ServerMiddleware?: Array<ServerCallbackMiddleware>;
+
+	/** @internal */
+	readonly ClientMiddleware?: Array<ClientCallbackMiddleware>;
 
 	/** @internal */
 	readonly Unreliable: boolean;
+}
+
+export interface FunctionCacheOptions {
+	readonly CacheTime: NetDuration;
 }
 
 export interface AsyncFunctionDeclarationLike {
@@ -81,11 +91,15 @@ export interface AsyncFunctionDeclarationLike {
 	readonly Type: "AsyncFunction";
 
 	/** @internal */
-	readonly ServerMiddleware?: [...mw: MiddlewareOverload<any>];
+	readonly ClientMiddleware?: Array<ClientCallbackMiddleware>;
+
+	/** @internal */
+	readonly ServerMiddleware?: Array<ServerCallbackMiddleware>;
+
+	readonly CacheOptions?: FunctionCacheOptions;
 }
 
-export interface FunctionDeclaration<T extends readonly unknown[], R extends unknown = undefined>
-	extends FunctionDeclarationLike {
+export interface FunctionDeclaration<T extends ReadonlyArray<unknown>, R = undefined> extends FunctionDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_FunctionDeclaration: unique symbol;
 }
@@ -119,7 +133,7 @@ export type DeclarationsOf<
 		| AsyncServerFunctionDeclaration<any, any>
 		| ServerToClientEventDeclaration<any>
 		| ClientToServerEventDeclaration<any>
-		| BidirectionalEventDeclaration<any, any>
+		| BidirectionalEventDeclaration<any, any>,
 > = {
 	[K in ExtractKeys<T, U>]: T[K];
 };
@@ -150,10 +164,10 @@ export type FilterClientDeclarations<T extends RemoteDeclarations> = {
  * @deprecated
  */
 export interface LegacyAsyncFunctionDeclaration<
-	_ServerArgs extends readonly unknown[],
-	_ServerReturn extends unknown,
-	_ClientArgs extends readonly unknown[],
-	_ClientReturn extends unknown
+	_ServerArgs extends ReadonlyArray<unknown>,
+	_ServerReturn,
+	_ClientArgs extends ReadonlyArray<unknown>,
+	_ClientReturn,
 > extends AsyncFunctionDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_LegacyAsyncFunctionDeclaration: unique symbol;
@@ -162,7 +176,7 @@ export interface LegacyAsyncFunctionDeclaration<
 /**
  * A declaration for an async client function
  */
-export interface AsyncClientFunctionDeclaration<_ClientArgs extends readonly unknown[], _ClientReturn>
+export interface AsyncClientFunctionDeclaration<_ClientArgs extends ReadonlyArray<unknown>, _ClientReturn>
 	extends AsyncFunctionDeclarationLike {
 	/**
 	 * @deprecated
@@ -173,7 +187,7 @@ export interface AsyncClientFunctionDeclaration<_ClientArgs extends readonly unk
 /**
  * A declaration for an async server function
  */
-export interface AsyncServerFunctionDeclaration<_ServerArgs extends readonly unknown[], _ServerReturn>
+export interface AsyncServerFunctionDeclaration<_ServerArgs extends ReadonlyArray<unknown>, _ServerReturn>
 	extends AsyncFunctionDeclarationLike {
 	/**
 	 * @deprecated
@@ -182,8 +196,10 @@ export interface AsyncServerFunctionDeclaration<_ServerArgs extends readonly unk
 }
 
 /** @deprecated */
-export interface LegacyEventDeclaration<_ServerArgs extends readonly unknown[], _ClientArgs extends readonly unknown[]>
-	extends EventDeclarationLike {
+export interface LegacyEventDeclaration<
+	_ServerArgs extends ReadonlyArray<unknown>,
+	_ClientArgs extends ReadonlyArray<unknown>,
+> extends EventDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_LegacyEventDeclaration: unique symbol;
 }
@@ -191,7 +207,8 @@ export interface LegacyEventDeclaration<_ServerArgs extends readonly unknown[], 
 /**
  * A declaration for a client -> server event
  */
-export interface ClientToServerEventDeclaration<_ClientArgs extends readonly unknown[]> extends EventDeclarationLike {
+export interface ClientToServerEventDeclaration<_ClientArgs extends ReadonlyArray<unknown>>
+	extends EventDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_ClientToServerEvent: unique symbol;
 }
@@ -199,7 +216,8 @@ export interface ClientToServerEventDeclaration<_ClientArgs extends readonly unk
 /**
  * A declaration for a server -> client event
  */
-export interface ServerToClientEventDeclaration<_ServerArgs extends readonly unknown[]> extends EventDeclarationLike {
+export interface ServerToClientEventDeclaration<_ServerArgs extends ReadonlyArray<unknown>>
+	extends EventDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_ServerToClientEvent: unique symbol;
 }
@@ -207,8 +225,7 @@ export interface ServerToClientEventDeclaration<_ServerArgs extends readonly unk
 /**
  * A declaration for a server -> server event
  */
-export interface ExperienceBroadcastEventDeclaration<_ServerArgs extends unknown>
-	extends MessagingEventDeclarationLike {
+export interface ExperienceBroadcastEventDeclaration<_ServerArgs> extends MessagingEventDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_ExperienceBroadcastEvent: unique symbol;
 }
@@ -216,7 +233,7 @@ export interface ExperienceBroadcastEventDeclaration<_ServerArgs extends unknown
 /**
  * A declaration for a server -> server event, that replicates to clients
  */
-export interface ExperienceReplicatingEventDeclaration<_ServerArgs extends readonly unknown[]>
+export interface ExperienceReplicatingEventDeclaration<_ServerArgs extends ReadonlyArray<unknown>>
 	extends ExperienceEventDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_ExperienceReplicatingEvent: unique symbol;
@@ -226,8 +243,8 @@ export interface ExperienceReplicatingEventDeclaration<_ServerArgs extends reado
  * A declaration for a Bidirectional event
  */
 export interface BidirectionalEventDeclaration<
-	_ServerArgs extends readonly unknown[],
-	_ClientArgs extends readonly unknown[]
+	_ServerArgs extends ReadonlyArray<unknown>,
+	_ClientArgs extends ReadonlyArray<unknown>,
 > extends EventDeclarationLike {
 	/** @deprecated */
 	readonly _nominal_Bidirectional: unique symbol;
@@ -261,6 +278,9 @@ export type DeclarationLike =
 	| EventDeclarationLike
 	| ExperienceEventDeclarationLike;
 export type RemoteDeclarations = Record<string, DeclarationLike | DeclarationNamespaceLike>;
+
+export type Constructor<T extends object = object> = new (...args: Array<any>) => T;
+export type Prototype<T extends Constructor> = T extends Constructor<infer R> ? R : never;
 
 ////////////////////////////////
 // * Inference Magic

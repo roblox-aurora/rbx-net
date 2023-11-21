@@ -3,7 +3,7 @@ import { MiddlewareList, MutableMiddlewareList } from "./MiddlewareEvent";
 
 abstract class MiddlewareFunction {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
-	abstract GetInstance(): RemoteFunction;
+	public abstract GetInstance(): RemoteFunction;
 
 	/** @internal */
 	public _use(middleware: NetGlobalMiddleware) {

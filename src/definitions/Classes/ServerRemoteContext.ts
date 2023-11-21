@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NetGlobalMiddleware } from "../../middleware";
-import { $dbg, $nameof, $print } from "rbxts-transform-debug";
+import { $nameof, $warn } from "rbxts-transform-debug";
 import ServerAsyncFunction from "../../server/ServerAsyncFunction";
 import ServerEvent from "../../server/ServerEvent";
 import ServerFunction from "../../server/ServerFunction";
@@ -20,7 +21,7 @@ import {
 } from "../Types";
 import { NAMESPACE_ROOT, NAMESPACE_SEPARATOR, TagId } from "../../internal";
 import { InferDefinition } from "./NamespaceGenerator";
-import { DefinitionConfiguration } from "..";
+import { NetworkModelConfiguration as NetworkModelConfiguration } from "..";
 import ExperienceBroadcastEvent from "../../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../../server/ServerMessagingEvent";
 const CollectionService = game.GetService("CollectionService");
@@ -59,12 +60,16 @@ const remoteFunctionCache = new Map<string, ServerFunction>();
 const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
 const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
-export interface ServerDefinitionConfig extends DefinitionConfiguration {}
+export interface ServerNetworkModelConfig extends NetworkModelConfiguration {}
 
 export class ServerRemoteContext<T extends RemoteDeclarations> {
-	private globalMiddleware?: NetGlobalMiddleware[];
+	private globalMiddleware?: Array<NetGlobalMiddleware>;
 
-	public constructor(declarations: T, private config: ServerDefinitionConfig, private namespace = NAMESPACE_ROOT) {
+	public constructor(
+		declarations: T,
+		private config: ServerNetworkModelConfig,
+		private namespace = NAMESPACE_ROOT,
+	) {
 		const {
 			ServerAutoGenerateRemotes: AutoGenerateServerRemotes = true,
 			ServerGlobalMiddleware: GlobalMiddleware,
@@ -97,15 +102,12 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 			if (remoteFunctionCache.has(namespacedId)) {
 				return remoteFunctionCache.get(namespacedId)!;
 			} else {
-				if (declaration.ServerMiddleware) {
-					func = new ServerFunction(namespacedId, declaration.ServerMiddleware);
-				} else {
-					func = new ServerFunction(namespacedId);
-				}
+				func = new ServerFunction(namespacedId, declaration.ServerMiddleware, this.config);
+
 				CollectionService.AddTag(func.GetInstance(), TagId.DefinitionManaged);
 				remoteFunctionCache.set(namespacedId, func);
 
-				this.globalMiddleware?.forEach(mw => func._use(mw));
+				this.globalMiddleware?.forEach((mw) => func._use(mw));
 				return func;
 			}
 		} else if (declaration.Type === "AsyncFunction") {
@@ -115,16 +117,13 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 			if (remoteAsyncFunctionCache.has(namespacedId)) {
 				return remoteAsyncFunctionCache.get(namespacedId)!;
 			} else {
-				if (declaration.ServerMiddleware) {
-					asyncFunction = new ServerAsyncFunction(namespacedId, declaration.ServerMiddleware);
-				} else {
-					asyncFunction = new ServerAsyncFunction(namespacedId);
-				}
+				asyncFunction = new ServerAsyncFunction(namespacedId, declaration.ServerMiddleware, this.config);
+
 				CollectionService.AddTag(asyncFunction.GetInstance(), TagId.DefinitionManaged);
 				remoteAsyncFunctionCache.set(namespacedId, asyncFunction);
 			}
 
-			this.globalMiddleware?.forEach(mw => asyncFunction._use(mw));
+			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
 			return asyncFunction;
 		} else if (declaration.Type === "Event") {
 			let event: ServerEvent;
@@ -133,16 +132,13 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 			if (remoteEventCache.has(namespacedId)) {
 				return remoteEventCache.get(namespacedId)!;
 			} else {
-				if (declaration.ServerMiddleware) {
-					event = new ServerEvent(namespacedId, declaration.ServerMiddleware);
-				} else {
-					event = new ServerEvent(namespacedId);
-				}
+				event = new ServerEvent(namespacedId, declaration.ServerMiddleware, this.config);
+
 				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
 				remoteEventCache.set(namespacedId, event);
 			}
 
-			this.globalMiddleware?.forEach(mw => event._use(mw));
+			this.globalMiddleware?.forEach((mw) => event._use(mw));
 			return event;
 		} else if (declaration.Type === "Messaging") {
 			let event: ExperienceBroadcastEvent;
@@ -159,7 +155,7 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 			if (messagingServerEventCache.has(namespacedId)) {
 				return messagingServerEventCache.get(namespacedId)!;
 			} else {
-				event = new ServerMessagingEvent(namespacedId);
+				event = new ServerMessagingEvent(namespacedId, this.config);
 				messagingServerEventCache.set(namespacedId, event);
 			}
 			return event;
@@ -179,12 +175,17 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 		 * I, as well as many other users have run into from time to time.
 		 */
 
-		$print("Running remote prefetch for", this.namespace);
-
 		const declarations = declarationMap.get(this)! as RemoteDeclarationDict<T>;
-		for (const [id, declaration] of (pairs(declarations) as unknown) as IterableFunction<
-			[keyof RemoteDeclarationDict<T>, RemoteDeclarationDict<T>[keyof RemoteDeclarationDict<T>]]
+		assert(declarations !== undefined, `Failed to find declarations for ServerContext '${this.namespace}'`);
+
+		for (const [id, declaration] of pairs(declarations) as unknown as IterableFunction<
+			LuaTuple<[keyof RemoteDeclarationDict<T>, RemoteDeclarationDict<T>[keyof RemoteDeclarationDict<T>]]>
 		>) {
+			if (declaration === undefined) {
+				$warn("Failed to find type at id", id);
+				continue;
+			}
+
 			switch (declaration.Type) {
 				case "Event":
 				case "AsyncFunction":
@@ -238,7 +239,6 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 		const group = declarationMap.get(this)![namespaceId] as NamespaceDeclaration<RemoteDeclarations>;
 		assert(group, `Group ${namespaceId} does not exist under namespace ${this.namespace}`);
 		assert(group.Type === "Namespace");
-		$print(`Fetch Group`, namespaceId);
 		return group.Namespace._GenerateServerContext(
 			group.Namespace._CombineConfigurations(this.config),
 			this.namespace !== NAMESPACE_ROOT ? [this.namespace, namespaceId].join(NAMESPACE_SEPARATOR) : namespaceId,
@@ -277,7 +277,6 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 			item.Type === "Messaging"
 		) {
 			if (remoteAsyncFunctionCache.has(id)) {
-				$print(`Fetch cached copy of ${id}`);
 				return remoteAsyncFunctionCache.get(id)! as InferServerRemote<T[K]>;
 			} else {
 				return this._CreateOrGetInstance(id, item) as InferServerRemote<T[K]>;

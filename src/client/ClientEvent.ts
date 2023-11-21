@@ -1,4 +1,6 @@
+import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
+import { ClientCallbackMiddleware } from "../middleware";
 
 /**
  * Interface for client listening events
@@ -23,11 +25,17 @@ export interface ClientSenderEvent<CallArguments extends ReadonlyArray<unknown>>
 }
 
 class ClientEvent<
-	ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
-> implements ClientListenerEvent<ConnectArgs>, ClientSenderEvent<CallArguments> {
+		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	>
+	implements ClientListenerEvent<ConnectArgs>, ClientSenderEvent<CallArguments>
+{
 	private instance: RemoteEvent;
-	public constructor(name: string) {
+	public constructor(
+		name: string,
+		middleware: Array<ClientCallbackMiddleware> = [],
+		private configuration: DefinitionConfiguration,
+	) {
 		this.instance = getRemoteOrThrow("RemoteEvent", name);
 		assert(!IS_SERVER, "Cannot fetch NetClientEvent on the server!");
 	}
@@ -39,11 +47,11 @@ class ClientEvent<
 
 	public static Wait<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallArguments extends ReadonlyArray<unknown> = Array<unknown>
-	>(name: string) {
+		CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+	>(name: string, configuration: DefinitionConfiguration) {
 		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async (resolve) => {
 			await waitForRemote("RemoteEvent", name, 60);
-			resolve(new ClientEvent(name));
+			resolve(new ClientEvent(name, undefined, configuration));
 		});
 	}
 

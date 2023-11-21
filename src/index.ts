@@ -1,4 +1,4 @@
-import NetDefinitions, { DefinitionConfiguration } from "./definitions";
+import NetDefinitions, { NetworkModelConfiguration } from "./definitions";
 import { NetMiddleware, ServerCallbackMiddleware } from "./middleware";
 import { $env, $NODE_ENV } from "rbxts-transform-env";
 import {
@@ -10,8 +10,16 @@ import {
 	NamespaceDeclaration,
 	RemoteDeclarations,
 	ServerBuildResult,
+	Constructor,
 } from "./definitions/Types";
 import { $package } from "rbxts-transform-debug";
+import { EventBuilder, Unsafe } from "./definitions/Classes/RemoteBuilders/EventBuilder";
+import { CheckLike, ToCheck } from "./middleware/TypeCheckMiddleware/types";
+import { ExperienceBroadcastEventBuilder } from "./definitions/Classes/MessagingBuilders/MessageBuilder";
+import { SerializedClassTypeBuilder } from "./definitions/Classes/Serialization/SerializedClassTypeBuilder";
+import { Serializer } from "./definitions/Classes/RemoteBuilders/DefinitionBuilder";
+import { SerializedTypeBuilder } from "./definitions/Classes/Serialization/SerializedTypeBuilder";
+import { NetValidation } from "./types";
 
 /**
  * Networking Library for Roblox
@@ -22,6 +30,8 @@ namespace Net {
 	 * The definitions API for Net
 	 */
 	export const Definitions = NetDefinitions;
+
+	export const Types = NetValidation;
 
 	/**
 	 * Utility types for Net
@@ -57,7 +67,7 @@ namespace Net {
 		 */
 		export type GetNamespaceDefinitions<
 			T extends RemoteDeclarations,
-			K extends keyof FilterGroups<T>
+			K extends keyof FilterGroups<T>,
 		> = T[K] extends NamespaceDeclaration<infer A> ? A : never;
 
 		/**
@@ -112,7 +122,7 @@ namespace Net {
 	/**
 	 * The version of RbxNet
 	 */
-	export const VERSION = $NODE_ENV === "production" ? $package.version : `DEV ${DIST})} ${$package.version}`;
+	export const VERSION = `ZENERITH_INTERNAL ${$package.version}`;
 
 	/**
 	 * Built-in middlewares
@@ -125,10 +135,51 @@ namespace Net {
 	export type Middleware = ServerCallbackMiddleware;
 
 	/**
-	 * Short-hand for `Net.Definitions.Create`
-	 * @see {@link Definitions.Create}
+	 * @deprecated
 	 */
 	export const CreateDefinitions = Definitions.Create;
+
+	export const BuildDefinition = Definitions.Create;
+
+	/**
+	 * Define a remote object
+	 * @param typeChecks The type arguments for the remote object
+	 * @returns The builder for a remote
+	 */
+	export function Remote<T extends ReadonlyArray<unknown>>(): Unsafe<EventBuilder<[]>>;
+	export function Remote<T extends ReadonlyArray<unknown>>(...typeChecks: ToCheck<T>): EventBuilder<T>;
+	export function Remote<T extends ReadonlyArray<unknown>>(...typeChecks: ToCheck<T>): EventBuilder<T> {
+		if (typeChecks.size() === 0) {
+			return new EventBuilder();
+		}
+
+		return new EventBuilder().WithArgumentTypes(...(typeChecks as never));
+	}
+
+	/**
+	 * @internal WIP
+	 */
+	export function SerializerForClassType<TClass extends Constructor>(value: TClass) {
+		return new SerializedClassTypeBuilder(value);
+	}
+
+	/**
+	 * @internal WIP
+	 */
+	export function Serializer<TIn extends object, TOut>(value: Serializer<TIn, TOut>) {
+		return new SerializedTypeBuilder(value);
+	}
+
+	/**
+	 * Defines a server-only network object that broadcasts a message between servers
+	 *
+	 * - Internally uses {@link MessagingService} to communicate between servers
+	 * - Will use only one messaging topic, however it's still recommended to use this sparingly!
+	 * @returns The builder for the experience broadcaster
+	 */
+	export function Broadcaster<T>(check: CheckLike<T>): ExperienceBroadcastEventBuilder<T> {
+		return new ExperienceBroadcastEventBuilder<T>().WithMessageType(check);
+	}
 }
 
 export = Net;

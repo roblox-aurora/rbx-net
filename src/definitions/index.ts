@@ -1,33 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MiddlewareOverload, NetGlobalMiddleware, createTypeChecker } from "../middleware";
+import { MiddlewareOverload, NetGlobalMiddleware } from "../middleware";
 import {
 	FunctionDeclaration,
 	RemoteDeclarations,
 	RemoteContexts,
-	NamespaceDeclaration,
 	ServerToClientEventDeclaration,
 	ClientToServerEventDeclaration,
 	BidirectionalEventDeclaration,
 	AsyncServerFunctionDeclaration,
 	AsyncClientFunctionDeclaration,
-	DeclarationTypeCheck,
 	ExperienceBroadcastEventDeclaration,
 	ExperienceReplicatingEventDeclaration,
 } from "./Types";
-import { ServerRemoteContext } from "./Classes/ServerRemoteContext";
-import { ClientRemoteContext } from "./Classes/ClientRemoteContext";
-import { NamespaceGenerator, NamespaceConfiguration } from "./Classes/NamespaceGenerator";
+import { NamespaceConfiguration } from "./Classes/NamespaceGenerator";
 import { AsyncFunctionBuilder } from "./Classes/RemoteBuilders/AsyncFunctionBuilder";
 import { EventBuilder } from "./Classes/RemoteBuilders/EventBuilder";
 import { DefinitionBuilder } from "./Classes/RemoteBuilders/DefinitionBuilder";
 
-export interface DefinitionConfiguration {
+export interface NetworkModelConfiguration {
 	/**
 	 * Middleware that's applied to _all_ remotes on the server
 	 *
 	 * @default undefined
 	 */
-	readonly ServerGlobalMiddleware?: NetGlobalMiddleware[];
+	readonly ServerGlobalMiddleware?: Array<NetGlobalMiddleware>;
 
 	/**
 	 * Whether or not the server remotes are automatically generated
@@ -48,6 +44,11 @@ export interface DefinitionConfiguration {
 	 * @default true
 	 */
 	readonly ClientGetShouldYield?: boolean;
+
+	/**
+	 * Add a microprofiler debug label to each callback
+	 */
+	readonly MicroprofileCallbacks?: boolean;
 }
 
 namespace NetDefinitions {
@@ -55,10 +56,11 @@ namespace NetDefinitions {
 	 * Creates definitions for Remote instances that can be used on both the client and server.
 	 * @description https://docs.vorlias.com/rbx-net/docs/3.0/definitions#definitions-oh-my
 	 * @param declarations
+	 * @deprecated Use `Create().Add(declarations)`
 	 */
 	export function Create<T extends RemoteDeclarations>(
 		declarations: T,
-		configuration?: DefinitionConfiguration,
+		configuration?: NetworkModelConfiguration,
 	): RemoteContexts<T>;
 	/**
 	 * Creates definitions using the new net definitions builder
@@ -68,7 +70,7 @@ namespace NetDefinitions {
 	export function Create(): DefinitionBuilder;
 	export function Create(
 		declarations?: RemoteDeclarations,
-		configuration?: DefinitionConfiguration,
+		configuration?: NetworkModelConfiguration,
 	): RemoteContexts<RemoteDeclarations> | DefinitionBuilder {
 		if (declarations !== undefined) {
 			configuration ??= {};
@@ -112,7 +114,7 @@ namespace NetDefinitions {
 	 * @deprecated
 	 */
 	export function ServerAsyncFunction<
-		ServerFunction extends (...args: any[]) => unknown = (...args: unknown[]) => unknown
+		ServerFunction extends (...args: Array<any>) => unknown = (...args: Array<unknown>) => unknown,
 	>(mw?: MiddlewareOverload<Parameters<ServerFunction>>) {
 		const funBuilder = new AsyncFunctionBuilder();
 		if (mw) {
@@ -123,26 +125,6 @@ namespace NetDefinitions {
 			Parameters<ServerFunction>,
 			ReturnType<ServerFunction>
 		>;
-	}
-
-	/**
-	 * Create an async function
-	 *
-	 * @returns
-	 * @version 4.0
-	 */
-	export function AsyncFunction() {
-		return new AsyncFunctionBuilder();
-	}
-
-	/**
-	 * Create a one-way event
-	 *
-	 * @returns
-	 * @version 4.0
-	 */
-	export function Event() {
-		return new EventBuilder();
 	}
 
 	/**
@@ -179,7 +161,9 @@ namespace NetDefinitions {
 	 * @deprecated Not yet official API, could be changed or removed.
 	 * @internal
 	 */
-	export function EXPERIMENTAL_ExperienceReplicatedEvent<ServerArgs extends readonly unknown[] = unknown[]>() {
+	export function EXPERIMENTAL_ExperienceReplicatedEvent<
+		ServerArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	>() {
 		return {
 			Type: "ExperienceEvent",
 		} as ExperienceReplicatingEventDeclaration<ServerArgs>;
@@ -195,7 +179,7 @@ namespace NetDefinitions {
 	 * @deprecated
 	 */
 	export function ClientAsyncFunction<
-		ClientFunction extends (...args: any[]) => defined = (...args: unknown[]) => defined
+		ClientFunction extends (...args: Array<any>) => defined = (...args: Array<unknown>) => defined,
 	>() {
 		const funBuilder = new AsyncFunctionBuilder();
 		return funBuilder.OnClient() as AsyncClientFunctionDeclaration<
@@ -211,7 +195,7 @@ namespace NetDefinitions {
 	 *
 	 * @deprecated
 	 */
-	export function ServerFunction<ServerFunction extends (...args: any[]) => any>(
+	export function ServerFunction<ServerFunction extends (...args: Array<any>) => any>(
 		mw?: MiddlewareOverload<Parameters<ServerFunction>>,
 	) {
 		return {
@@ -231,7 +215,7 @@ namespace NetDefinitions {
 	 *
 	 * @deprecated
 	 */
-	export function ServerToClientEvent<ServerArgs extends readonly unknown[] = unknown[]>() {
+	export function ServerToClientEvent<ServerArgs extends ReadonlyArray<unknown> = Array<unknown>>() {
 		const builder = new EventBuilder<ServerArgs>();
 		return builder.OnServer() as ServerToClientEventDeclaration<ServerArgs>;
 	}
@@ -250,17 +234,17 @@ namespace NetDefinitions {
 	 * @deprecated
 	 */
 	export function ClientToServerEvent<
-		ClientArgs extends readonly unknown[] = unknown[]
+		ClientArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	>(): ClientToServerEventDeclaration<ClientArgs>;
-	export function ClientToServerEvent<ClientArgs extends readonly unknown[]>(
+	export function ClientToServerEvent<ClientArgs extends ReadonlyArray<unknown>>(
 		mw?: MiddlewareOverload<ClientArgs>,
 	): ClientToServerEventDeclaration<ClientArgs>;
-	export function ClientToServerEvent<ClientArgs extends readonly unknown[] = unknown[]>(
+	export function ClientToServerEvent<ClientArgs extends ReadonlyArray<unknown> = Array<unknown>>(
 		mw?: MiddlewareOverload<ClientArgs>,
 	) {
 		const builder = new EventBuilder<ClientArgs>();
 		if (mw !== undefined) {
-			builder.WithServerCallbackMiddleware(...(mw as never[]));
+			builder.WithServerCallbackMiddleware(...(mw as Array<never>));
 		}
 
 		return builder.OnClient() as ClientToServerEventDeclaration<ClientArgs>;
@@ -275,20 +259,16 @@ namespace NetDefinitions {
 	 * @deprecated
 	 */
 	export function BidirectionalEvent<
-		ServerConnect extends readonly unknown[] = unknown[],
-		ClientConnect extends readonly unknown[] = unknown[]
+		ServerConnect extends ReadonlyArray<unknown> = Array<unknown>,
+		ClientConnect extends ReadonlyArray<unknown> = Array<unknown>,
 	>(): BidirectionalEventDeclaration<ServerConnect, ClientConnect>;
 	export function BidirectionalEvent<
-		ServerConnect extends readonly unknown[] = unknown[],
-		ClientConnect extends readonly unknown[] = unknown[]
-	>(mw?: MiddlewareOverload<ServerConnect>): BidirectionalEventDeclaration<ServerConnect, ClientConnect>;
-	export function BidirectionalEvent<
-		ServerArgs extends readonly unknown[] = unknown[],
-		ClientArgs extends readonly unknown[] = unknown[]
+		ServerArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		ClientArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	>() {
 		return {
 			Type: "Event",
-			ServerMiddleware: [],
+			Unreliable: false,
 		} as BidirectionalEventDeclaration<ServerArgs, ClientArgs>;
 	}
 }

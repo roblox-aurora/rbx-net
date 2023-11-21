@@ -1,6 +1,7 @@
 import { format, IS_SERVER, NetManagedInstance, RequestCounter, ServerTickFunctions } from "../../internal";
 import throttler from "./throttle";
 import { ServerCallbackMiddleware } from "../../middleware";
+import { NetDuration } from "../../duration";
 
 const throttles = new Map<NetManagedInstance, RequestCounter>();
 
@@ -14,7 +15,9 @@ export interface RateLimitError {
 }
 
 export interface RateLimitOptions {
-	MaxRequestsPerMinute: number;
+	RequestsPerWindow: number;
+	RequestWindow: NetDuration;
+
 	/**
 	 * @default "Request limit exceeded ({limit}) by {player} via {remote}"
 	 */
@@ -41,7 +44,7 @@ const THROTTLE_RESET_TIMER = 60;
  * @param maxRequestsPerMinute The maximum requests per minute
  */
 function createRateLimiter(options: RateLimitOptions): RateLimitMiddleware {
-	const maxRequestsPerMinute = options.MaxRequestsPerMinute;
+	const maxRequestsPerMinute = options.RequestsPerWindow;
 	const errorHandler = options.ErrorHandler ?? rateLimitWarningHandler;
 	const throttleMessage = options.ThrottleMessage ?? "Request limit exceeded ({limit}) by {player} via {remote}";
 

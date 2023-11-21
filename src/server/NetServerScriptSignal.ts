@@ -11,8 +11,8 @@ export interface NetServerSignalConnection {
  * A wrapper around a RBXScriptSignal for remotes, that always has a listener set.
  */
 export class NetServerScriptSignal<
-	T extends (player: Player, ...args: unknown[]) => void,
-	I extends RemoteEvent | RemoteFunction
+	T extends (player: Player, ...args: Array<unknown>) => void,
+	I extends RemoteEvent | RemoteFunction,
 > {
 	private connections = new Array<RBXScriptConnection>();
 	private defaultConnection?: RBXScriptConnection;
@@ -66,7 +66,7 @@ export class NetServerScriptSignal<
 		return this.signalInstance.Wait();
 	}
 
-	public WaitAsync(): Promise<LuaTuple<Parameters<T>>> {
+	public async WaitAsync(): Promise<LuaTuple<Parameters<T>>> {
 		return Promise.defer((resolve) => {
 			const result = this.signalInstance.Wait();
 			resolve(result);

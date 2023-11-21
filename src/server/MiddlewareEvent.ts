@@ -7,7 +7,7 @@ abstract class MiddlewareEvent {
 	protected constructor(private readonly middlewares: MiddlewareList = []) {}
 
 	/** @internal */
-	abstract GetInstance(): RemoteEvent;
+	public abstract GetInstance(): RemoteEvent;
 
 	/** @internal */
 	public _use(middleware: NetGlobalMiddleware) {

@@ -48,10 +48,18 @@ export interface NetManagedInstance {
 	GetInstance(): RemoteEvent | RemoteFunction;
 }
 
+export interface SerializedData<T extends object> {
+	$classId: string;
+	$data: T;
+}
+export function isSerializedData<T extends object>(value: unknown): value is SerializedData<T> {
+	return typeIs(value, "table") && "$classId" in value && "$data" in value;
+}
+
 /** @internal */
 export class NetMiddlewareEvent implements NetManagedInstance {
-	constructor(private netInstance: MiddlewareEvent | MiddlewareFunction) {}
-	GetInstance(): RemoteEvent | RemoteFunction {
+	public constructor(private netInstance: MiddlewareEvent | MiddlewareFunction) {}
+	public GetInstance(): RemoteEvent | RemoteFunction {
 		return this.netInstance.GetInstance();
 	}
 }

@@ -1,25 +1,24 @@
 import { ClientCallbackMiddleware, ServerCallbackMiddleware, ServerInvokeMiddleware } from "../../../middleware";
 
-export type CheckLike<T> = (value: unknown) => value is T;
-export abstract class RemoteBuilder<TServer extends object, TClient extends object> {
-	public readonly serverCallbackMiddleware = new Array<ServerCallbackMiddleware>();
-	public readonly serverCallerMiddleware = new Array<ServerInvokeMiddleware>();
+export interface ServerBuilder<TServer> {
+	serverCallbackMiddleware: Array<ServerCallbackMiddleware>;
+	OnServer(): TServer;
+}
 
-	public readonly clientCallbackMiddleware = new Array<ClientCallbackMiddleware>();
+export interface ClientBuilder<TClient> {
+	clientCallbackMiddleware: Array<ClientCallbackMiddleware>;
+	OnClient(): TClient;
+}
+
+export type CheckLike<T> = (value: unknown) => value is T;
+export abstract class RemoteBuilder<TServer extends object, TClient extends object>
+	implements ServerBuilder<TServer>, ClientBuilder<TClient>
+{
+	public serverCallbackMiddleware = new Array<ServerCallbackMiddleware>();
+	public serverCallerMiddleware = new Array<ServerInvokeMiddleware>();
+
+	public clientCallbackMiddleware = new Array<ClientCallbackMiddleware>();
 
 	public abstract OnServer(): TServer;
 	public abstract OnClient(): TClient;
-}
-
-export interface Serialized<T extends string> {
-	$class: T;
-}
-
-export interface Serializable<T> {
-	Serialize(): T;
-}
-
-export interface SerializeClass<TClass extends unknown, TSerialized extends Serialized<string>> {
-	new (): Serializable<TSerialized>;
-	Deserialize(ser: TSerialized): TClass;
 }

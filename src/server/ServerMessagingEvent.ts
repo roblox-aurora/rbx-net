@@ -4,6 +4,7 @@ import ExperienceBroadcastEvent, {
 } from "../messaging/ExperienceBroadcastEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
+import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 const Players = game.GetService("Players");
 
 export interface IMessage<TArgs> {
@@ -29,21 +30,19 @@ function isTargetedSubscriptionMessage(value: unknown): value is ISubscriptionTa
 /**
  * Similar to a ServerEvent, but works across all servers.
  */
-export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unknown[]> {
+export default class ServerMessagingEvent<TArgs extends ReadonlyArray<unknown> = Array<unknown>> {
 	private readonly instance: ServerEvent<[], TArgs>;
 	private readonly event: ExperienceBroadcastEvent<IMessage<TArgs>>;
 	private readonly eventHandler: RBXScriptConnection;
 
-	constructor(name: string) {
-		this.instance = new ServerEvent(getGlobalRemote(name));
+	public constructor(name: string, configuration: DefinitionConfiguration) {
+		this.instance = new ServerEvent(getGlobalRemote(name), undefined, configuration);
 		this.event = new ExperienceBroadcastEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
 		this.eventHandler = this.event.Connect((message) => {
 			if (isTargetedSubscriptionMessage(message)) {
 				this.recievedMessage(message.Data);
-			} else {
-				warn(`[rbx-net] Recieved malformed message for ServerGameEvent: ${name}`);
 			}
 		});
 	}
@@ -91,7 +90,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	}
 
 	/**
-	 * SEnds an event to all servers in the game
+	 * Sends an event to all servers, and all those server's clients
 	 * @param args The args of the message
 	 */
 	public SendToAllServers(...args: TArgs) {
@@ -99,7 +98,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	}
 
 	/**
-	 * Sends an event to the specified server
+	 * Sends an event to the specified server, and to all the clients of the specified server
 	 * @param jobId The game.JobId of the target server
 	 * @param args The args of the message
 	 */
@@ -123,7 +122,7 @@ export default class ServerMessagingEvent<TArgs extends readonly unknown[] = unk
 	}
 
 	/**
-	 * Sends an event to all the specified players (if they're in any of the game's servers)
+	 * Sends an event to all servers, and all the specified players (if they're in any of the game's servers)
 	 * @param userIds The list of user ids to send this message to
 	 * @param args The args of the message
 	 */

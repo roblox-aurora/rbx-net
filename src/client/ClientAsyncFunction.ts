@@ -1,10 +1,12 @@
+import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
+import { ClientCallbackMiddleware } from "../middleware";
 
 const HttpService = game.GetService("HttpService");
 const RunService = game.GetService("RunService");
 const CollectionService = game.GetService("CollectionService");
 
-export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
+export interface ClientAsyncCallback<CallbackArgs extends ReadonlyArray<unknown>, CallbackReturnType> {
 	/**
 	 * Sets the callback that will be invoked when the server calls this function.
 	 *
@@ -16,7 +18,7 @@ export interface ClientAsyncCallback<CallbackArgs extends readonly unknown[], Ca
 	SetCallback<R extends Promise<CallbackReturnType>>(callback: (...args: CallbackArgs) => R): void;
 }
 
-export interface ClientAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
+export interface ClientAsyncCaller<CallArgs extends ReadonlyArray<unknown>, CallReturnType> {
 	/**
 	 * Calls the server with the given arguments and returns the result from the server as a promise.
 	 * @param args The arguments to the function
@@ -40,17 +42,23 @@ export interface ClientAsyncCaller<CallArgs extends readonly unknown[], CallRetu
  * @rbxts client
  */
 export default class ClientAsyncFunction<
-	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	CallReturnType = unknown,
-	CallbackReturnType = unknown
-> implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
+		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallReturnType = unknown,
+		CallbackReturnType = unknown,
+	>
+	implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType>
+{
 	private instance: RemoteEvent;
 	private timeout = 60;
 	private connector: RBXScriptConnection | undefined;
 	private listeners = new Map<string, IAsyncListener>();
 
-	constructor(private name: string) {
+	public constructor(
+		private name: string,
+		middleware: Array<ClientCallbackMiddleware> = [],
+		private configuration: DefinitionConfiguration,
+	) {
 		this.instance = getRemoteOrThrow("AsyncRemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientAsyncFunction on the Server!");
 	}
@@ -58,11 +66,11 @@ export default class ClientAsyncFunction<
 	public static Wait<
 		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		ServerReturnType = unknown
-	>(name: string) {
+		ServerReturnType = unknown,
+	>(name: string, configuration: DefinitionConfiguration) {
 		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async (resolve) => {
 			await waitForRemote("AsyncRemoteFunction", name, 60);
-			resolve(new ClientAsyncFunction(name));
+			resolve(new ClientAsyncFunction(name, undefined, configuration));
 		});
 	}
 

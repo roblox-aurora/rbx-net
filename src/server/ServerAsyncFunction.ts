@@ -1,6 +1,7 @@
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
-import { MiddlewareOverload } from "../middleware";
+import { MiddlewareOverload, ServerCallbackMiddleware } from "../middleware";
+import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 const CollectionService = game.GetService("CollectionService");
 
 const HttpService = game.GetService("HttpService");
@@ -8,13 +9,13 @@ const RunService = game.GetService("RunService");
 
 type AsyncEventArgs = [eventId: string, data: unknown];
 
-function isEventArgs(value: unknown[]): value is AsyncEventArgs {
+function isEventArgs(value: Array<unknown>): value is AsyncEventArgs {
 	if (value.size() < 2) return false;
 	const [eventId, data] = value;
 	return typeIs(eventId, "string") && typeIs(data, "table");
 }
 
-export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], CallbackReturnType> {
+export interface ServerAsyncCallback<CallbackArgs extends ReadonlyArray<unknown>, CallbackReturnType> {
 	/**
 	 * Sets the callback that will be invoked when the client calls this function.
 	 *
@@ -26,7 +27,7 @@ export interface ServerAsyncCallback<CallbackArgs extends readonly unknown[], Ca
 	SetCallback<R extends Promise<CallbackReturnType>>(callback: (player: Player, ...args: CallbackArgs) => R): void;
 }
 
-export interface ServerAsyncCaller<CallArgs extends readonly unknown[], CallReturnType> {
+export interface ServerAsyncCaller<CallArgs extends ReadonlyArray<unknown>, CallReturnType> {
 	/**
 	 * Calls the specified player with the given arguments, and returns the result as a promise.
 	 *
@@ -56,10 +57,11 @@ class ServerAsyncFunction<
 		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallReturnType = unknown,
-		CallbackReturnType = unknown
+		CallbackReturnType = unknown,
 	>
 	extends MiddlewareEvent
-	implements ServerAsyncCallback<CallbackArgs, CallbackReturnType>, ServerAsyncCaller<CallArgs, CallReturnType> {
+	implements ServerAsyncCallback<CallbackArgs, CallbackReturnType>, ServerAsyncCaller<CallArgs, CallReturnType>
+{
 	private instance: RemoteEvent<Callback>;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
@@ -67,7 +69,7 @@ class ServerAsyncFunction<
 	private defaultHook?: RBXScriptConnection;
 
 	/** @internal */
-	private static readonly DefaultEventHook = (player: Player, ...args: unknown[]) => {
+	private static readonly DefaultEventHook = (player: Player, ...args: Array<unknown>) => {
 		// TODO: 2.2. make usable for analytics?
 	};
 
@@ -76,9 +78,11 @@ class ServerAsyncFunction<
 		return this.instance;
 	}
 
-	constructor(name: string);
-	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs>);
-	constructor(name: string, middlewares: MiddlewareList = []) {
+	public constructor(
+		name: string,
+		middlewares: Array<ServerCallbackMiddleware> = [],
+		private configuration: DefinitionConfiguration,
+	) {
 		super(middlewares);
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
 			// Default connection
