@@ -139,7 +139,6 @@ class ServerAsyncFunction<
 			} else {
 				warn("[rbx-net-async] Recieved message without eventId");
 			}
-			if (microprofile) debug.profileend();
 		});
 	}
 

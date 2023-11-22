@@ -84,7 +84,6 @@ export default class ServerEvent<
 		return this.connection.Connect((player, ...args) => {
 			if (microprofile) debug.profilebegin(`Net: ${remoteId}`);
 			this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
-			if (microprofile) debug.profileend();
 		});
 	}
 

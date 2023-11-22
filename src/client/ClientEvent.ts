@@ -60,7 +60,6 @@ class ClientEvent<
 			return this.instance.OnClientEvent.Connect((...args) => {
 				debug.profilebegin(`Net: ${remoteId}`);
 				callback(...((args as unknown) as ConnectArgs));
-				debug.profileend();
 			});
 		} else {
 			return this.instance.OnClientEvent.Connect(callback);

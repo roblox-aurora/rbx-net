@@ -105,8 +105,6 @@ export default class ClientAsyncFunction<
 			} else {
 				warn("Recieved message without eventId");
 			}
-
-			if (microprofile) debug.profileend();
 		});
 	}
 
