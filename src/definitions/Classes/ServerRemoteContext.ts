@@ -24,6 +24,7 @@ import { InferDefinition } from "./NamespaceGenerator";
 import { NetworkModelConfiguration as NetworkModelConfiguration } from "..";
 import ExperienceBroadcastEvent from "../../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../../server/ServerMessagingEvent";
+import UnreliableServerEvent from "../../server/UnreliableServerEvent";
 const CollectionService = game.GetService("CollectionService");
 const RunService = game.GetService("RunService");
 
@@ -54,13 +55,21 @@ type RemoteDeclarationDict<T extends RemoteDeclarations> =
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ServerRemoteContext<RemoteDeclarations>, RemoteDeclarations>();
-const remoteEventCache = new Map<string, ServerEvent>();
+const remoteEventCache = new Map<string, ServerEvent | UnreliableServerEvent>();
 const remoteAsyncFunctionCache = new Map<string, ServerAsyncFunction>();
 const remoteFunctionCache = new Map<string, ServerFunction>();
 const messagingEventCache = new Map<string, ExperienceBroadcastEvent>();
 const messagingServerEventCache = new Map<string, ServerMessagingEvent>();
 
-export interface ServerNetworkModelConfiguration extends NetworkModelConfiguration {}
+export interface ServerNetworkModelConfiguration extends NetworkModelConfiguration {
+	/**
+	 * Function called for any `ServerAsyncEvent` or `ServerFunction` remotes that have no connected functions
+	 * @param id The id of the remote
+	 * @param player The player who invoked the event
+	 * @param args The arguments provided to the remote
+	 */
+	OnRecieveFunctionCallWithNoCallback?: (id: string, player: Player, args: Array<unknown>) => void;
+}
 
 export class ServerRemoteContext<T extends RemoteDeclarations> {
 	private globalMiddleware?: Array<NetGlobalMiddleware>;
@@ -126,13 +135,17 @@ export class ServerRemoteContext<T extends RemoteDeclarations> {
 			this.globalMiddleware?.forEach((mw) => asyncFunction._use(mw));
 			return asyncFunction;
 		} else if (declaration.Type === "Event") {
-			let event: ServerEvent;
+			let event: ServerEvent | UnreliableServerEvent;
 
 			// This should make certain use cases cheaper
 			if (remoteEventCache.has(namespacedId)) {
 				return remoteEventCache.get(namespacedId)!;
 			} else {
-				event = new ServerEvent(namespacedId, declaration.ServerMiddleware, this.config);
+				if (declaration.Unreliable) {
+					event = new UnreliableServerEvent(namespacedId, declaration.ServerMiddleware, this.config);
+				} else {
+					event = new ServerEvent(namespacedId, declaration.ServerMiddleware, this.config);
+				}
 
 				CollectionService.AddTag(event.GetInstance(), TagId.DefinitionManaged);
 				remoteEventCache.set(namespacedId, event);

@@ -18,6 +18,7 @@ import {
 	ServerToClientEventDeclaration,
 	FilterClientDeclarations,
 } from "../Types";
+import UnreliableClientEvent from "../../client/UnreliableClientEvent";
 
 // Keep the declarations fully isolated
 const declarationMap = new WeakMap<ClientRemoteContext<RemoteDeclarations>, RemoteDeclarations>();
@@ -83,7 +84,15 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 		if (item.Type === "Function") {
 			return new ClientFunction(remoteId, this.configuration) as InferClientRemote<T[K]>;
 		} else if (item.Type === "Event") {
-			return new ClientEvent(remoteId, item.ClientMiddleware, this.configuration) as InferClientRemote<T[K]>;
+			if (item.Unreliable) {
+				return new UnreliableClientEvent(
+					remoteId,
+					item.ClientMiddleware,
+					this.configuration,
+				) as never as InferClientRemote<T[K]>;
+			} else {
+				return new ClientEvent(remoteId, item.ClientMiddleware, this.configuration) as InferClientRemote<T[K]>;
+			}
 		} else if (item.Type === "AsyncFunction") {
 			return new ClientAsyncFunction(remoteId, item.ClientMiddleware, this.configuration) as InferClientRemote<
 				T[K]

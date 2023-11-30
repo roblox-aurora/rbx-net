@@ -68,7 +68,7 @@ export default class ClientAsyncFunction<
 		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		ServerReturnType = unknown,
-	>(name: string, configuration: DefinitionConfiguration) {
+	>(name: string, configuration: NetworkModelConfiguration) {
 		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async (resolve) => {
 			await waitForRemote("AsyncRemoteFunction", name, 60);
 			resolve(new ClientAsyncFunction(name, undefined, configuration));
@@ -113,8 +113,6 @@ export default class ClientAsyncFunction<
 			} else {
 				warn("Recieved message without eventId");
 			}
-
-			if (microprofile) debug.profileend();
 		});
 	}
 

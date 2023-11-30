@@ -1,6 +1,6 @@
 export interface NetServerSignalConnection {
 	/** @internal */
-	readonly NetSignal: NetServerScriptSignal<Callback, RemoteEvent | RemoteFunction>;
+	readonly NetSignal: NetServerScriptSignal<Callback, RemoteEvent | RemoteFunction | UnreliableRemoteEvent>;
 	/** @internal */
 	readonly RBXSignal: RBXScriptConnection;
 	Connected: boolean;
@@ -12,7 +12,7 @@ export interface NetServerSignalConnection {
  */
 export class NetServerScriptSignal<
 	T extends (player: Player, ...args: Array<unknown>) => void,
-	I extends RemoteEvent | RemoteFunction,
+	I extends RemoteEvent | RemoteFunction | UnreliableRemoteEvent,
 > {
 	private connections = new Array<RBXScriptConnection>();
 	private defaultConnection?: RBXScriptConnection;
@@ -22,7 +22,10 @@ export class NetServerScriptSignal<
 		// TODO: Make usable for analytics
 	}) as T;
 
-	public constructor(private signalInstance: RBXScriptSignal<T>, private instance: I) {
+	public constructor(
+		private signalInstance: RBXScriptSignal<T>,
+		private instance: I,
+	) {
 		this.defaultConnection = signalInstance.Connect(this.defaultConnectionDelegate);
 		const sig = this.instance.AncestryChanged.Connect((child, parent) => {
 			if (child === instance && parent === undefined) {

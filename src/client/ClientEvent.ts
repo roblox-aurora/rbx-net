@@ -49,7 +49,7 @@ class ClientEvent<
 	public static Wait<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
-	>(name: string, configuration: DefinitionConfiguration) {
+	>(name: string, configuration: NetworkModelConfiguration) {
 		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async (resolve) => {
 			await waitForRemote("RemoteEvent", name, 60);
 			resolve(new ClientEvent(name, undefined, configuration));
@@ -68,7 +68,6 @@ class ClientEvent<
 			return this.instance.OnClientEvent.Connect((...args) => {
 				debug.profilebegin(`NetEvent: ${id}`);
 				callback(...(args as unknown as ConnectArgs));
-				debug.profileend();
 			});
 		} else {
 			return this.instance.OnClientEvent.Connect(callback);

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload, ServerCallbackMiddleware } from "../middleware";
@@ -71,8 +72,9 @@ class ServerAsyncFunction<
 	private defaultHook?: RBXScriptConnection;
 
 	/** @internal */
-	private static readonly DefaultEventHook = (player: Player, ...args: Array<unknown>) => {
-		// TODO: 2.2. make usable for analytics?
+	private readonly DefaultEventHook = (player: Player, ...args: Array<unknown>) => {
+		this.configuration.OnRecieveFunctionCallWithNoCallback?.(this.instance.Name, player, args);
+		return;
 	};
 
 	/** @internal */
@@ -88,7 +90,7 @@ class ServerAsyncFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
 			// Default connection
-			this.defaultHook = instance.OnServerEvent.Connect(ServerAsyncFunction.DefaultEventHook);
+			this.defaultHook = instance.OnServerEvent.Connect(this.DefaultEventHook);
 			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
 		});
 		assert(!IS_CLIENT, "Cannot create a NetServerAsyncFunction on the client!");
@@ -147,8 +149,6 @@ class ServerAsyncFunction<
 			} else {
 				warn("[rbx-net-async] Recieved message without eventId");
 			}
-
-			if (microprofile) debug.profileend();
 		});
 	}
 

@@ -20,6 +20,7 @@ import { SerializedClassTypeBuilder } from "./definitions/Classes/Serialization/
 import { Serializer } from "./definitions/Classes/RemoteBuilders/DefinitionBuilder";
 import { SerializedTypeBuilder } from "./definitions/Classes/Serialization/SerializedTypeBuilder";
 import { NetValidation } from "./types";
+import { UnreliableEventBuilder } from "./definitions/Classes/RemoteBuilders/UnreliableEventBuilder";
 
 /**
  * Networking Library for Roblox
@@ -146,7 +147,8 @@ namespace Net {
 	 * @param typeChecks The type arguments for the remote object
 	 * @returns The builder for a remote
 	 */
-	export function Remote<T extends ReadonlyArray<unknown>>(): Unsafe<EventBuilder<[]>>;
+	export function Remote(): EventBuilder<[]>;
+	export function Remote<T extends ReadonlyArray<unknown>>(): Unsafe<EventBuilder<T>>;
 	export function Remote<T extends ReadonlyArray<unknown>>(...typeChecks: ToCheck<T>): EventBuilder<T>;
 	export function Remote<T extends ReadonlyArray<unknown>>(...typeChecks: ToCheck<T>): EventBuilder<T> {
 		if (typeChecks.size() === 0) {
@@ -154,6 +156,26 @@ namespace Net {
 		}
 
 		return new EventBuilder().WithArgumentTypes(...(typeChecks as never));
+	}
+
+	/**
+	 * Define an unreliable remote
+	 * @param typeChecks The type arguments for the remote object
+	 * @returns The builder for a remote
+	 */
+	export function UnreliableRemote(): UnreliableEventBuilder<[]>;
+	export function UnreliableRemote<T extends ReadonlyArray<unknown>>(): Unsafe<UnreliableEventBuilder<T>>;
+	export function UnreliableRemote<T extends ReadonlyArray<unknown>>(
+		...typeChecks: ToCheck<T>
+	): UnreliableEventBuilder<T>;
+	export function UnreliableRemote<T extends ReadonlyArray<unknown>>(
+		...typeChecks: ToCheck<T>
+	): UnreliableEventBuilder<T> {
+		if (typeChecks.size() === 0) {
+			return new UnreliableEventBuilder();
+		}
+
+		return new UnreliableEventBuilder().WithArgumentTypes(...(typeChecks as never));
 	}
 
 	/**

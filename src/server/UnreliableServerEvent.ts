@@ -1,63 +1,18 @@
-import { ServerCallbackMiddleware, NextCaller } from "../middleware";
+import { ServerCallbackMiddleware } from "../middleware";
 import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from "../internal";
-import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
-import { MiddlewareOverload } from "../middleware";
+import MiddlewareEvent from "./MiddlewareEvent";
 import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
-import { NetworkModelConfiguration } from "../definitions";
 import { ServerNetworkModelConfiguration } from "../definitions/Classes/ServerRemoteContext";
+import { ServerListenerEvent, ServerSenderEvent } from "./ServerEvent";
 
-/**
- * Interface for server listening events
- */
-export interface ServerListenerEvent<CallArguments extends ReadonlyArray<unknown>> {
-	/**
-	 * Connects a callback function to this event, in which if any events are recieved by the client will be called.
-	 * @param callback The callback function
-	 */
-	Connect(callback: (player: Player, ...args: CallArguments) => void): Readonly<NetServerSignalConnection>;
-}
-
-/**
- * Interface for server sender events
- */
-export interface ServerSenderEvent<CallArguments extends ReadonlyArray<unknown>> {
-	/**
-	 * Sends an event to all players on the server
-	 * @param args The arguments to send to the players
-	 */
-	SendToAllPlayers(...args: CallArguments): void;
-
-	/**
-	 * Sends an event to all players on the server except the specified player
-	 * @param blacklist The blacklist
-	 * @param args The arguments
-	 */
-	SendToAllPlayersExcept(blacklist: Player | Array<Player>, ...args: CallArguments): void;
-
-	/**
-	 * Sends an event to the specified player
-	 * @param player The player
-	 * @param args The arguments to send to the player
-	 */
-	SendToPlayer(player: Player, ...args: CallArguments): void;
-
-	/**
-	 * Sends an event to the specified players on the server
-	 * @param players The players
-	 * @param args The arugments to send to these players
-	 */
-	SendToPlayers(players: Array<Player>, ...args: CallArguments): void;
-}
-
-export default class ServerEvent<
+export default class UnreliableServerEvent<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
 	>
 	extends MiddlewareEvent
 	implements NetManagedInstance, ServerListenerEvent<ConnectArgs>, ServerSenderEvent<CallArgs>
 {
-	private instance: RemoteEvent;
+	private instance: UnreliableRemoteEvent;
 	private connection;
 
 	public constructor(
@@ -67,7 +22,7 @@ export default class ServerEvent<
 	) {
 		super(middlewares);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
-		this.instance = findOrCreateRemote("RemoteEvent", name);
+		this.instance = findOrCreateRemote("UnreliableRemoteEvent", name);
 		this.connection = new NetServerScriptSignal(this.instance.OnServerEvent, this.instance);
 	}
 
@@ -103,7 +58,7 @@ export default class ServerEvent<
 	public SendToAllPlayers(...args: CallArgs) {
 		if (!IS_RUNNING) return;
 
-		this.instance.FireAllClients(...args);
+		(this.instance as unknown as RemoteEvent).FireAllClients(...args);
 	}
 
 	/**
@@ -118,12 +73,12 @@ export default class ServerEvent<
 		if (typeIs(blacklist, "Instance")) {
 			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
 			for (const player of otherPlayers) {
-				this.instance.FireClient(player, ...(args as CallArgs));
+				(this.instance as unknown as RemoteEvent).FireClient(player, ...(args as CallArgs));
 			}
 		} else if (typeIs(blacklist, "table")) {
 			for (const player of Players.GetPlayers()) {
 				if (blacklist.indexOf(player) === -1) {
-					this.instance.FireClient(player, ...(args as CallArgs));
+					(this.instance as unknown as RemoteEvent).FireClient(player, ...(args as CallArgs));
 				}
 			}
 		}
@@ -137,7 +92,7 @@ export default class ServerEvent<
 	public SendToPlayer(player: Player, ...args: CallArgs) {
 		if (!IS_RUNNING) return;
 
-		this.instance.FireClient(player, ...(args as CallArgs));
+		(this.instance as unknown as RemoteEvent).FireClient(player, ...(args as CallArgs));
 	}
 
 	/**

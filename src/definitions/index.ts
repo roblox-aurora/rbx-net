@@ -74,7 +74,7 @@ namespace NetDefinitions {
 	): RemoteContexts<RemoteDeclarations> | DefinitionBuilder {
 		if (declarations !== undefined) {
 			configuration ??= {};
-			return new DefinitionBuilder().Add(declarations).SetConfiguration(configuration).Build();
+			return new DefinitionBuilder().AddLegacyDefinitions(declarations).SetConfiguration(configuration).Build();
 		} else {
 			return new DefinitionBuilder();
 		}
@@ -99,7 +99,7 @@ namespace NetDefinitions {
 	 */
 	export function Namespace<T extends RemoteDeclarations>(declarations: T, configuration?: NamespaceConfiguration) {
 		return new DefinitionBuilder()
-			.Add(declarations)
+			.AddLegacyDefinitions(declarations)
 			.SetConfiguration(configuration ?? {})
 			.ToNamespace();
 	}

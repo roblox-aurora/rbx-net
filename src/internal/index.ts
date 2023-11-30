@@ -10,6 +10,7 @@ interface RemoteTypes {
 	RemoteEvent: RemoteEvent;
 	RemoteFunction: RemoteFunction;
 	AsyncRemoteFunction: RemoteEvent;
+	UnreliableRemoteEvent: UnreliableRemoteEvent;
 }
 
 export interface RequestCounter {
@@ -45,7 +46,7 @@ export function isLuaTable(value: unknown): value is Map<unknown, unknown> {
 }
 
 export interface NetManagedInstance {
-	GetInstance(): RemoteEvent | RemoteFunction;
+	GetInstance(): RemoteEvent | RemoteFunction | UnreliableRemoteEvent;
 }
 
 export interface SerializedData<T extends object> {
@@ -59,7 +60,7 @@ export function isSerializedData<T extends object>(value: unknown): value is Ser
 /** @internal */
 export class NetMiddlewareEvent implements NetManagedInstance {
 	public constructor(private netInstance: MiddlewareEvent | MiddlewareFunction) {}
-	public GetInstance(): RemoteEvent | RemoteFunction {
+	public GetInstance(): RemoteEvent | RemoteFunction | UnreliableRemoteEvent {
 		return this.netInstance.GetInstance();
 	}
 }
@@ -67,6 +68,7 @@ export class NetMiddlewareEvent implements NetManagedInstance {
 const REMOTES_FOLDER_NAME = "_NetManaged";
 
 /** @internal */
+
 export const enum TagId {
 	RecieveOnly = "NetRecieveOnly",
 	Managed = "NetManagedInstance",
@@ -75,6 +77,7 @@ export const enum TagId {
 	LegacyFunction = "NetManagedLegacyFunction",
 	Event = "NetManagedEvent",
 	DefinitionManaged = "NetDefinitionManaged",
+	UnreliableEvent = "UnreliableEvent",
 }
 
 /** @internal */
@@ -172,6 +175,8 @@ export function getTagFromRemoteType<K extends keyof RemoteTypes>(remoteType: K)
 			return TagId.Async;
 		case "RemoteEvent":
 			return TagId.Event;
+		case "UnreliableRemoteEvent":
+			return TagId.UnreliableEvent;
 		case "RemoteFunction":
 			return TagId.LegacyFunction;
 	}
@@ -207,7 +212,7 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(
 			throw "Creation of Events or Functions must be done on server!";
 		}
 
-		let remote: RemoteEvent | RemoteFunction;
+		let remote: RemoteEvent | RemoteFunction | UnreliableRemoteEvent;
 
 		if (remoteType === "RemoteEvent") {
 			remote = new Instance("RemoteEvent");
@@ -218,6 +223,9 @@ export function findOrCreateRemote<K extends keyof RemoteTypes>(
 		} else if (remoteType === "RemoteFunction") {
 			remote = new Instance("RemoteFunction");
 			collectionService.AddTag(remote, TagId.LegacyFunction);
+		} else if (remoteType === "UnreliableRemoteEvent") {
+			remote = new Instance("UnreliableRemoteEvent");
+			collectionService.AddTag(remote, TagId.UnreliableEvent);
 		} else {
 			throw `Invalid Remote Type: ${remoteType}`;
 		} // stfu

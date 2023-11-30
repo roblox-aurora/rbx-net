@@ -107,7 +107,7 @@ export class DefinitionBuilder<TDeclarations extends RemoteDeclarations = define
 		>;
 	}
 
-	public Add<TAddDeclarations extends RemoteDeclarations>(declarations: TAddDeclarations) {
+	public AddLegacyDefinitions<TAddDeclarations extends RemoteDeclarations>(declarations: TAddDeclarations) {
 		this.declarations = {
 			...this.declarations,
 			...declarations,

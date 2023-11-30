@@ -5,6 +5,7 @@ import ExperienceBroadcastEvent, {
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
 import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
+import { NetworkModelConfiguration } from "../definitions";
 const Players = game.GetService("Players");
 
 export interface IMessage<TArgs> {
@@ -35,7 +36,7 @@ export default class ServerMessagingEvent<TArgs extends ReadonlyArray<unknown> =
 	private readonly event: ExperienceBroadcastEvent<IMessage<TArgs>>;
 	private readonly eventHandler: RBXScriptConnection;
 
-	public constructor(name: string, configuration: DefinitionConfiguration) {
+	public constructor(name: string, configuration: NetworkModelConfiguration) {
 		this.instance = new ServerEvent(getGlobalRemote(name), undefined, configuration);
 		this.event = new ExperienceBroadcastEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");

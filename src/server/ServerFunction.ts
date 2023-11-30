@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { MiddlewareOverload } from "../middleware";
 import { findOrCreateRemote, IS_SERVER, TagId } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
@@ -12,9 +13,8 @@ export default class ServerFunction<
 > extends MiddlewareFunction {
 	private instance: RemoteFunction;
 
-	public static readonly DefaultFunctionHook = () => {
-		// TODO: 2.2 make usable for analytics?
-		// Although, unlike `Event`, this will need to be part of `SetCallback`'s stuff.
+	public readonly DefaultFunctionHook = (player: Player, ...args: Array<unknown>) => {
+		this.configuration.OnRecieveFunctionCallWithNoCallback?.(this.instance.Name, player, args);
 		return undefined;
 	};
 
@@ -26,7 +26,7 @@ export default class ServerFunction<
 		super(middlewares);
 		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
 			// Default listener
-			instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
+			instance.OnServerInvoke = this.DefaultFunctionHook;
 			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
 		});
 		assert(IS_SERVER, "Cannot create a Net.ServerFunction on the Client!");
@@ -62,7 +62,6 @@ export default class ServerFunction<
 				}
 			}
 
-			if (microprofile) debug.profileend();
 			return result;
 		};
 	}
