@@ -98,18 +98,22 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve("./sidebars.json"),
-          lastVersion: "current",
+          lastVersion: "3.0.x",
           versions: {
             current: {
               label: require("../package.json").version,
-              path: "3.0"
+              path: "4.0"
+            },
+            "3.0.x": {
+              label: "3.0",
+              path: "3.0",
             },
             "2.1.x": {
-              label: "2.1.5",
+              label: "2.1",
               path: "2.1",
             },
             "2.0.x": {
-              label: "2.0.0",
+              label: "2.0",
               path: "2.0",
             }
           },

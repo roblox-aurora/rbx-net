@@ -15,8 +15,43 @@
 			"items": [
 				"definitions/overview",
 				"definitions/starting",
-				"definitions/implementing",
-				"definitions/namespacing"
+				"definitions/implementing"
+			]
+		},
+		{
+			"type": "category",
+			"label": "Networking Guide",
+			"items": [
+				{
+					"type": "category",
+					"label": "Functions",
+					"items": [
+						"types/async-function",
+						"types/function"
+					]
+				},
+				{
+					"type": "category",
+					"label": "Events",
+					"items": [
+						"types/event",
+						"types/unreliable-event"
+					]
+				},
+				{
+					"type": "category",
+					"label": "Broadcasting",
+					"items": [
+						"types/experience-event"
+					]
+				},
+				{
+					"type": "category",
+					"label": "Namespacing",
+					"items": [
+						"types/namespace"
+					]
+				}
 			]
 		},
 		{
@@ -35,17 +70,6 @@
 				"middleware/typecheck",
 				"middleware/logging",
 				"middleware/custom"
-			]
-		},
-		{
-			"type": "category",
-			"label": "API",
-			"items": [
-				"api/api",
-				"api/net.server",
-				"api/net.client",
-				"api/net.definitions",
-				"api/net.middleware"
 			]
 		}
 	]
