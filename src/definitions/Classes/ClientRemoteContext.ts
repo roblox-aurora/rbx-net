@@ -124,7 +124,11 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 		if (item.Type === "Function") {
 			return ClientFunction.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "Event") {
-			return ClientEvent.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
+			if (item.Unreliable) {
+				return UnreliableClientEvent.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
+			} else {
+				return ClientEvent.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
+			}
 		} else if (item.Type === "AsyncFunction") {
 			return ClientAsyncFunction.Wait(remoteId, this.configuration) as Promise<InferClientRemote<T[K]>>;
 		} else if (item.Type === "ExperienceEvent") {
@@ -149,7 +153,7 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, ServerToClientEventDeclaration<Array<unknown>>> &
 			string,
 	>(name: K, fn: InferClientConnect<Extract<T[K], ServerToClientEventDeclaration<Array<unknown>>>>) {
-		const result = (await this.WaitFor(name)) as InferClientRemote<ServerToClientEventDeclaration<any>>;
+		const result = this.GetOrThrow(name) as InferClientRemote<ServerToClientEventDeclaration<any>>;
 		return result.Connect(fn);
 	}
 
@@ -169,7 +173,7 @@ export class ClientRemoteContext<T extends RemoteDeclarations> {
 	public async OnFunction<
 		K extends keyof DeclarationsOf<FilterClientDeclarations<T>, AsyncClientFunctionDeclaration<any, any>> & string,
 	>(name: K, fn: InferClientCallback<Extract<T[K], AsyncClientFunctionDeclaration<any, any>>>) {
-		const result = (await this.WaitFor(name)) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
+		const result = this.GetOrThrow(name) as InferClientRemote<AsyncClientFunctionDeclaration<any, any>>;
 		result.SetCallback(fn);
 	}
 }

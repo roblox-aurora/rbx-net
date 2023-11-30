@@ -19,6 +19,7 @@ import { NamespaceGenerator } from "./Classes/NamespaceGenerator";
 import ExperienceBroadcastEvent from "../messaging/ExperienceBroadcastEvent";
 import ServerMessagingEvent from "../server/ServerMessagingEvent";
 import { NetDuration } from "../duration";
+import UnreliableClientEvent from "../client/UnreliableClientEvent";
 
 export type Identity<T> = T extends object
 	? {} & {
@@ -320,9 +321,9 @@ export type InferClientRemote<T> = T extends AsyncClientFunctionDeclaration<infe
 	: T extends ServerToClientEventDeclaration<infer A>
 	? ClientListenerEvent<A>
 	: T extends BidirectionalEventDeclaration<infer S, infer C>
-	? ClientEvent<C, S>
+	? ClientEvent<C, S> | UnreliableClientEvent<C, S>
 	: T extends LegacyEventDeclaration<infer SA, infer CA>
-	? ClientEvent<CA, SA>
+	? ClientEvent<CA, SA> | UnreliableClientEvent<CA, SA>
 	: T extends LegacyAsyncFunctionDeclaration<infer SA, infer SR, infer CA, infer CR>
 	? ClientAsyncFunction<CA, SA, CR, SR>
 	: T extends FunctionDeclaration<infer SA, infer SR>

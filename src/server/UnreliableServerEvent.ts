@@ -58,7 +58,7 @@ export default class UnreliableServerEvent<
 	public SendToAllPlayers(...args: CallArgs) {
 		if (!IS_RUNNING) return;
 
-		(this.instance as unknown as RemoteEvent).FireAllClients(...args);
+		this.instance.FireAllClients(...args);
 	}
 
 	/**
@@ -73,12 +73,12 @@ export default class UnreliableServerEvent<
 		if (typeIs(blacklist, "Instance")) {
 			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
 			for (const player of otherPlayers) {
-				(this.instance as unknown as RemoteEvent).FireClient(player, ...(args as CallArgs));
+				this.instance.FireClient(player, ...(args as CallArgs));
 			}
 		} else if (typeIs(blacklist, "table")) {
 			for (const player of Players.GetPlayers()) {
 				if (blacklist.indexOf(player) === -1) {
-					(this.instance as unknown as RemoteEvent).FireClient(player, ...(args as CallArgs));
+					this.instance.FireClient(player, ...(args as CallArgs));
 				}
 			}
 		}
@@ -92,7 +92,7 @@ export default class UnreliableServerEvent<
 	public SendToPlayer(player: Player, ...args: CallArgs) {
 		if (!IS_RUNNING) return;
 
-		(this.instance as unknown as RemoteEvent).FireClient(player, ...(args as CallArgs));
+		this.instance.FireClient(player, ...(args as CallArgs));
 	}
 
 	/**
