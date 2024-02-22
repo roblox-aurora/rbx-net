@@ -50,7 +50,7 @@ export class NetServerScriptSignal<
 			RBXSignal: connection,
 			Connected: connection.Connected,
 			Disconnect() {
-				const idx = this.NetSignal.connections.findIndex((f) => f === ref);
+				const idx = this.NetSignal.connections.findIndex((f) => f === connection);
 				if (idx !== -1) {
 					this.NetSignal.DisconnectAt(idx);
 					this.Connected = false;
