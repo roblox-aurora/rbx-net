@@ -1,7 +1,7 @@
 ---
 id: implementing
-title: Using your definitions
-sidebar_label: Using definitions
+title: Using Remotes with the NOM
+# sidebar_label: Using definitions
 slug: /definitions/using
 ---
 import Code, { DEFAULT_VALUE, GROUP, TABS } from '@site/src/components/Code'

@@ -1,6 +1,6 @@
 ---
 id: install
-title: Install for TypeScript
+title: Install for Roblox (TypeScript)
 ---
 The TypeScript version of RbxNet requires knowledge and usage of [roblox-ts](https://roblox-ts.com).
 

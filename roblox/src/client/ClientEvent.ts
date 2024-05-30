@@ -1,4 +1,3 @@
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { getRemoteOrThrow, IS_SERVER, waitForRemote } from "../internal";
 import { ClientCallbackMiddleware } from "../middleware";
 import { NetworkModelConfiguration } from "../definitions";
@@ -26,11 +25,9 @@ export interface ClientSenderEvent<CallArguments extends ReadonlyArray<unknown>>
 }
 
 class ClientEvent<
-		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
-	>
-	implements ClientListenerEvent<ConnectArgs>, ClientSenderEvent<CallArguments>
-{
+	ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArguments extends ReadonlyArray<unknown> = Array<unknown>
+> implements ClientListenerEvent<ConnectArgs>, ClientSenderEvent<CallArguments> {
 	private instance: RemoteEvent;
 	public constructor(
 		name: string,
@@ -48,9 +45,9 @@ class ClientEvent<
 
 	public static Wait<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallArguments extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArguments extends ReadonlyArray<unknown> = Array<unknown>
 	>(name: string, configuration: NetworkModelConfiguration) {
-		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async (resolve) => {
+		return Promise.defer<ClientEvent<ConnectArgs, CallArguments>>(async resolve => {
 			await waitForRemote("RemoteEvent", name, 60);
 			resolve(new ClientEvent(name, undefined, configuration));
 		});
@@ -67,7 +64,7 @@ class ClientEvent<
 		if (microprofile) {
 			return this.instance.OnClientEvent.Connect((...args) => {
 				debug.profilebegin(`NetEvent: ${id}`);
-				callback(...(args as unknown as ConnectArgs));
+				callback(...((args as unknown) as ConnectArgs));
 			});
 		} else {
 			return this.instance.OnClientEvent.Connect(callback);

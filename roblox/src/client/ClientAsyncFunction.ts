@@ -1,4 +1,3 @@
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { IAsyncListener, getRemoteOrThrow, IS_SERVER, waitForRemote, TagId } from "../internal";
 import { ClientCallbackMiddleware } from "../middleware";
 import { NetworkModelConfiguration } from "../definitions";
@@ -43,13 +42,11 @@ export interface ClientAsyncCaller<CallArgs extends ReadonlyArray<unknown>, Call
  * @rbxts client
  */
 export default class ClientAsyncFunction<
-		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallReturnType = unknown,
-		CallbackReturnType = unknown,
-	>
-	implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType>
-{
+	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+	CallReturnType = unknown,
+	CallbackReturnType = unknown
+> implements ClientAsyncCallback<CallbackArgs, CallbackReturnType>, ClientAsyncCaller<CallArgs, CallReturnType> {
 	private instance: RemoteEvent;
 	private timeout = 60;
 	private connector: RBXScriptConnection | undefined;
@@ -67,9 +64,9 @@ export default class ClientAsyncFunction<
 	public static Wait<
 		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		ServerReturnType = unknown,
+		ServerReturnType = unknown
 	>(name: string, configuration: NetworkModelConfiguration) {
-		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async (resolve) => {
+		return Promise.defer<ClientAsyncFunction<CallbackArgs, CallArgs, ServerReturnType>>(async resolve => {
 			await waitForRemote("AsyncRemoteFunction", name, 60);
 			resolve(new ClientAsyncFunction(name, undefined, configuration));
 		});
@@ -101,7 +98,7 @@ export default class ClientAsyncFunction<
 				const result: unknown | Promise<unknown> = callback(...(data as CallbackArgs));
 				if (Promise.is(result)) {
 					result
-						.then((promiseResult) => {
+						.then(promiseResult => {
 							this.instance.FireServer(eventId, promiseResult);
 						})
 						.catch((err: string) => {

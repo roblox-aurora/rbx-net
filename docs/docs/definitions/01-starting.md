@@ -1,7 +1,6 @@
 ---
 id: starting
-title: Creating a definition
-sidebar_label: Creating definitions
+title: Remotes and the NOM
 slug: /definitions/starting
 ---
 import Code, { DEFAULT_VALUE, GROUP, TABS } from '@site/src/components/Code'

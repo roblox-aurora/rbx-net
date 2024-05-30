@@ -5,5 +5,5 @@ build
 roblox.toml
 *.rbxmx
 *.tgz
-/dist
-/luau/artefacts
+/roblox/dist
+/roblox/luau/artefacts

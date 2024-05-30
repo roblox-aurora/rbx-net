@@ -1,6 +1,6 @@
 module.exports = {
-  title: "RbxNet",
-  tagline: "Advanced multi-language networking library for Roblox.",
+  title: "Net",
+  tagline: "Advanced multi-platform multi-language networking library using the Network Object Model (NOM)",
   url: "https://rbxnet.australis.dev",
   baseUrl: "/",
   onBrokenLinks: "throw",

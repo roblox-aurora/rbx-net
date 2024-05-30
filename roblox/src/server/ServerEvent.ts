@@ -3,7 +3,6 @@ import { findOrCreateRemote, IS_CLIENT, IS_RUNNING, NetManagedInstance } from ".
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
 import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { NetworkModelConfiguration } from "../definitions";
 import { ServerNetworkModelConfiguration } from "../definitions/Classes/ServerRemoteContext";
 
@@ -52,11 +51,10 @@ export interface ServerSenderEvent<CallArguments extends ReadonlyArray<unknown>>
 
 export default class ServerEvent<
 		ConnectArgs extends ReadonlyArray<unknown> = Array<unknown>,
-		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
+		CallArgs extends ReadonlyArray<unknown> = Array<unknown>
 	>
 	extends MiddlewareEvent
-	implements NetManagedInstance, ServerListenerEvent<ConnectArgs>, ServerSenderEvent<CallArgs>
-{
+	implements NetManagedInstance, ServerListenerEvent<ConnectArgs>, ServerSenderEvent<CallArgs> {
 	private instance: RemoteEvent;
 	private connection;
 
@@ -87,11 +85,11 @@ export default class ServerEvent<
 		if (microprofile) {
 			return this.connection.Connect((player, ...args) => {
 				debug.profilebegin(`NetEvent: ${id}`);
-				this._processMiddleware(callback)?.(player, ...(args as unknown as ConnectArgs));
+				this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
 			});
 		} else {
 			return this.connection.Connect((player, ...args) => {
-				this._processMiddleware(callback)?.(player, ...(args as unknown as ConnectArgs));
+				this._processMiddleware(callback)?.(player, ...((args as unknown) as ConnectArgs));
 			});
 		}
 	}
@@ -116,7 +114,7 @@ export default class ServerEvent<
 		const Players = game.GetService("Players");
 
 		if (typeIs(blacklist, "Instance")) {
-			const otherPlayers = Players.GetPlayers().filter((p) => p !== blacklist);
+			const otherPlayers = Players.GetPlayers().filter(p => p !== blacklist);
 			for (const player of otherPlayers) {
 				this.instance.FireClient(player, ...(args as CallArgs));
 			}

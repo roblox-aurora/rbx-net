@@ -3,13 +3,12 @@ import { MiddlewareOverload } from "../middleware";
 import { findOrCreateRemote, IS_SERVER, TagId } from "../internal";
 import MiddlewareEvent from "./MiddlewareEvent";
 import MiddlewareFunction from "./MiddlewareFunction";
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { ServerNetworkModelConfiguration } from "../definitions/Classes/ServerRemoteContext";
 const CollectionService = game.GetService("CollectionService");
 
 export default class ServerFunction<
 	CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
-	Returns = unknown,
+	Returns = unknown
 > extends MiddlewareFunction {
 	private instance: RemoteFunction;
 
@@ -24,7 +23,7 @@ export default class ServerFunction<
 		private configuration: ServerNetworkModelConfiguration,
 	) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
+		this.instance = findOrCreateRemote("RemoteFunction", name, instance => {
 			// Default listener
 			instance.OnServerInvoke = this.DefaultFunctionHook;
 			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);

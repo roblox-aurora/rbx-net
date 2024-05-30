@@ -4,7 +4,6 @@ import ExperienceBroadcastEvent, {
 } from "../messaging/ExperienceBroadcastEvent";
 import { getGlobalRemote, IS_CLIENT, isLuaTable } from "../internal";
 import ServerEvent from "./ServerEvent";
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { NetworkModelConfiguration } from "../definitions";
 const Players = game.GetService("Players");
 
@@ -41,7 +40,7 @@ export default class ServerMessagingEvent<TArgs extends ReadonlyArray<unknown> =
 		this.event = new ExperienceBroadcastEvent(name);
 		assert(!IS_CLIENT, "Cannot create a Net.GlobalServerEvent on the Client!");
 
-		this.eventHandler = this.event.Connect((message) => {
+		this.eventHandler = this.event.Connect(message => {
 			if (isTargetedSubscriptionMessage(message)) {
 				this.recievedMessage(message.Data);
 			}

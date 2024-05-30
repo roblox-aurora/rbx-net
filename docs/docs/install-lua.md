@@ -1,6 +1,6 @@
 ---
 id: install-luau
-title: Install for Luau
+title: Install for Roblox (Luau)
 ---
 Depending on your stack for Roblox, you might want to either use the [Rojo](#via-rojo) step or the [Studio](#via-studio) step. If you don't know what _Rojo_ is, use the Studio step.
 

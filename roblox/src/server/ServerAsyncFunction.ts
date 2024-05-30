@@ -2,7 +2,6 @@
 import { findOrCreateRemote, IAsyncListener, IS_CLIENT, TagId } from "../internal";
 import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload, ServerCallbackMiddleware } from "../middleware";
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
 import { NetworkModelConfiguration } from "../definitions";
 import { ServerNetworkModelConfiguration } from "../definitions/Classes/ServerRemoteContext";
 const CollectionService = game.GetService("CollectionService");
@@ -60,11 +59,10 @@ class ServerAsyncFunction<
 		CallbackArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallArgs extends ReadonlyArray<unknown> = Array<unknown>,
 		CallReturnType = unknown,
-		CallbackReturnType = unknown,
+		CallbackReturnType = unknown
 	>
 	extends MiddlewareEvent
-	implements ServerAsyncCallback<CallbackArgs, CallbackReturnType>, ServerAsyncCaller<CallArgs, CallReturnType>
-{
+	implements ServerAsyncCallback<CallbackArgs, CallbackReturnType>, ServerAsyncCaller<CallArgs, CallReturnType> {
 	private instance: RemoteEvent<Callback>;
 	private timeout = 10;
 	private connector: RBXScriptConnection | undefined;
@@ -88,7 +86,7 @@ class ServerAsyncFunction<
 		private configuration: ServerNetworkModelConfiguration,
 	) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, (instance) => {
+		this.instance = findOrCreateRemote("AsyncRemoteFunction", name, instance => {
 			// Default connection
 			this.defaultHook = instance.OnServerEvent.Connect(this.DefaultEventHook);
 			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);
@@ -137,7 +135,7 @@ class ServerAsyncFunction<
 				);
 				if (Promise.is(result)) {
 					result
-						.then((promiseResult) => {
+						.then(promiseResult => {
 							this.instance.FireClient(player, eventId, promiseResult);
 						})
 						.catch((err: string) => {

@@ -1,6 +1,6 @@
 ---
 id: function
-title: Synchronous Functions
+title: Sync Functions
 # sidebar_label: ExperienceBroadcastEvent
 slug: /API/Function
 ---

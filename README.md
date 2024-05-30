@@ -1,14 +1,14 @@
 <img src="logo.png" align="right"/>
 
-<h1>RbxNet</h1>
-<h3>Advanced multi-language networking framework for Roblox.</h3>
+<h1>NET</h1>
+<h3>Advanced multi-language networking library powering Roblox games<!-- ;) -->, using the Network Object Model (NOM)</h3>
 
 <a href="https://www.npmjs.com/package/@rbxts/net"><img src="https://badge.fury.io/js/@rbxts%2Fnet.svg" alt="npm version" height="18"></a>
 <a href="https://wally.run/package/vorlias/net"><img src="https://img.shields.io/badge/wally%20package-3.0.4-red" height="18"/></a>
 
 ---
 
-RbxNet is a definition-based _networking framework_ for Roblox, built in TypeScript, but also available in Luau. It simplifies the creation and management of networking in Roblox experiences.
+Net is a definition-based _networking framework_ for Roblox, built in TypeScript, but also available in Luau. It simplifies the creation and management of networking in Roblox experiences.
 
 ## Features
 - Create a _definitions_ file of all your networking-based objects in your game. This is a single source of truth for your networking objects. No more tracking instances manually, or having to programmatically create them manually. Each network object is represented by an identifier you define, and by default is created on the server at runtime.

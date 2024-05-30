@@ -1,23 +1,20 @@
-import { DefinitionConfiguration } from "@rbxts/net/out/definitions";
+import { NetworkModelConfiguration } from "../definitions";
 import { getRemoteOrThrow, IS_SERVER, TagId, waitForRemote } from "../internal";
 const CollectionService = game.GetService("CollectionService");
 
 export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, ServerReturnType = unknown> {
 	private instance: RemoteFunction;
 
-	public constructor(
-		private name: string,
-		configuration: DefinitionConfiguration,
-	) {
+	public constructor(private name: string, configuration: NetworkModelConfiguration) {
 		this.instance = getRemoteOrThrow("RemoteFunction", name);
 		assert(!IS_SERVER, "Cannot create a Net.ClientFunction on the Server!");
 	}
 
 	public static Wait<CallArgs extends ReadonlyArray<unknown> = Array<unknown>, ServerReturnType = unknown>(
 		name: string,
-		configuration: DefinitionConfiguration,
+		configuration: NetworkModelConfiguration,
 	) {
-		return Promise.defer<ClientFunction<CallArgs, ServerReturnType>>(async (resolve) => {
+		return Promise.defer<ClientFunction<CallArgs, ServerReturnType>>(async resolve => {
 			await waitForRemote("RemoteFunction", name, 60);
 			resolve(new ClientFunction(name, configuration));
 		});
@@ -40,7 +37,7 @@ export default class ClientFunction<CallArgs extends ReadonlyArray<unknown>, Ser
 	 * @param args The call arguments
 	 */
 	public async CallServerAsync(...args: CallArgs): Promise<ServerReturnType> {
-		return Promise.defer<ServerReturnType>((resolve) => {
+		return Promise.defer<ServerReturnType>(resolve => {
 			const result = this.instance.InvokeServer(...args) as ServerReturnType;
 			resolve(result);
 		});

@@ -11,31 +11,25 @@
 		},
 		{
 			"type": "category",
-			"label": "Definitions Guide",
+			"label": "Network Object Model",
 			"items": [
 				"definitions/overview",
 				"definitions/starting",
-				"definitions/implementing"
-			]
-		},
-		{
-			"type": "category",
-			"label": "Networking Guide",
-			"items": [
-				{
-					"type": "category",
-					"label": "Functions",
-					"items": [
-						"types/async-function",
-						"types/function"
-					]
-				},
+				"definitions/implementing",
 				{
 					"type": "category",
 					"label": "Events",
 					"items": [
 						"types/event",
 						"types/unreliable-event"
+					]
+				},
+				{
+					"type": "category",
+					"label": "Functions",
+					"items": [
+						"types/async-function",
+						"types/function"
 					]
 				},
 				{
@@ -52,6 +46,13 @@
 						"types/namespace"
 					]
 				}
+			]
+		},
+		{
+			"type": "category",
+			"label": "Serialization",
+			"items": [
+
 			]
 		},
 		{
