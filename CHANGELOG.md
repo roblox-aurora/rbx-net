@@ -1,3 +1,6 @@
+## 3.0.10
+- ServerGlobalMiddleware should now function :-)
+
 ## 3.0.6
 - Fixes (https://github.com/roblox-aurora/rbx-net/pull/84) `Client:Get(remoteId) causing delays`
 

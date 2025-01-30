@@ -41,7 +41,7 @@ const Remotes = Create(
 	{
 		ServerGlobalMiddleware: [
 			Net.Middleware.Global((remote, data, player) => {
-				$print("call from", player, "via", remote, ...data);
+				$print("**** call from", player, "via", remote, ...data);
 			}),
 		],
 	},

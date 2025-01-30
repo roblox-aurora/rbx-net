@@ -17,9 +17,13 @@ export default class ServerFunction<
 		return undefined;
 	};
 
-	constructor(name: string, middlewares: MiddlewareOverload<CallbackArgs> = [], private configuration: DefinitionConfiguration) {
+	constructor(
+		name: string,
+		middlewares: MiddlewareOverload<CallbackArgs> = [],
+		private configuration: DefinitionConfiguration,
+	) {
 		super(middlewares);
-		this.instance = findOrCreateRemote("RemoteFunction", name, (instance) => {
+		this.instance = findOrCreateRemote("RemoteFunction", name, instance => {
 			// Default listener
 			instance.OnServerInvoke = ServerFunction.DefaultFunctionHook;
 			CollectionService.AddTag(instance, TagId.DefaultFunctionListener);

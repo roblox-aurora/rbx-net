@@ -9,7 +9,7 @@ const testEvents = Remotes.Server.GetNamespace("TestingEvents");
 testFunctions.OnFunction("CallServerAndAddNumbers", (_, a, b) => a + b);
 testEvents.OnEvent("PrintMessage", print);
 const testLegacy = Remotes.Server.GetNamespace("Legacy").Create("LegacyFunction");
-const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
+// const testLegacy2 = Remotes.Client.GetNamespace("Legacy").Get("LegacyFunction");
 
 testFunctions.Create("CallServerAndAddNumbers").SetCallback((_, a, b) => a + b);
 
@@ -21,7 +21,7 @@ type NamespaceTest = Net.Util.GetNamespaceDefinitions<GlobalNamespace, "TestingE
 type TestNamespaceAsServerRemotes = Net.Util.GetServerRemotes<NamespaceTest>;
 type TestNamespaceAsClientRemotes = Net.Util.GetClientRemotes<NamespaceTest>;
 
-Remotes.Server.Get("Srv").Connect((message) => {});
+Remotes.Server.Get("Srv").Connect(message => {});
 
 Remotes.Server.GetNamespace("TestingFunctions").OnFunction("CallServerAndAddNumbers", async () => {
 	return 10;

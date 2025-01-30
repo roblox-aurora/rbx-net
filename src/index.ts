@@ -130,7 +130,7 @@ namespace Net {
 	/**
 	 * The version of RbxNet
 	 */
-	export const VERSION = $NODE_ENV === "production" ? PKG_VERSION : `DEV ${DIST})} ${PKG_VERSION}`;
+	export const VERSION = ($NODE_ENV as string) === "production" ? PKG_VERSION : `DEV ${DIST})} ${PKG_VERSION}`;
 
 	/**
 	 * Built-in middlewares

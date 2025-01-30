@@ -4,6 +4,7 @@ import MiddlewareEvent, { MiddlewareList } from "./MiddlewareEvent";
 import { MiddlewareOverload } from "../middleware";
 import { NetServerScriptSignal, NetServerSignalConnection } from "./NetServerScriptSignal";
 import { DefinitionConfiguration } from "../definitions";
+import { $dbg } from "rbxts-transform-debug";
 
 /**
  * Interface for server listening events
@@ -62,7 +63,7 @@ export default class ServerEvent<
 		middlewares: MiddlewareOverload<ConnectArgs> = [],
 		private configuration: DefinitionConfiguration,
 	) {
-		super(middlewares);
+		super([...middlewares, ...(configuration.ServerGlobalMiddleware ?? [])]);
 		assert(!IS_CLIENT, "Cannot create a NetServerEvent on the client!");
 		this.instance = findOrCreateRemote("RemoteEvent", name);
 		this.connection = new NetServerScriptSignal(this.instance.OnServerEvent, this.instance);
